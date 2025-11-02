@@ -1,0 +1,155 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Corporación Club del Meta">
+  <section class="hero">
+    <div class="hero__visual">
+      <div class="hero__emblem" aria-hidden="true">Escudo del Club</div>
+    </div>
+    <div class="hero__content">
+      <h1>Corporación Club del Meta</h1>
+      <p class="hero__subtitle">Reserva de salones y espacios</p>
+      <p class="hero__description">
+        Gestiona reservas para eventos corporativos, recepciones sociales y encuentros exclusivos en las
+        instalaciones del Club El Meta. Una experiencia premium con logística centralizada y atención
+        personalizada.
+      </p>
+      <a class="hero__cta" href="/reservas">Agendar Reserva</a>
+    </div>
+  </section>
+
+  <section class="features">
+    <article>
+      <h2>Gestión ágil</h2>
+      <p>Consulta disponibilidad, confirma reservas y recibe notificaciones en tiempo real.</p>
+    </article>
+    <article>
+      <h2>Espacios versátiles</h2>
+      <p>Salones preparados para conferencias, celebraciones y encuentros privados de alto nivel.</p>
+    </article>
+    <article>
+      <h2>Servicio integral</h2>
+      <p>Coordinación con proveedores, ambientación personalizada y soporte durante tu evento.</p>
+    </article>
+  </section>
+
+  <style>
+    .hero {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    .hero__visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero__emblem {
+      width: min(220px, 60vw);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 6px solid var(--color-accent);
+      display: grid;
+      place-items: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--color-primary);
+      background: linear-gradient(145deg, rgba(10, 75, 165, 0.15), rgba(197, 125, 61, 0.25));
+      text-align: center;
+      padding: 1.5rem;
+    }
+
+    .hero__content h1 {
+      font-size: clamp(2.4rem, 4vw, 3.2rem);
+      margin: 0 0 0.5rem;
+      color: var(--color-primary);
+    }
+
+    .hero__subtitle {
+      font-size: 1.35rem;
+      font-weight: 500;
+      margin: 0 0 1.5rem;
+      color: #1f2933;
+      letter-spacing: 0.03em;
+    }
+
+    .hero__description {
+      margin: 0 0 2rem;
+      line-height: 1.6;
+      color: #3c4858;
+    }
+
+    .hero__cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.9rem 2.4rem;
+      border-radius: 999px;
+      background: var(--color-primary);
+      color: #ffffff;
+      font-weight: 600;
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      box-shadow: 0 12px 20px rgba(10, 75, 165, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .hero__cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 24px rgba(10, 75, 165, 0.28);
+    }
+
+    .features {
+      margin-top: 4rem;
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .features article {
+      background: var(--color-surface);
+      border-radius: 18px;
+      padding: 1.75rem;
+      border: 1px solid rgba(191, 195, 199, 0.6);
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .features article:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 28px rgba(15, 23, 42, 0.1);
+    }
+
+    .features h2 {
+      margin-top: 0;
+      color: var(--color-primary);
+      font-size: 1.25rem;
+    }
+
+    .features p {
+      margin-bottom: 0;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      .hero {
+        text-align: center;
+      }
+
+      .hero__content {
+        display: grid;
+        justify-items: center;
+        gap: 1.1rem;
+      }
+
+      .hero__description {
+        text-align: center;
+      }
+    }
+  </style>
+</BaseLayout>

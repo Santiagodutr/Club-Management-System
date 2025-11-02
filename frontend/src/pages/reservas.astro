@@ -1,0 +1,126 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+
+const espacios = [
+  {
+    nombre: 'Salón Principal',
+    descripcion:
+      'Capacidad para grandes recepciones, escenario modular, iluminación dinámica y soporte técnico integrado.',
+  },
+  {
+    nombre: 'Salón de Conferencias',
+    descripcion:
+      'Ambiente profesional con sistema audiovisual, mesas configurables y conectividad de alta velocidad.',
+  },
+  {
+    nombre: 'Área Social',
+    descripcion:
+      'Espacio abierto rodeado de jardines, ideal para celebraciones familiares y encuentros informales.',
+  },
+  {
+    nombre: 'Salón VIP',
+    descripcion:
+      'Experiencia privada con servicio personalizado, mobiliario premium y atención dedicada.',
+  },
+]
+---
+
+<BaseLayout title="Reservas - Club del Meta">
+  <section class="reservas">
+    <header class="reservas__header">
+      <h1>Agenda tu espacio en el Club</h1>
+      <p>
+        Selecciona uno de los ambientes disponibles y comienza el proceso de reserva. Nuestro equipo confirmará la
+        disponibilidad y te acompañará en cada detalle del evento.
+      </p>
+    </header>
+
+    <div class="reservas__grid">
+      {espacios.map((espacio) => (
+        <article class="reserva-card">
+          <h2>{espacio.nombre}</h2>
+          <p>{espacio.descripcion}</p>
+          <button type="button">Reservar</button>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <style>
+    .reservas {
+      display: grid;
+      gap: 2.5rem;
+    }
+
+    .reservas__header h1 {
+      margin: 0 0 1rem;
+      font-size: clamp(2rem, 3.5vw, 2.6rem);
+      color: var(--color-primary);
+    }
+
+    .reservas__header p {
+      margin: 0;
+      line-height: 1.6;
+      color: #334155;
+      max-width: 720px;
+    }
+
+    .reservas__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.75rem;
+    }
+
+    .reserva-card {
+      background: var(--color-surface);
+      border-radius: 20px;
+      padding: 2rem 1.75rem;
+      border: 1px solid rgba(191, 195, 199, 0.7);
+      box-shadow: 0 18px 30px rgba(15, 23, 42, 0.08);
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .reserva-card h2 {
+      margin: 0;
+      color: var(--color-primary);
+      font-size: 1.35rem;
+    }
+
+    .reserva-card p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    .reserva-card button {
+      justify-self: start;
+      padding: 0.75rem 1.8rem;
+      border-radius: 999px;
+      border: none;
+      background: var(--color-primary);
+      color: #ffffff;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 12px 20px rgba(10, 75, 165, 0.25);
+    }
+
+    .reserva-card button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 22px rgba(10, 75, 165, 0.28);
+    }
+
+    @media (max-width: 640px) {
+      .reserva-card {
+        padding: 1.6rem 1.4rem;
+      }
+
+      .reserva-card button {
+        width: 100%;
+        justify-self: stretch;
+      }
+    }
+  </style>
+</BaseLayout>
