@@ -4,7 +4,7 @@ import logoClub from 'src/assets/logo_corpmeta.png'
 import heroBackground from 'src/assets/fondoclub.png'
 ---
 
-<BaseLayout title="Corporacion Club del Meta">
+<BaseLayout title="Corporacion Club del Meta" hideNavbar fullWidth>
   <section class="hero" aria-labelledby="hero-heading">
     <div
       class="hero__background"
@@ -83,15 +83,15 @@ import heroBackground from 'src/assets/fondoclub.png'
 
     .hero {
       position: relative;
-      min-height: clamp(560px, 90vh, 760px);
-      border-radius: 28px;
+      min-height: 100vh;
+      border-radius: 0;
       overflow: hidden;
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-  padding: clamp(2.5rem, 6vw, 4.5rem);
-  background: #07193a;
+      padding: clamp(2.5rem, 6vw, 4.5rem);
+      background: #07193a;
     }
 
     .hero__background {
@@ -322,7 +322,6 @@ import heroBackground from 'src/assets/fondoclub.png'
 
     @media (max-width: 900px) {
       .hero {
-        border-radius: 20px;
         padding: clamp(2rem, 8vw, 3rem);
       }
 
