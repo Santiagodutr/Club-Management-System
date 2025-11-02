@@ -1,154 +1,346 @@
----
 import BaseLayout from '../layouts/BaseLayout.astro'
+import logoClub from '../assets/logo_corpmeta.png'
+import heroBackground from '../assets/fondoclub.png'
 ---
 
-<BaseLayout title="Corporación Club del Meta">
-  <section class="hero">
-    <div class="hero__visual">
-      <div class="hero__emblem" aria-hidden="true">Escudo del Club</div>
-    </div>
-    <div class="hero__content">
-      <h1>Corporación Club del Meta</h1>
-      <p class="hero__subtitle">Reserva de salones y espacios</p>
-      <p class="hero__description">
-        Gestiona reservas para eventos corporativos, recepciones sociales y encuentros exclusivos en las
-        instalaciones del Club El Meta. Una experiencia premium con logística centralizada y atención
-        personalizada.
-      </p>
-      <a class="hero__cta" href="/reservas">Agendar Reserva</a>
-    </div>
-  </section>
+<BaseLayout title="Corporacion Club del Meta">
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero__background" aria-hidden="true"></div>
+    <div class="hero__layer" aria-hidden="true"></div>
 
-  <section class="features">
-    <article>
-      <h2>Gestión ágil</h2>
-      <p>Consulta disponibilidad, confirma reservas y recibe notificaciones en tiempo real.</p>
-    </article>
-    <article>
-      <h2>Espacios versátiles</h2>
-      <p>Salones preparados para conferencias, celebraciones y encuentros privados de alto nivel.</p>
-    </article>
-    <article>
-      <h2>Servicio integral</h2>
-      <p>Coordinación con proveedores, ambientación personalizada y soporte durante tu evento.</p>
-    </article>
+    <div class="hero__wrap">
+      <header class="hero__header">
+        <div class="hero__identity">
+          <img src={logoClub} alt="Logo Corporacion Club del Meta" class="hero__logo" />
+          <span class="hero__name">Corporacion Club del Meta</span>
+        </div>
+        <nav class="hero__languages" aria-label="Selector de idioma">
+          <a href="#" class="hero__language hero__language--active">ES</a>
+          <a href="#" class="hero__language">EN</a>
+        </nav>
+      </header>
+
+      <div class="hero__content">
+        <div class="hero__eyebrow">Tu club, tu horario, tu comunidad</div>
+        <h1 id="hero-heading" class="hero__headline">
+          <span class="hero__headline-top">El match</span>
+          <span class="hero__headline-bottom">perfecto para tu club</span>
+        </h1>
+        <p class="hero__subtitle">
+          Gestiona y reserva canchas, salones y eventos del Club del Meta en segundos. Conecta a socios, controla
+          calendarios y garantiza la mejor experiencia deportiva.
+        </p>
+
+        <div class="hero__actions">
+          <a class="hero__cta" href="/reservas">Reserva tu cancha aqui</a>
+          <a class="hero__secondary" href="mailto:contacto@clubdelmeta.com">
+            Soy administrador, deseo informacion para mi club
+          </a>
+        </div>
+
+        <div class="hero__stores" aria-label="Descargar apps">
+          <a class="hero__store" href="#">
+            <span class="hero__store-icon" aria-hidden="true">APP</span>
+            <span class="hero__store-text">
+              <span class="hero__store-small">Disponible en</span>
+              <span class="hero__store-name">App Store</span>
+            </span>
+          </a>
+          <a class="hero__store" href="#">
+            <span class="hero__store-icon" aria-hidden="true">GP</span>
+            <span class="hero__store-text">
+              <span class="hero__store-small">Disponible en</span>
+              <span class="hero__store-name">Google Play</span>
+            </span>
+          </a>
+          <a class="hero__store" href="#">
+            <span class="hero__store-icon" aria-hidden="true">AG</span>
+            <span class="hero__store-text">
+              <span class="hero__store-small">Disponible en</span>
+              <span class="hero__store-name">AppGallery</span>
+            </span>
+          </a>
+        </div>
+      </div>
+
+      <a class="hero__support" href="mailto:alianzas@clubdelmeta.com">
+        Soy administrador o propietario de un club, deseo unirme al ecosistema del Club del Meta
+      </a>
+    </div>
   </section>
 
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+
     .hero {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2.5rem;
-      align-items: center;
-    }
-
-    .hero__visual {
+      position: relative;
+      min-height: clamp(560px, 90vh, 760px);
+      border-radius: 28px;
+      overflow: hidden;
+      color: #ffffff;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
+      padding: clamp(2.5rem, 6vw, 4.5rem);
+      background: #07193a;
     }
 
-    .hero__emblem {
-      width: min(220px, 60vw);
-      aspect-ratio: 1;
-      border-radius: 50%;
-      border: 6px solid var(--color-accent);
+    .hero__background {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(4, 14, 32, 0.15), rgba(4, 14, 32, 0.4)), url({heroBackground.src});
+      background-size: cover;
+      background-position: center;
+    }
+
+    .hero__layer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(110deg, rgba(8, 27, 68, 0.9), rgba(8, 27, 68, 0.6) 48%, rgba(16, 36, 78, 0.35));
+    }
+
+    .hero__wrap {
+      position: relative;
       display: grid;
-      place-items: center;
-      font-weight: 600;
-      font-size: 1.1rem;
-      color: var(--color-primary);
-      background: linear-gradient(145deg, rgba(10, 75, 165, 0.15), rgba(197, 125, 61, 0.25));
-      text-align: center;
-      padding: 1.5rem;
+      gap: clamp(2rem, 5vw, 3rem);
+      max-width: min(1100px, 92vw);
+      width: 100%;
     }
 
-    .hero__content h1 {
-      font-size: clamp(2.4rem, 4vw, 3.2rem);
-      margin: 0 0 0.5rem;
-      color: var(--color-primary);
+    .hero__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+
+    .hero__identity {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .hero__logo {
+      width: clamp(96px, 10vw, 140px);
+      height: auto;
+      filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+    }
+
+    .hero__name {
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .hero__languages {
+      display: inline-flex;
+      gap: 0.65rem;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 0.45rem;
+      border-radius: 999px;
+      backdrop-filter: blur(6px);
+    }
+
+    .hero__language {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.75);
+      text-decoration: none;
+      padding: 0.45rem 0.95rem;
+      border-radius: 999px;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .hero__language--active,
+    .hero__language:hover {
+      background: #ffffff;
+      color: #0a1e4a;
+    }
+
+    .hero__content {
+      display: grid;
+      gap: 1.6rem;
+      max-width: min(640px, 90%);
+    }
+
+    .hero__eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .hero__headline {
+      margin: 0;
+      line-height: 1;
+      display: grid;
+      gap: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .hero__headline-top {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 7vw, 4.2rem);
+      letter-spacing: 0.18em;
+      color: #ff2b6d;
+    }
+
+    .hero__headline-bottom {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.2rem, 7.5vw, 5.1rem);
+      letter-spacing: 0.2em;
     }
 
     .hero__subtitle {
-      font-size: 1.35rem;
-      font-weight: 500;
-      margin: 0 0 1.5rem;
-      color: #1f2933;
-      letter-spacing: 0.03em;
+      margin: 0;
+      font-size: clamp(1.05rem, 2.3vw, 1.2rem);
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.88);
     }
 
-    .hero__description {
-      margin: 0 0 2rem;
-      line-height: 1.6;
-      color: #3c4858;
+    .hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
     .hero__cta {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.9rem 2.4rem;
+      padding: 1rem 2.4rem;
       border-radius: 999px;
-      background: var(--color-primary);
-      color: #ffffff;
+      background: #ffffff;
+      color: #0a1e4a;
       font-weight: 600;
       text-decoration: none;
-      letter-spacing: 0.05em;
-      box-shadow: 0 12px 20px rgba(10, 75, 165, 0.25);
+      letter-spacing: 0.08em;
+      box-shadow: 0 18px 30px rgba(0, 0, 0, 0.28);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .hero__cta:hover {
       transform: translateY(-2px);
-      box-shadow: 0 16px 24px rgba(10, 75, 165, 0.28);
+      box-shadow: 0 22px 38px rgba(0, 0, 0, 0.32);
     }
 
-    .features {
-      margin-top: 4rem;
-      display: grid;
-      gap: 1.5rem;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    .hero__secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 2rem;
+      border-radius: 999px;
+      background: rgba(9, 21, 50, 0.62);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      transition: background 0.2s ease, transform 0.2s ease;
     }
 
-    .features article {
-      background: var(--color-surface);
-      border-radius: 18px;
-      padding: 1.75rem;
-      border: 1px solid rgba(191, 195, 199, 0.6);
-      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    .hero__secondary:hover {
+      background: rgba(9, 21, 50, 0.78);
+      transform: translateY(-1px);
     }
 
-    .features article:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 18px 28px rgba(15, 23, 42, 0.1);
+    .hero__stores {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
-    .features h2 {
-      margin-top: 0;
-      color: var(--color-primary);
-      font-size: 1.25rem;
+    .hero__store {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 1.4rem;
+      border-radius: 14px;
+      background: rgba(7, 24, 60, 0.7);
+      text-decoration: none;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      transition: background 0.2s ease, border-color 0.2s ease;
+      font-family: 'Inter', sans-serif;
     }
 
-    .features p {
-      margin-bottom: 0;
-      color: #475569;
-      line-height: 1.5;
+    .hero__store:hover {
+      background: rgba(7, 28, 72, 0.95);
+      border-color: rgba(255, 255, 255, 0.35);
     }
 
-    @media (max-width: 600px) {
+    .hero__store-icon {
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+
+    .hero__store-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .hero__store-small {
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.65);
+    }
+
+    .hero__store-name {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .hero__support {
+      margin-top: auto;
+      justify-self: end;
+      max-width: 420px;
+      padding: 0.95rem 1.4rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(6px);
+      transition: background 0.2s ease;
+    }
+
+    .hero__support:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    @media (max-width: 900px) {
       .hero {
-        text-align: center;
+        border-radius: 20px;
+        padding: clamp(2rem, 8vw, 3rem);
+      }
+
+      .hero__header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero__support {
+        justify-self: stretch;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .hero__languages {
+        align-self: flex-start;
       }
 
       .hero__content {
-        display: grid;
-        justify-items: center;
-        gap: 1.1rem;
+        max-width: 100%;
       }
 
-      .hero__description {
-        text-align: center;
+      .hero__actions,
+      .hero__stores {
+        flex-direction: column;
+        align-items: stretch;
       }
     }
   </style>
