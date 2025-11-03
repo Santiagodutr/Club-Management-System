@@ -1,26 +1,60 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import millanuraImg from '../assets/millanura.jpg'
+import barImg from '../assets/bar.jpg'
+import empresarialImg from '../assets/empresarial.jpg'
+import terrazaImg from '../assets/terraza.jpg'
+import kioskoImg from '../assets/kiosko.jpg'
+import presidencialImg from '../assets/presidencial.jpg'
 
 const espacios = [
   {
-    nombre: 'Salón Principal',
+    nombre: 'Mi Llanura',
     descripcion:
-      'Capacidad para grandes recepciones, escenario modular, iluminación dinámica y soporte técnico integrado.',
+      'Salón insignia con vista a las áreas verdes, ambientación adaptable y capacidad para 180 asistentes.',
+    aforo: 'Hasta 180 personas',
+    destaque: 'Ideal para recepciones y eventos sociales',
+    imagen: millanuraImg,
   },
   {
-    nombre: 'Salón de Conferencias',
+    nombre: 'Salón Bar',
     descripcion:
-      'Ambiente profesional con sistema audiovisual, mesas configurables y conectividad de alta velocidad.',
+      'Ambiente contemporáneo con barra integrada, iluminación escénica y sistema de sonido premium.',
+    aforo: 'Hasta 90 personas',
+    destaque: 'Perfecto para cocteles y lanzamientos',
+    imagen: barImg,
   },
   {
-    nombre: 'Área Social',
+    nombre: 'Salón Empresarial',
     descripcion:
-      'Espacio abierto rodeado de jardines, ideal para celebraciones familiares y encuentros informales.',
+      'Equipado con pantallas, streaming y mobiliario modular para workshops, conferencias y directorios.',
+    aforo: 'Hasta 120 personas',
+    destaque: 'Conectividad y soporte técnico continuo',
+    imagen: empresarialImg,
   },
   {
-    nombre: 'Salón VIP',
+    nombre: 'Terraza',
     descripcion:
-      'Experiencia privada con servicio personalizado, mobiliario premium y atención dedicada.',
+      'Espacio al aire libre con pérgolas, iluminación ambiental y vista privilegiada a las zonas deportivas.',
+    aforo: 'Hasta 150 personas',
+    destaque: 'Eventos sunset, matrimonios y brunchs',
+    imagen: terrazaImg,
+  },
+  {
+    nombre: 'Kiosco',
+    descripcion:
+      'Área semiabierta rodeada de jardines, piso en deck y estaciones eléctricas para música en vivo.',
+    aforo: 'Hasta 70 personas',
+    destaque: 'Reuniones familiares y celebraciones infantiles',
+    imagen: kioskoImg,
+  },
+  {
+    nombre: 'Salón Presidente',
+    descripcion:
+      'Espacio exclusivo con mobiliario ejecutivo, insonorización y servicio gourmet personalizado.',
+    aforo: 'Hasta 60 personas',
+    destaque: 'Juntas corporativas y sesiones privadas',
+    imagen: presidencialImg,
   },
 ]
 ---
@@ -35,14 +69,30 @@ const espacios = [
       </p>
     </header>
 
-    <div class="reservas__grid">
-      {espacios.map((espacio) => (
-        <article class="reserva-card">
-          <h2>{espacio.nombre}</h2>
-          <p>{espacio.descripcion}</p>
-          <button type="button">Reservar</button>
-        </article>
-      ))}
+    <div class="carousel" data-carousel>
+      <button class="carousel__control carousel__control--prev" type="button" data-carousel-prev aria-label="Espacio anterior">
+        <span aria-hidden="true">‹</span>
+      </button>
+
+      <div class="carousel__track" data-carousel-track role="list">
+        {espacios.map((espacio) => (
+          <article class="reserva-card" role="listitem" style={`background-image: url(${espacio.imagen.src})`}>
+            <div class="reserva-card__overlay">
+              <header class="reserva-card__header">
+                <span class="reserva-card__badge">{espacio.aforo}</span>
+                <h2>{espacio.nombre}</h2>
+              </header>
+              <p class="reserva-card__highlight">{espacio.destaque}</p>
+              <p>{espacio.descripcion}</p>
+              <button type="button">Reservar</button>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <button class="carousel__control carousel__control--next" type="button" data-carousel-next aria-label="Espacio siguiente">
+        <span aria-hidden="true">›</span>
+      </button>
     </div>
   </section>
 
@@ -50,77 +100,301 @@ const espacios = [
     .reservas {
       display: grid;
       gap: 2.5rem;
+      padding-top: 2rem;
     }
 
     .reservas__header h1 {
       margin: 0 0 1rem;
-      font-size: clamp(2rem, 3.5vw, 2.6rem);
-      color: var(--color-primary);
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      color: #1f2937;
+      font-weight: 700;
+      text-align: center;
     }
 
     .reservas__header p {
-      margin: 0;
+      margin: 0 auto;
       line-height: 1.6;
-      color: #334155;
-      max-width: 720px;
+      color: #4b5563;
+      max-width: 620px;
+      text-align: center;
+      font-size: 1.05rem;
     }
 
-    .reservas__grid {
+    .carousel {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.75rem;
+      grid-template-columns: auto 1fr auto;
+      gap: 1.5rem;
+      align-items: center;
+      max-width: 1300px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .carousel__track {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(min(380px, 85vw), 520px);
+      gap: 2.5rem;
+      overflow-x: auto;
+      padding: 1rem 0 2rem 0;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .carousel__track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .carousel__control {
+      appearance: none;
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: rgba(10, 75, 165, 0.12);
+      color: var(--color-primary);
+      font-size: 1.8rem;
+      font-weight: 600;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .carousel__control:hover {
+      background: rgba(10, 75, 165, 0.2);
+      transform: translateY(-2px);
     }
 
     .reserva-card {
-      background: var(--color-surface);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       border-radius: 20px;
-      padding: 2rem 1.75rem;
-      border: 1px solid rgba(191, 195, 199, 0.7);
-      box-shadow: 0 18px 30px rgba(15, 23, 42, 0.08);
+      border: none;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      display: flex;
+      scroll-snap-align: start;
+      min-height: 560px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .reserva-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .reserva-card__overlay {
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.3) 0%,
+        rgba(0, 0, 0, 0.5) 40%,
+        rgba(0, 0, 0, 0.75) 100%
+      );
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      width: 100%;
+    }
+
+    .reserva-card__header {
       display: grid;
-      gap: 1.25rem;
+      gap: 0.75rem;
     }
 
     .reserva-card h2 {
       margin: 0;
-      color: var(--color-primary);
-      font-size: 1.35rem;
+      color: #ffffff;
+      font-size: 1.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+      font-weight: 700;
+    }
+
+    .reserva-card__badge {
+      justify-self: start;
+      align-self: start;
+      padding: 0.5rem 1.1rem;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #1f2937;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .reserva-card__highlight {
+      margin: 0;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #ffffff;
+      letter-spacing: 0.02em;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
     }
 
     .reserva-card p {
       margin: 0;
-      color: #475569;
+      color: #ffffff;
       line-height: 1.6;
+      font-size: 1rem;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+      flex: 1;
+      display: block;
     }
 
     .reserva-card button {
-      justify-self: start;
-      padding: 0.75rem 1.8rem;
+      align-self: flex-start;
+      padding: 0.8rem 2.2rem;
       border-radius: 999px;
       border: none;
-      background: var(--color-primary);
+      background: #0a4ba5;
       color: #ffffff;
       font-weight: 600;
       cursor: pointer;
-      letter-spacing: 0.04em;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 12px 20px rgba(10, 75, 165, 0.25);
+      letter-spacing: 0.02em;
+      transition: all 0.2s ease;
+      box-shadow: 0 8px 16px rgba(10, 75, 165, 0.3);
+      margin-top: auto;
+      font-size: 1rem;
     }
 
     .reserva-card button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 16px 22px rgba(10, 75, 165, 0.28);
+      box-shadow: 0 12px 20px rgba(10, 75, 165, 0.4);
+      background: #0842a0;
     }
 
     @media (max-width: 640px) {
+      .carousel {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+        gap: 1rem;
+      }
+
+      .carousel__track {
+        grid-auto-columns: minmax(min(300px, 90vw), 1fr);
+        gap: 1.5rem;
+        padding: 1rem 0 2rem 0;
+      }
+
+      .carousel__control {
+        display: none;
+      }
+
       .reserva-card {
-        padding: 1.6rem 1.4rem;
+        min-height: 480px;
+      }
+
+      .reserva-card__overlay {
+        padding: 2rem 1.75rem;
+        gap: 1rem;
+      }
+
+      .reserva-card h2 {
+        font-size: 1.4rem;
+      }
+
+      .reserva-card__badge {
+        font-size: 0.75rem;
+        padding: 0.45rem 1rem;
+      }
+
+      .reserva-card__highlight {
+        font-size: 0.95rem;
+      }
+
+      .reserva-card p {
+        font-size: 0.9rem;
+        line-height: 1.55;
       }
 
       .reserva-card button {
         width: 100%;
-        justify-self: stretch;
+        align-self: stretch;
+        padding: 0.85rem 1.5rem;
+        font-size: 0.95rem;
+      }
+
+      .reservas__header h1 {
+        font-size: 1.75rem;
+      }
+
+      .reservas__header p {
+        font-size: 0.95rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .reserva-card {
+        min-height: 460px;
+      }
+
+      .reserva-card__overlay {
+        padding: 1.75rem 1.5rem;
+        gap: 0.9rem;
+      }
+
+      .reserva-card h2 {
+        font-size: 1.3rem;
+      }
+
+      .reserva-card__badge {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.9rem;
+      }
+
+      .reserva-card__highlight {
+        font-size: 0.9rem;
+      }
+
+      .reserva-card p {
+        font-size: 0.875rem;
+        line-height: 1.5;
+      }
+
+      .reserva-card button {
+        padding: 0.8rem 1.25rem;
+        font-size: 0.9rem;
+      }
+
+      .reservas__header h1 {
+        font-size: 1.5rem;
+      }
+
+      .reservas__header p {
+        font-size: 0.9rem;
       }
     }
   </style>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const carousels = document.querySelectorAll('[data-carousel]')
+
+      carousels.forEach((carousel) => {
+        const track = carousel.querySelector('[data-carousel-track]')
+        const prev = carousel.querySelector('[data-carousel-prev]')
+        const next = carousel.querySelector('[data-carousel-next]')
+
+        if (!track) {
+          return
+        }
+
+        const scrollStep = () => track.clientWidth * 0.8
+
+        const scrollBy = (distance) => {
+          track.scrollBy({ left: distance, behavior: 'smooth' })
+        }
+
+        prev?.addEventListener('click', () => scrollBy(scrollStep() * -1))
+        next?.addEventListener('click', () => scrollBy(scrollStep()))
+      })
+    })
+  </script>
 </BaseLayout>

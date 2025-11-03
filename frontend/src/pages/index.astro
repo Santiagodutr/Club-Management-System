@@ -4,7 +4,7 @@ import logoClub from 'src/assets/logo_corpmeta.png'
 import heroBackground from 'src/assets/fondoclub.png'
 ---
 
-<BaseLayout title="Corporacion Club del Meta" hideNavbar fullWidth>
+<BaseLayout title="Corporacion Club el Meta" hideNavbar fullWidth>
   <section class="hero" aria-labelledby="hero-heading">
     <div
       class="hero__background"
@@ -16,8 +16,8 @@ import heroBackground from 'src/assets/fondoclub.png'
     <div class="hero__wrap">
       <header class="hero__header">
         <div class="hero__identity">
-          <img src={logoClub.src} alt="Logo Corporacion Club del Meta" class="hero__logo" />
-          <span class="hero__name">Corporacion Club del Meta</span>
+          <img src={logoClub.src} alt="Logo Corporacion Club el Meta" class="hero__logo" />
+          <span class="hero__name">Corporacion Club el Meta</span>
         </div>
         <nav class="hero__languages" aria-label="Selector de idioma">
           <a href="#" class="hero__language hero__language--active">ES</a>
@@ -26,10 +26,10 @@ import heroBackground from 'src/assets/fondoclub.png'
       </header>
 
       <div class="hero__content">
-        <div class="hero__eyebrow">Tu club, tu horario, tu comunidad</div>
+        <div class="hero__eyebrow">Tu espacio, tu horario, tu comunidad</div>
         <h1 id="hero-heading" class="hero__headline">
-          <span class="hero__headline-top">El match</span>
-          <span class="hero__headline-bottom">perfecto para tu club</span>
+          <span class="hero__headline-top">EL LUGAR</span>
+          <span class="hero__headline-bottom">perfecto para tu evento</span>
         </h1>
         <p class="hero__subtitle">
           Gestiona y reserva canchas, salones y eventos del Club del Meta en segundos. Conecta a socios, controla
@@ -37,40 +37,9 @@ import heroBackground from 'src/assets/fondoclub.png'
         </p>
 
         <div class="hero__actions">
-          <a class="hero__cta" href="/reservas">Reserva tu cancha aqui</a>
-          <a class="hero__secondary" href="mailto:contacto@clubdelmeta.com">
-            Soy administrador, deseo informacion para mi club
-          </a>
-        </div>
-
-        <div class="hero__stores" aria-label="Descargar apps">
-          <a class="hero__store" href="#">
-            <span class="hero__store-icon" aria-hidden="true">APP</span>
-            <span class="hero__store-text">
-              <span class="hero__store-small">Disponible en</span>
-              <span class="hero__store-name">App Store</span>
-            </span>
-          </a>
-          <a class="hero__store" href="#">
-            <span class="hero__store-icon" aria-hidden="true">GP</span>
-            <span class="hero__store-text">
-              <span class="hero__store-small">Disponible en</span>
-              <span class="hero__store-name">Google Play</span>
-            </span>
-          </a>
-          <a class="hero__store" href="#">
-            <span class="hero__store-icon" aria-hidden="true">AG</span>
-            <span class="hero__store-text">
-              <span class="hero__store-small">Disponible en</span>
-              <span class="hero__store-name">AppGallery</span>
-            </span>
-          </a>
+          <a class="hero__cta" href="/reservas">Reserva tu espacio aqui</a>
         </div>
       </div>
-
-      <a class="hero__support" href="mailto:alianzas@clubdelmeta.com">
-        Soy administrador o propietario de un club, deseo unirme al ecosistema del Club del Meta
-      </a>
     </div>
   </section>
 
@@ -88,9 +57,9 @@ import heroBackground from 'src/assets/fondoclub.png'
       overflow: hidden;
       color: #ffffff;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: clamp(2.5rem, 6vw, 4.5rem);
+      padding: clamp(1rem, 3vw, 2.5rem) clamp(2.5rem, 7vw, 5rem);
       background: #07193a;
     }
 
@@ -110,8 +79,8 @@ import heroBackground from 'src/assets/fondoclub.png'
     .hero__wrap {
       position: relative;
       display: grid;
-      gap: clamp(2rem, 5vw, 3rem);
-      max-width: min(1100px, 92vw);
+      gap: clamp(1.5rem, 4vw, 3rem);
+      max-width: min(1200px, 96vw);
       width: 100%;
     }
 
@@ -169,7 +138,7 @@ import heroBackground from 'src/assets/fondoclub.png'
     .hero__content {
       display: grid;
       gap: 1.6rem;
-      max-width: min(640px, 90%);
+      max-width: min(720px, 95%);
     }
 
     .hero__eyebrow {
@@ -322,7 +291,7 @@ import heroBackground from 'src/assets/fondoclub.png'
 
     @media (max-width: 900px) {
       .hero {
-        padding: clamp(2rem, 8vw, 3rem);
+        padding: clamp(1rem, 8vw, 2rem) clamp(1.5rem, 10vw, 3.5rem);
       }
 
       .hero__header {
