@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import Navbar from '../components/Navbar.astro'
 import heroBackground from 'src/assets/fondoclub.png'
-import logoCorpmeta from 'src/assets/logo_corpmeta.png'
 ---
 
 <BaseLayout title="Contacto - Club del Meta" hideNavbar fullWidth>
@@ -11,23 +11,9 @@ import logoCorpmeta from 'src/assets/logo_corpmeta.png'
       style={`background-image: linear-gradient(rgba(4, 14, 32, 0.6), rgba(4, 14, 32, 0.8)), url(${heroBackground.src});`}
     ></div>
     
-    <nav class="contact-navbar">
-      <a href="/" class="navbar-brand">
-        <img src={logoCorpmeta.src} alt="Club El Meta" class="navbar-logo" />
-      </a>
-      
-      <button class="navbar-toggle" aria-label="Abrir menú" id="navbarToggle">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
-      <ul class="navbar-links" id="navbarLinks">
-        <li><a href="/">Inicio</a></li>
-        <li><a href="/reservas">Reservas</a></li>
-        <li><a href="/contacto" class="active">Contacto</a></li>
-      </ul>
-    </nav>
+    <div class="navbar-wrapper">
+      <Navbar />
+    </div>
 
     <div class="contact-hero__content">
       <h1>Contáctanos</h1>
@@ -128,81 +114,27 @@ import logoCorpmeta from 'src/assets/logo_corpmeta.png'
       width: 100%;
     }
 
-    .contact-navbar {
+    .navbar-wrapper {
       position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.5rem 5%;
       z-index: 10;
-      width: 100%;
-      max-width: 100%;
     }
 
-    .navbar-brand {
-      display: flex;
-      align-items: center;
+    .navbar-wrapper :global(.navbar) {
+      background: transparent !important;
+      box-shadow: none !important;
+      position: relative !important;
     }
 
-    .navbar-logo {
-      height: 65px;
-      width: auto;
-      object-fit: contain;
+    .navbar-wrapper :global(.navbar__link) {
+      color: #ffffff !important;
     }
 
-    .navbar-toggle {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 0.5rem;
-      z-index: 20;
+    .navbar-wrapper :global(.navbar__link:hover) {
+      color: #60a5fa !important;
     }
 
-    .navbar-toggle span {
-      display: block;
-      width: 28px;
-      height: 3px;
-      background: #ffffff;
-      border-radius: 2px;
-      transition: all 0.3s ease;
-    }
-
-    .navbar-toggle.active span:nth-child(1) {
-      transform: rotate(45deg) translate(8px, 8px);
-    }
-
-    .navbar-toggle.active span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .navbar-toggle.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(7px, -7px);
-    }
-
-    .navbar-links {
-      list-style: none;
-      display: flex;
-      gap: 3rem;
-      margin: 0;
-      padding: 0;
-      margin-right: 8%;
-    }
-
-    .navbar-links a {
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 1.1rem;
-      transition: color 0.2s ease;
-      position: relative;
-    }
-
-    .navbar-links a:hover,
-    .navbar-links a.active {
-      color: #60a5fa;
+    .navbar-wrapper :global(.navbar__toggle span) {
+      background: #ffffff !important;
     }
 
     .contact-hero__content {
@@ -342,46 +274,8 @@ import logoCorpmeta from 'src/assets/logo_corpmeta.png'
     }
 
     @media (max-width: 968px) {
-      .contact-navbar {
-        padding: 1.25rem 1.5rem;
-      }
-
-      .navbar-toggle {
-        display: flex;
-      }
-
-      .navbar-links {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        height: 100vh;
-        width: 70%;
-        max-width: 350px;
-        background: rgba(10, 75, 165, 0.98);
-        backdrop-filter: blur(10px);
-        flex-direction: column;
-        gap: 0;
-        padding: 100px 2rem 2rem;
-        margin: 0;
-        transition: right 0.4s ease;
-        z-index: 15;
-        box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
-      }
-
-      .navbar-links.active {
-        right: 0;
-      }
-
-      .navbar-links li {
-        width: 100%;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .navbar-links a {
-        display: block;
-        padding: 1.2rem 0;
-        font-size: 1.2rem;
-        width: 100%;
+      .navbar-wrapper :global(.navbar__links) {
+        background: rgba(10, 75, 165, 0.98) !important;
       }
 
       .contact-hero {
@@ -399,23 +293,6 @@ import logoCorpmeta from 'src/assets/logo_corpmeta.png'
     }
 
     @media (max-width: 640px) {
-      .contact-navbar {
-        padding: 1rem 4%;
-      }
-
-      .navbar-logo {
-        height: 50px;
-      }
-
-      .navbar-links {
-        width: 80%;
-        padding-top: 80px;
-      }
-
-      .navbar-links a {
-        font-size: 1.1rem;
-      }
-
       .contact-hero h1 {
         font-size: 2rem;
       }
@@ -441,35 +318,4 @@ import logoCorpmeta from 'src/assets/logo_corpmeta.png'
       }
     }
   </style>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const navbarToggle = document.getElementById('navbarToggle');
-      const navbarLinks = document.getElementById('navbarLinks');
-
-      if (navbarToggle && navbarLinks) {
-        navbarToggle.addEventListener('click', () => {
-          navbarToggle.classList.toggle('active');
-          navbarLinks.classList.toggle('active');
-        });
-
-        // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
-          const target = e.target as HTMLElement;
-          if (!target.closest('.contact-navbar')) {
-            navbarToggle.classList.remove('active');
-            navbarLinks.classList.remove('active');
-          }
-        });
-
-        // Close menu when clicking on a link
-        navbarLinks.querySelectorAll('a').forEach(link => {
-          link.addEventListener('click', () => {
-            navbarToggle.classList.remove('active');
-            navbarLinks.classList.remove('active');
-          });
-        });
-      }
-    });
-  </script>
 </BaseLayout>
