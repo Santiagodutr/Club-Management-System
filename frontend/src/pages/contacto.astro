@@ -1,0 +1,475 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import heroBackground from 'src/assets/fondoclub.png'
+import logoCorpmeta from 'src/assets/logo_corpmeta.png'
+---
+
+<BaseLayout title="Contacto - Club del Meta" hideNavbar fullWidth>
+  <section class="contact-hero">
+    <div
+      class="contact-hero__background"
+      style={`background-image: linear-gradient(rgba(4, 14, 32, 0.6), rgba(4, 14, 32, 0.8)), url(${heroBackground.src});`}
+    ></div>
+    
+    <nav class="contact-navbar">
+      <a href="/" class="navbar-brand">
+        <img src={logoCorpmeta.src} alt="Club El Meta" class="navbar-logo" />
+      </a>
+      
+      <button class="navbar-toggle" aria-label="Abrir menú" id="navbarToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <ul class="navbar-links" id="navbarLinks">
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/reservas">Reservas</a></li>
+        <li><a href="/contacto" class="active">Contacto</a></li>
+      </ul>
+    </nav>
+
+    <div class="contact-hero__content">
+      <h1>Contáctanos</h1>
+      <p>
+        Impulsa tu negocio al siguiente nivel. En el Club del Meta estamos listos para ayudarte a
+        digitalizar, automatizar y optimizar tus procesos con soluciones tecnológicas a medida.
+      </p>
+    </div>
+  </section>
+
+  <section class="contact-content">
+    <div class="contact-container">
+      <div class="map-section">
+        <h2>Nuestra Ubicación</h2>
+        <div class="map-container">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1989.645188052661!2d-73.63941951079238!3d4.163210806773625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e3e2d9252257e01%3A0x13a9394f0ef8b23d!2sClub%20Meta!5e0!3m2!1ses!2sco!4v1762378314013!5m2!1ses!2sco"
+            width="100%"
+            height="500"
+            style="border:0;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+      </div>
+
+      <div class="contact-info-section">
+        <h2>Información de Contacto</h2>
+        
+        <div class="info-grid">
+          <div class="info-card">
+            <div class="info-icon">📞</div>
+            <h3>Teléfonos</h3>
+            <p>(8) 6 64 11 15 - 312 4347893</p>
+            <p>EVENTOS: 310 8874473 - 312 4350412</p>
+            <p>COMPRAS: 310 8771304</p>
+            <p>CARTERA: 313 2349780</p>
+            <p>OPERACIONES: 313 4660698</p>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">📧</div>
+            <h3>Email</h3>
+            <p><a href="mailto:comunicaciones@clubelmeta.com">comunicaciones@clubelmeta.com</a></p>
+            <p><a href="mailto:secretaria@clubelmeta.com">secretaria@clubelmeta.com</a></p>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">📍</div>
+            <h3>Dirección</h3>
+            <p>Calle 48A Carrera 30</p>
+            <p>Barrio Ciudad Oriental</p>
+            <p>Villavicencio - Meta</p>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">⏰</div>
+            <h3>Horario de Atención</h3>
+            <p>Lunes a Viernes: 8:00 AM - 6:00 PM</p>
+            <p>Sábados: 9:00 AM - 2:00 PM</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WhatsApp Floating Button -->
+  <a
+    href="https://wa.me/573123439172"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="whatsapp-float"
+    aria-label="Contactar por WhatsApp"
+  >
+    <svg viewBox="0 0 32 32" fill="currentColor">
+      <path d="M16 0C7.163 0 0 7.163 0 16c0 2.825.742 5.49 2.038 7.813L.054 31.19l7.649-1.925A15.94 15.94 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm8.219 22.706c-.35.987-2.056 1.831-2.844 1.95-.75.1-1.725.138-2.788-.175-.644-.188-1.469-.438-2.525-.856-4.419-1.756-7.3-6.225-7.519-6.512-.213-.281-1.75-2.325-1.75-4.437 0-2.113 1.106-3.15 1.5-3.581.394-.431.863-.538 1.15-.538.288 0 .575.006.825.013.269.013.631-.1.988.756.363.869 1.238 3.019 1.344 3.238.106.219.181.475.038.756-.144.288-.213.469-.425.719-.213.25-.444.556-.638.75-.213.212-.431.438-.181.863.25.419 1.113 1.831 2.388 2.969 1.637 1.462 3.019 1.919 3.45 2.138.431.219.681.181.931-.106.25-.288 1.075-1.256 1.363-1.688.288-.431.575-.363.969-.219.394.144 2.5 1.181 2.931 1.394.431.213.719.313.825.488.106.175.106 1.006-.244 1.994z"/>
+    </svg>
+  </a>
+
+  <style>
+    .contact-hero {
+      position: relative;
+      min-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      color: #ffffff;
+      overflow: hidden;
+      margin: 0;
+      width: 100%;
+    }
+
+    .contact-hero__background {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      width: 100%;
+    }
+
+    .contact-navbar {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 5%;
+      z-index: 10;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-logo {
+      height: 65px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .navbar-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      z-index: 20;
+    }
+
+    .navbar-toggle span {
+      display: block;
+      width: 28px;
+      height: 3px;
+      background: #ffffff;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .navbar-toggle.active span:nth-child(1) {
+      transform: rotate(45deg) translate(8px, 8px);
+    }
+
+    .navbar-toggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .navbar-toggle.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -7px);
+    }
+
+    .navbar-links {
+      list-style: none;
+      display: flex;
+      gap: 3rem;
+      margin: 0;
+      padding: 0;
+      margin-right: 8%;
+    }
+
+    .navbar-links a {
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1.1rem;
+      transition: color 0.2s ease;
+      position: relative;
+    }
+
+    .navbar-links a:hover,
+    .navbar-links a.active {
+      color: #60a5fa;
+    }
+
+    .contact-hero__content {
+      position: relative;
+      text-align: center;
+      max-width: 900px;
+      margin: auto;
+      padding: 3rem 2rem;
+      z-index: 1;
+    }
+
+    .contact-hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 700;
+      margin: 0 0 1.5rem;
+      letter-spacing: 0.02em;
+    }
+
+    .contact-hero p {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      line-height: 1.7;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.95);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .contact-content {
+      padding: 5rem 2rem;
+      background: #ffffff;
+    }
+
+    .contact-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      gap: 4rem;
+    }
+
+    .contact-info-section h2,
+    .map-section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 0 2.5rem;
+      color: #1f2937;
+      text-align: center;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .info-card {
+      background: #f9fafb;
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+      border: 1px solid #e5e7eb;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .info-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 1rem;
+      color: #1f2937;
+    }
+
+    .info-card p {
+      margin: 0.5rem 0;
+      color: #6b7280;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .info-card a {
+      color: #0a4ba5;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .info-card a:hover {
+      color: #0842a0;
+      text-decoration: underline;
+    }
+
+    .map-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .map-container {
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    .whatsapp-float {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 60px;
+      height: 60px;
+      background: #25d366;
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      z-index: 1000;
+    }
+
+    .whatsapp-float:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 12px 32px rgba(37, 211, 102, 0.5);
+    }
+
+    .whatsapp-float svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    @media (max-width: 968px) {
+      .contact-navbar {
+        padding: 1.25rem 1.5rem;
+      }
+
+      .navbar-toggle {
+        display: flex;
+      }
+
+      .navbar-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        height: 100vh;
+        width: 70%;
+        max-width: 350px;
+        background: rgba(10, 75, 165, 0.98);
+        backdrop-filter: blur(10px);
+        flex-direction: column;
+        gap: 0;
+        padding: 100px 2rem 2rem;
+        margin: 0;
+        transition: right 0.4s ease;
+        z-index: 15;
+        box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .navbar-links.active {
+        right: 0;
+      }
+
+      .navbar-links li {
+        width: 100%;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .navbar-links a {
+        display: block;
+        padding: 1.2rem 0;
+        font-size: 1.2rem;
+        width: 100%;
+      }
+
+      .contact-hero {
+        min-height: 60vh;
+      }
+
+      .contact-content {
+        padding: 3rem 1.5rem;
+      }
+
+      .info-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .contact-navbar {
+        padding: 1rem 4%;
+      }
+
+      .navbar-logo {
+        height: 50px;
+      }
+
+      .navbar-links {
+        width: 80%;
+        padding-top: 80px;
+      }
+
+      .navbar-links a {
+        font-size: 1.1rem;
+      }
+
+      .contact-hero h1 {
+        font-size: 2rem;
+      }
+
+      .contact-hero p {
+        font-size: 1rem;
+      }
+
+      .info-card {
+        padding: 1.5rem;
+      }
+
+      .whatsapp-float {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 56px;
+        height: 56px;
+      }
+
+      .whatsapp-float svg {
+        width: 28px;
+        height: 28px;
+      }
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const navbarToggle = document.getElementById('navbarToggle');
+      const navbarLinks = document.getElementById('navbarLinks');
+
+      if (navbarToggle && navbarLinks) {
+        navbarToggle.addEventListener('click', () => {
+          navbarToggle.classList.toggle('active');
+          navbarLinks.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+          const target = e.target as HTMLElement;
+          if (!target.closest('.contact-navbar')) {
+            navbarToggle.classList.remove('active');
+            navbarLinks.classList.remove('active');
+          }
+        });
+
+        // Close menu when clicking on a link
+        navbarLinks.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => {
+            navbarToggle.classList.remove('active');
+            navbarLinks.classList.remove('active');
+          });
+        });
+      }
+    });
+  </script>
+</BaseLayout>
