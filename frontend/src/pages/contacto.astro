@@ -2,6 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Navbar from '../components/Navbar.astro'
 import heroBackground from 'src/assets/fondoclub.png'
+import telefonoIcon from 'src/assets/telefono.png'
+import emailIcon from 'src/assets/email.png'
+import ubicacionIcon from 'src/assets/ubicacion.png'
+import horarioIcon from 'src/assets/horario.png'
 ---
 
 <BaseLayout title="Contacto - Club del Meta" hideNavbar fullWidth>
@@ -46,7 +50,9 @@ import heroBackground from 'src/assets/fondoclub.png'
         
         <div class="info-grid">
           <div class="info-card">
-            <div class="info-icon">📞</div>
+            <div class="info-icon">
+              <img src={telefonoIcon.src} alt="Teléfono" />
+            </div>
             <h3>Teléfonos</h3>
             <p>(8) 6 64 11 15 - 312 4347893</p>
             <p>EVENTOS: 310 8874473 - 312 4350412</p>
@@ -56,14 +62,18 @@ import heroBackground from 'src/assets/fondoclub.png'
           </div>
 
           <div class="info-card">
-            <div class="info-icon">📧</div>
+            <div class="info-icon">
+              <img src={emailIcon.src} alt="Email" />
+            </div>
             <h3>Email</h3>
             <p><a href="mailto:comunicaciones@clubelmeta.com">comunicaciones@clubelmeta.com</a></p>
             <p><a href="mailto:secretaria@clubelmeta.com">secretaria@clubelmeta.com</a></p>
           </div>
 
           <div class="info-card">
-            <div class="info-icon">📍</div>
+            <div class="info-icon">
+              <img src={ubicacionIcon.src} alt="Ubicación" />
+            </div>
             <h3>Dirección</h3>
             <p>Calle 48A Carrera 30</p>
             <p>Barrio Ciudad Oriental</p>
@@ -71,7 +81,9 @@ import heroBackground from 'src/assets/fondoclub.png'
           </div>
 
           <div class="info-card">
-            <div class="info-icon">⏰</div>
+            <div class="info-icon">
+              <img src={horarioIcon.src} alt="Horario" />
+            </div>
             <h3>Horario de Atención</h3>
             <p>Lunes a Viernes: 8:00 AM - 6:00 PM</p>
             <p>Sábados: 9:00 AM - 2:00 PM</p>
@@ -205,8 +217,18 @@ import heroBackground from 'src/assets/fondoclub.png'
     }
 
     .info-icon {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .info-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
     .info-card h3 {
