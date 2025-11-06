@@ -12,10 +12,8 @@ export default class AuthController {
       return response.badRequest({ message: 'Email y password son requeridos' })
     }
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
+    // Adonis bodyparser ya parsea JSON. Supabase requiere email/password.
+    const { data, error } = await supabase.auth.signUp({ email, password })
 
     if (error) {
       return response.badRequest({ message: error.message })
@@ -38,10 +36,7 @@ export default class AuthController {
       return response.badRequest({ message: 'Email y password son requeridos' })
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
       return response.unauthorized({ message: error.message })
