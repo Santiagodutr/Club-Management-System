@@ -34,6 +34,7 @@ router.get('/admin/usuarios', [AdminController, 'listUsuarios']).use(middleware.
 
 // Cotizaciones routes
 const CotizacionController = () => import('#controllers/cotizacion_controller')
+router.get('/api/espacios/:nombre/tarifas', [CotizacionController, 'obtenerTarifas'])
 router.post('/api/cotizaciones', [CotizacionController, 'store'])
 router.get('/api/cotizaciones/:id/pdf', [CotizacionController, 'downloadPdf'])
 
@@ -43,6 +44,7 @@ router.get('/api/espacios', [EspacioController, 'index'])
 router.get('/api/espacios/simplificado', [EspacioController, 'listarSimplificado'])
 router.get('/api/espacios/:id', [EspacioController, 'show'])
 router.get('/api/disposiciones', [EspacioController, 'listarDisposiciones'])
+router.get('/api/prestaciones', [EspacioController, 'listarPrestaciones'])
 
 // --- API Docs ---
 // Sirve el OpenAPI spec en JSON generado desde archivos "solo-docs"

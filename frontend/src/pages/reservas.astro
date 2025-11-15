@@ -26,8 +26,8 @@ const descriptions = {
   'PRESIDENTE': 'Espacio exclusivo con mobiliario ejecutivo, insonorización y servicio gourmet personalizado. Juntas corporativas y sesiones privadas.',
 }
 
-// Datos estáticos de fallback
-const espacios = [
+// Datos estáticos de fallback (solo se usan si falla el backend)
+let espacios = [
   {
     nombre: 'MI LLANURA',
     descripcion: descriptions['MI LLANURA'],
@@ -66,10 +66,6 @@ const espacios = [
   },
 ]
 ---
-    },
-  ]
-}
----
 
 <BaseLayout title="Reservas - Club del Meta">
   <section class="reservas">
@@ -81,7 +77,7 @@ const espacios = [
       </p>
     </header>
 
-    <div class="reservas-grid" role="list">
+    <div class="reservas-grid" id="espacios-grid" role="list">
       {espacios.map((espacio) => (
         <article class="reserva-card" role="listitem" style={`background-image: url(${espacio.imagen.src})`}>
           <div class="reserva-card__overlay">
@@ -102,6 +98,71 @@ const espacios = [
       ))}
     </div>
   </section>
+
+  <script>
+    // Cargar espacios desde el backend
+    const API_URL = 'http://localhost:3333';
+    const imageMap = {
+      'MI LLANURA': '/src/assets/millanura.jpg',
+      'BAR': '/src/assets/bar.jpg',
+      'EMPRESARIAL': '/src/assets/empresarial.jpg',
+      'TERRAZA': '/src/assets/terraza.jpg',
+      'KIOSKO': '/src/assets/kiosko.jpg',
+      'PRESIDENTE': '/src/assets/presidencial.jpg',
+    };
+
+    const descriptions = {
+      'MI LLANURA': 'Salón insignia con vista a las áreas verdes, ambientación adaptable. Ideal para recepciones y eventos sociales.',
+      'BAR': 'Ambiente contemporáneo con barra integrada, iluminación escénica y sistema de sonido premium. Perfecto para cocteles y lanzamientos.',
+      'EMPRESARIAL': 'Equipado con pantallas, streaming y mobiliario modular para workshops, conferencias y directorios. Conectividad y soporte técnico continuo.',
+      'TERRAZA': 'Espacio al aire libre con pérgolas, iluminación ambiental y vista privilegiada. Eventos sunset, matrimonios y brunchs.',
+      'KIOSKO': 'Área semiabierta rodeada de jardines, piso en deck y estaciones eléctricas para música en vivo. Reuniones familiares y celebraciones.',
+      'PRESIDENTE': 'Espacio exclusivo con mobiliario ejecutivo, insonorización y servicio gourmet personalizado. Juntas corporativas y sesiones privadas.',
+    };
+
+    async function cargarEspacios() {
+      try {
+        const response = await fetch(`${API_URL}/api/espacios/simplificado`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          const grid = document.getElementById('espacios-grid');
+          if (!grid) return;
+          
+          grid.innerHTML = result.data.map(espacio => {
+            const imagen = imageMap[espacio.nombre] || '/src/assets/millanura.jpg';
+            const descripcion = descriptions[espacio.nombre] || 'Espacio exclusivo para eventos especiales.';
+            const aforo = `Hasta ${espacio.capacidadMaxima} personas`;
+            
+            return `
+              <article class="reserva-card" role="listitem" style="background-image: url(${imagen})">
+                <div class="reserva-card__overlay">
+                  <header class="reserva-card__header">
+                    <span class="reserva-card__badge">${aforo}</span>
+                    <h2>${espacio.nombre}</h2>
+                  </header>
+                  <p>${descripcion}</p>
+                  <a
+                    class="cotizar-btn"
+                    href="/obtener-cotizacion?salon=${encodeURIComponent(espacio.nombre)}"
+                    aria-label="Obtener cotización - ${espacio.nombre}"
+                  >
+                    Obten cotizacion
+                  </a>
+                </div>
+              </article>
+            `;
+          }).join('');
+        }
+      } catch (error) {
+        console.error('Error cargando espacios desde backend:', error);
+        // Si falla, mantener el HTML estático renderizado por Astro
+      }
+    }
+
+    // Cargar datos al iniciar
+    cargarEspacios();
+  </script>
 
   <style>
     .reservas {

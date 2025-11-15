@@ -1,10 +1,64 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Cotizacion from '#models/cotizacion'
-import Espacio from '#models/espacio'
 import { PDFService } from '#services/pdf_service'
 import vine from '@vinejs/vine'
+import db from '@adonisjs/lucid/services/db'
 
 export default class CotizacionController {
+  /**
+   * Obtener tarifas de un espacio
+   */
+  async obtenerTarifas({ params, response }: HttpContext) {
+    try {
+      const espacio = await db
+        .from('espacios')
+        .where('nombre', params.nombre.toUpperCase())
+        .first()
+
+      if (!espacio) {
+        return response.status(404).json({
+          success: false,
+          message: 'Espacio no encontrado',
+        })
+      }
+
+      const configuracion = await db
+        .from('configuraciones_espacio')
+        .where('espacio_id', espacio.id)
+        .first()
+
+      if (!configuracion) {
+        return response.status(404).json({
+          success: false,
+          message: 'Configuración no encontrada',
+        })
+      }
+
+      const tarifa = await db
+        .from('tarifas')
+        .where('configuracion_espacio_id', configuracion.id)
+        .where('tipo_cliente', 'particular')
+        .first()
+
+      return response.json({
+        success: true,
+        data: {
+          espacio: espacio.nombre,
+          capacidad: configuracion.capacidad,
+          precio4Horas: tarifa?.precio_4_horas ? parseFloat(tarifa.precio_4_horas) : null,
+          precio8Horas: tarifa?.precio_8_horas ? parseFloat(tarifa.precio_8_horas) : null,
+        },
+      })
+    } catch (error) {
+      console.error('Error obteniendo tarifas:', error)
+      return response.status(500).json({
+        success: false,
+        message: 'Error al obtener tarifas',
+        error: error.message,
+      })
+    }
+  }
+
   /**
    * Crear una nueva cotización
    */
@@ -28,14 +82,21 @@ export default class CotizacionController {
 
       const data = await vine.validate({ schema, data: request.all() })
 
+      console.log('Datos recibidos:', data)
+
       // Generar número de cotización (formato 0926, etc)
       const lastCotizacion = await Cotizacion.query().orderBy('id', 'desc').first()
       const nextNumber = lastCotizacion ? parseInt(lastCotizacion.cotizacionNumero) + 1 : 926
       const cotizacionNumero = nextNumber.toString().padStart(4, '0')
 
+      console.log('Número de cotización:', cotizacionNumero)
+
       // Calcular detalles y total
       const detalles = await this.calcularDetalles(data)
       const valorTotal = detalles.reduce((sum, item) => sum + item.total, 0)
+
+      console.log('Detalles calculados:', detalles)
+      console.log('Valor total:', valorTotal)
 
       // Crear cotización
       const cotizacion = await Cotizacion.create({
@@ -109,26 +170,33 @@ export default class CotizacionController {
     }> = []
 
     // Obtener tarifa del espacio desde la base de datos
-    const espacio = await Espacio.query()
+    const espacio = await db
+      .from('espacios')
       .where('nombre', data.salon.toUpperCase())
-      .preload('configuraciones', (query) => {
-        query.preload('tarifas', (tarifaQuery) => {
-          tarifaQuery.where('tipoCliente', 'particular')
-        })
-      })
       .first()
 
     let precioBase = 1500000 // Precio por defecto
 
-    if (espacio && espacio.configuraciones.length > 0) {
-      const config = espacio.configuraciones[0]
-      if (config.tarifas && config.tarifas.length > 0) {
-        const tarifa = config.tarifas[0]
-        // Usar precio según duración (4 horas o 8 horas)
-        if (data.duracion <= 4 && tarifa.precio4Horas) {
-          precioBase = parseFloat(tarifa.precio4Horas)
-        } else if (tarifa.precio8Horas) {
-          precioBase = parseFloat(tarifa.precio8Horas)
+    if (espacio) {
+      const configuracion = await db
+        .from('configuraciones_espacio')
+        .where('espacio_id', espacio.id)
+        .first()
+
+      if (configuracion) {
+        const tarifa = await db
+          .from('tarifas')
+          .where('configuracion_espacio_id', configuracion.id)
+          .where('tipo_cliente', 'particular')
+          .first()
+
+        if (tarifa) {
+          // Usar precio según duración (4 horas o 8 horas)
+          if (data.duracion <= 4 && tarifa.precio_4_horas) {
+            precioBase = parseFloat(tarifa.precio_4_horas)
+          } else if (tarifa.precio_8_horas) {
+            precioBase = parseFloat(tarifa.precio_8_horas)
+          }
         }
       }
     }

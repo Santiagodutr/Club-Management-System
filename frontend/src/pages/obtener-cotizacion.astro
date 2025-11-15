@@ -42,6 +42,8 @@ const espacios = [
           <p id="salon-description">Salón insignia con vista a las áreas verdes, ambientación adaptable. Ideal para recepciones, matrimonios y eventos corporativos.</p>
           <ul id="salon-features">
             <li id="capacidad-info">Capacidad: hasta 100 personas</li>
+            <li id="precio-4h-info">4 horas: Cargando...</li>
+            <li id="precio-8h-info">8 horas: Cargando...</li>
             <li>Climatización</li>
             <li>Conexión eléctrica para catering y sonido</li>
             <li>Acceso para proveedores</li>
@@ -93,15 +95,16 @@ const espacios = [
 
           <fieldset class="field">
             <legend>Prestaciones / servicios</legend>
-            <div class="checkboxes">
+            <div class="checkboxes" id="prestaciones-checkboxes">
+              <!-- Las prestaciones se cargarán desde el backend -->
               <label><input type="checkbox" name="features" value="Sillas" /> Sillas</label>
               <label><input type="checkbox" name="features" value="Mesas" /> Mesas</label>
               <label><input type="checkbox" name="features" value="Sonido" /> Sonido</label>
               <label><input type="checkbox" name="features" value="Iluminación" /> Iluminación</label>
-              <label><input type="checkbox" name="features" value="Proyector" /> Proyector / Pantalla</label>
+              <label><input type="checkbox" name="features" value="Proyector / Pantalla" /> Proyector / Pantalla</label>
               <label><input type="checkbox" name="features" value="WiFi" /> WiFi</label>
               <label><input type="checkbox" name="features" value="Catering" /> Catering</label>
-              <label><input type="checkbox" name="features" value="Personal" /> Personal de apoyo</label>
+              <label><input type="checkbox" name="features" value="Personal de apoyo" /> Personal de apoyo</label>
               <label><input type="checkbox" name="features" value="Estacionamiento" /> Estacionamiento</label>
             </div>
           </fieldset>
@@ -238,12 +241,58 @@ const espacios = [
         }
       },
     }
+
+    // Cargar espacios desde el backend
+    async function cargarEspacios() {
+      try {
+        const response = await fetch(`${API_URL}/api/espacios/simplificado`)
+        const result = await response.json()
+        
+        if (result.success && result.data) {
+          const salonSelect = document.getElementById('salon')
+          const imageMap = {
+            'MI LLANURA': '/src/assets/millanura.jpg',
+            'BAR': '/src/assets/bar.jpg',
+            'EMPRESARIAL': '/src/assets/empresarial.jpg',
+            'TERRAZA': '/src/assets/terraza.jpg',
+            'KIOSKO': '/src/assets/kiosko.jpg',
+            'PRESIDENTE': '/src/assets/presidencial.jpg',
+          }
+          
+          salonSelect.innerHTML = result.data.map(espacio => {
+            const imgSrc = imageMap[espacio.nombre] || '/src/assets/millanura.jpg'
+            return `<option value="${espacio.nombre}" data-img="${imgSrc}" data-capacidad="${espacio.capacidadMaxima}">${espacio.nombre}</option>`
+          }).join('')
+        }
+      } catch (error) {
+        console.error('Error cargando espacios:', error)
+      }
+    }
+
+    // Cargar prestaciones desde el backend
+    async function cargarPrestaciones() {
+      try {
+        const response = await fetch(`${API_URL}/api/prestaciones`)
+        const result = await response.json()
+        
+        if (result.success && result.data) {
+          const container = document.getElementById('prestaciones-checkboxes')
+          container.innerHTML = result.data.map(prestacion => 
+            `<label><input type="checkbox" name="features" value="${prestacion.nombre}" /> ${prestacion.nombre}</label>`
+          ).join('')
+        }
+      } catch (error) {
+        console.error('Error cargando prestaciones:', error)
+      }
+    }
     
     const salonSelect = document.getElementById('salon')
     const img = document.getElementById('salon-image')
     const title = document.getElementById('salon-title')
     const desc = document.getElementById('salon-description')
     const capacidadInfo = document.getElementById('capacidad-info')
+    const precio4hInfo = document.getElementById('precio-4h-info')
+    const precio8hInfo = document.getElementById('precio-8h-info')
 
     const descriptions = {
       'MI LLANURA': 'Salón insignia con vista a las áreas verdes, ambientación adaptable. Ideal para recepciones, matrimonios y eventos corporativos.',
@@ -253,6 +302,43 @@ const espacios = [
       'KIOSKO': 'Área semiabierta rodeada de jardines, perfecta para reuniones familiares y celebraciones.',
       'PRESIDENTE': 'Espacio exclusivo con mobiliario ejecutivo, insonorización y servicio gourmet para reuniones privadas.'
     }
+
+    // Cargar datos iniciales
+    cargarEspacios()
+    cargarPrestaciones()
+
+    // Cargar tarifas del salón
+    async function cargarTarifas(nombreSalon) {
+      try {
+        precio4hInfo.textContent = '4 horas: Cargando...'
+        precio8hInfo.textContent = '8 horas: Cargando...'
+        
+        const response = await fetch(`${API_URL}/api/espacios/${encodeURIComponent(nombreSalon)}/tarifas`)
+        const data = await response.json()
+        
+        if (data.success) {
+          const precio4h = data.data.precio4Horas 
+            ? `$${data.data.precio4Horas.toLocaleString('es-CO')}` 
+            : 'No disponible'
+          const precio8h = data.data.precio8Horas 
+            ? `$${data.data.precio8Horas.toLocaleString('es-CO')}` 
+            : 'No disponible'
+          
+          precio4hInfo.textContent = `4 horas: ${precio4h}`
+          precio8hInfo.textContent = `8 horas: ${precio8h}`
+        } else {
+          precio4hInfo.textContent = '4 horas: No disponible'
+          precio8hInfo.textContent = '8 horas: No disponible'
+        }
+      } catch (error) {
+        console.error('Error cargando tarifas:', error)
+        precio4hInfo.textContent = '4 horas: Error'
+        precio8hInfo.textContent = '8 horas: Error'
+      }
+    }
+
+    // Cargar tarifas iniciales
+    cargarTarifas('MI LLANURA')
 
     // If a salon is provided as query param, preselect it and trigger change
     try {
@@ -279,6 +365,9 @@ const espacios = [
       title.textContent = name
       desc.textContent = descriptions[name] || ''
       capacidadInfo.textContent = `Capacidad: hasta ${capacidad} personas`
+      
+      // Cargar tarifas del nuevo salón
+      cargarTarifas(name)
     })
 
     const form = document.getElementById('cotizacion-form')
