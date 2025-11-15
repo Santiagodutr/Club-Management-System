@@ -6,6 +6,25 @@ import empresarialImg from '../assets/empresarial.jpg'
 import terrazaImg from '../assets/terraza.jpg'
 import kioskoImg from '../assets/kiosko.jpg'
 import presidencialImg from '../assets/presidencial.jpg'
+
+const imageMap = {
+  'MI LLANURA': millanuraImg,
+  'BAR': barImg,
+  'EMPRESARIAL': empresarialImg,
+  'TERRAZA': terrazaImg,
+  'KIOSKO': kioskoImg,
+  'PRESIDENTE': presidencialImg,
+}
+
+// Datos estáticos para build
+const espacios = [
+  { id: 1, nombre: 'MI LLANURA', capacidadMaxima: 100 },
+  { id: 2, nombre: 'BAR', capacidadMaxima: 60 },
+  { id: 3, nombre: 'EMPRESARIAL', capacidadMaxima: 35 },
+  { id: 4, nombre: 'TERRAZA', capacidadMaxima: 30 },
+  { id: 5, nombre: 'KIOSKO', capacidadMaxima: 60 },
+  { id: 6, nombre: 'PRESIDENTE', capacidadMaxima: 15 },
+]
 ---
 
 <BaseLayout title="Obtener cotización - Club del Meta">
@@ -19,10 +38,10 @@ import presidencialImg from '../assets/presidencial.jpg'
       <aside class="cotizacion__media">
         <img id="salon-image" src={millanuraImg.src} alt="Imagen del salón seleccionado" />
         <div class="salon-info">
-          <h2 id="salon-title">Mi Llanura</h2>
-          <p id="salon-description">Salón insignia con vista a las áreas verdes, ambientación adaptable y capacidad para 180 asistentes. Ideal para recepciones, matrimonios y eventos corporativos. Incluye accesos, climatización y servicios básicos.</p>
+          <h2 id="salon-title">MI LLANURA</h2>
+          <p id="salon-description">Salón insignia con vista a las áreas verdes, ambientación adaptable. Ideal para recepciones, matrimonios y eventos corporativos.</p>
           <ul id="salon-features">
-            <li>Capacidad: hasta 180 personas</li>
+            <li id="capacidad-info">Capacidad: hasta 100 personas</li>
             <li>Climatización</li>
             <li>Conexión eléctrica para catering y sonido</li>
             <li>Acceso para proveedores</li>
@@ -35,12 +54,18 @@ import presidencialImg from '../assets/presidencial.jpg'
           <div class="field">
             <label for="salon">Salón</label>
             <select id="salon" name="salon" required>
-              <option value="Mi Llanura" data-img={millanuraImg.src} data-desc="Salón insignia con vista a las áreas verdes, ambientación adaptable y capacidad para 180 asistentes.">Mi Llanura</option>
-              <option value="Salón Bar" data-img={barImg.src} data-desc="Ambiente contemporáneo con barra integrada, iluminación escénica y sistema de sonido premium.">Salón Bar</option>
-              <option value="Salón Empresarial" data-img={empresarialImg.src} data-desc="Equipado con pantallas, streaming y mobiliario modular para workshops, conferencias y directorios.">Salón Empresarial</option>
-              <option value="Terraza" data-img={terrazaImg.src} data-desc="Espacio al aire libre con pérgolas, iluminación ambiental y vista privilegiada a las zonas deportivas.">Terraza</option>
-              <option value="Kiosco" data-img={kioskoImg.src} data-desc="Área semiabierta rodeada de jardines, piso en deck y estaciones eléctricas para música en vivo.">Kiosco</option>
-              <option value="Salón Presidente" data-img={presidencialImg.src} data-desc="Espacio exclusivo con mobiliario ejecutivo, insonorización y servicio gourmet personalizado.">Salón Presidente</option>
+              {espacios.map((espacio) => {
+                const imgSrc = imageMap[espacio.nombre]?.src || millanuraImg.src
+                return (
+                  <option 
+                    value={espacio.nombre} 
+                    data-img={imgSrc}
+                    data-capacidad={espacio.capacidadMaxima}
+                  >
+                    {espacio.nombre}
+                  </option>
+                )
+              })}
             </select>
           </div>
 
@@ -118,12 +143,18 @@ import presidencialImg from '../assets/presidencial.jpg'
           </div>
         </form>
 
-        <div id="summary" class="summary" hidden>
-          <h3>Resumen de la solicitud</h3>
-          <pre id="summary-content"></pre>
-          <div class="summary-actions">
-            <a id="mailto-link" href="#">Enviar solicitud por correo</a>
-          </div>
+        <div id="success-message" class="success-message" hidden>
+          <h3>¡Cotización solicitada exitosamente!</h3>
+          <p>Tu cotización <strong id="cotizacion-numero"></strong> ha sido generada.</p>
+          <p>Valor total estimado: <strong id="cotizacion-total"></strong></p>
+          <button type="button" id="download-pdf-btn" class="download-btn">Descargar cotización en PDF</button>
+          <button type="button" id="nueva-cotizacion-btn" class="secondary">Nueva cotización</button>
+        </div>
+        
+        <div id="error-message" class="error-message" hidden>
+          <h3>Error al procesar la cotización</h3>
+          <p id="error-text"></p>
+          <button type="button" id="retry-btn" class="secondary">Intentar nuevamente</button>
         </div>
       </main>
     </div>
@@ -155,24 +186,72 @@ import presidencialImg from '../assets/presidencial.jpg'
 
     .summary { margin-top:1rem; background:#f8fafc; padding:1rem; border-radius:8px; }
     .summary pre { white-space:pre-wrap; word-break:break-word; margin:0; }
+    
+    .success-message { margin-top:1rem; background:#ecfdf5; padding:1.5rem; border-radius:8px; border:1px solid #86efac; }
+    .success-message h3 { color:#065f46; margin:0 0 .5rem; }
+    .success-message p { color:#047857; margin:.25rem 0; }
+    .download-btn { background:#059669; margin-top:.75rem; }
+    .download-btn:hover { background:#047857; }
+    
+    .error-message { margin-top:1rem; background:#fef2f2; padding:1.5rem; border-radius:8px; border:1px solid #fca5a5; }
+    .error-message h3 { color:#991b1b; margin:0 0 .5rem; }
+    .error-message p { color:#dc2626; margin:.25rem 0; }
 
     @media (max-width: 900px) { .cotizacion__container { grid-template-columns: 1fr; } }
   </style>
 
   <script type="module">
+    // API Service inline
+    const API_URL = 'http://localhost:3333'
+    
+    const cotizacionesAPI = {
+      async crear(data) {
+        try {
+          const response = await fetch(`${API_URL}/api/cotizaciones`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+          })
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+          return await response.json()
+        } catch (error) {
+          console.error('Error creando cotización:', error)
+          return {
+            success: false,
+            message: 'Error al crear la cotización',
+            error: error instanceof Error ? error.message : 'Unknown error',
+          }
+        }
+      },
+      getPdfUrl(cotizacionId) {
+        return `${API_URL}/api/cotizaciones/${cotizacionId}/pdf`
+      },
+      async descargarPdf(cotizacionId) {
+        try {
+          const url = this.getPdfUrl(cotizacionId)
+          window.open(url, '_blank')
+        } catch (error) {
+          console.error('Error descargando PDF:', error)
+          throw error
+        }
+      },
+    }
+    
     const salonSelect = document.getElementById('salon')
     const img = document.getElementById('salon-image')
     const title = document.getElementById('salon-title')
     const desc = document.getElementById('salon-description')
-    const featuresList = document.getElementById('salon-features')
+    const capacidadInfo = document.getElementById('capacidad-info')
 
     const descriptions = {
-      'Mi Llanura': 'Salón insignia con vista a las áreas verdes, ambientación adaptable y capacidad para 180 asistentes. Ideal para recepciones, matrimonios y eventos corporativos. Incluye accesos, climatización y servicios básicos.',
-      'Salón Bar': 'Ambiente contemporáneo con barra integrada, iluminación escénica y sistema de sonido premium. Recomendada para cocteles, lanzamientos y fiestas privadas.',
-      'Salón Empresarial': 'Equipado con pantallas, streaming, mobiliario modular y conectividad para eventos corporativos, conferencias y workshops.',
-      'Terraza': 'Espacio al aire libre con pérgolas y vistas; ideal para eventos sunset, bodas y recepciones. Puede requerir montaje adicional según la ocasión.',
-      'Kiosco': 'Área semiabierta rodeada de jardines, perfecta para reuniones familiares y celebraciones pequeñas.',
-      'Salón Presidente': 'Espacio exclusivo con mobiliario ejecutivo, insonorización y servicio gourmet para reuniones privadas y eventos corporativos de alto nivel.'
+      'MI LLANURA': 'Salón insignia con vista a las áreas verdes, ambientación adaptable. Ideal para recepciones, matrimonios y eventos corporativos.',
+      'BAR': 'Ambiente contemporáneo con barra integrada, iluminación escénica y sistema de sonido premium. Recomendado para cocteles y lanzamientos.',
+      'EMPRESARIAL': 'Equipado con pantallas, streaming, mobiliario modular y conectividad para eventos corporativos, conferencias y workshops.',
+      'TERRAZA': 'Espacio al aire libre con pérgolas y vistas; ideal para eventos sunset, bodas y recepciones.',
+      'KIOSKO': 'Área semiabierta rodeada de jardines, perfecta para reuniones familiares y celebraciones.',
+      'PRESIDENTE': 'Espacio exclusivo con mobiliario ejecutivo, insonorización y servicio gourmet para reuniones privadas.'
     }
 
     // If a salon is provided as query param, preselect it and trigger change
@@ -194,45 +273,55 @@ import presidencialImg from '../assets/presidencial.jpg'
       const opt = e.target.selectedOptions[0]
       const imgSrc = opt.dataset.img
       const name = opt.value
+      const capacidad = opt.dataset.capacidad
+      
       img.src = imgSrc
       title.textContent = name
-      desc.textContent = descriptions[name] || opt.dataset.desc || ''
-      // update generic features (could be expanded per-salon)
-      const features = {
-        'Mi Llanura': ['Capacidad: hasta 180 personas','Climatización','Acceso proveedores','Espacio para pista de baile'],
-        'Salón Bar': ['Capacidad: hasta 90 personas','Bar equipado','Iluminación escénica','Sonido integrado'],
-        'Salón Empresarial': ['Hasta 120 personas','Streaming','Pantallas y proyector','WiFi'],
-        'Terraza': ['Hasta 150 personas','Al aire libre','Iluminación ambiental','Pérgolas'],
-        'Kiosco': ['Hasta 70 personas','Semiabierto','Acceso a jardín'],
-        'Salón Presidente': ['Hasta 60 personas','Insonorización','Servicio gourmet']
-      }
-      featuresList.innerHTML = ''
-      (features[name] || []).forEach(f => {
-        const li = document.createElement('li')
-        li.textContent = f
-        featuresList.appendChild(li)
-      })
+      desc.textContent = descriptions[name] || ''
+      capacidadInfo.textContent = `Capacidad: hasta ${capacidad} personas`
     })
 
     const form = document.getElementById('cotizacion-form')
-    const summary = document.getElementById('summary')
-    const summaryContent = document.getElementById('summary-content')
-    const mailtoLink = document.getElementById('mailto-link')
+    const successMessage = document.getElementById('success-message')
+    const errorMessage = document.getElementById('error-message')
     const resetBtn = document.getElementById('reset-btn')
 
-    resetBtn.addEventListener('click', () => { form.reset(); summary.hidden = true })
+    let currentCotizacionId = null
 
-    form.addEventListener('submit', (e) => {
+    resetBtn.addEventListener('click', () => { 
+      form.reset()
+      successMessage.hidden = true
+      errorMessage.hidden = true
+      currentCotizacionId = null
+    })
+
+    document.getElementById('nueva-cotizacion-btn')?.addEventListener('click', () => {
+      form.reset()
+      successMessage.hidden = true
+      errorMessage.hidden = true
+      currentCotizacionId = null
+    })
+
+    document.getElementById('retry-btn')?.addEventListener('click', () => {
+      errorMessage.hidden = true
+    })
+
+    document.getElementById('download-pdf-btn')?.addEventListener('click', () => {
+      if (currentCotizacionId) {
+        cotizacionesAPI.descargarPdf(currentCotizacionId)
+      }
+    })
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault()
       const data = new FormData(form)
       const values = Object.fromEntries(data.entries())
+      
       // features can be multiple
       const features = Array.from(form.querySelectorAll('input[name="features"]:checked')).map(i => i.value)
-      values.features = features
-
+      
       const needChairs = form.querySelector('#need-chairs').checked
-      values.needChairs = needChairs
-      values.chairsCount = form.querySelector('#chairs-count').value || '0'
+      const chairsCount = parseInt(form.querySelector('#chairs-count').value || '0')
 
       // basic validation
       if (!values.salon || !values.date || !values.time || !values.name || !values.email) {
@@ -240,17 +329,52 @@ import presidencialImg from '../assets/presidencial.jpg'
         return
       }
 
-      // build summary
-      const summaryText = `Salón: ${values.salon}\nFecha: ${values.date}\nHora inicio: ${values.time}\nDuración (h): ${values.duration}\nAsistentes estimados: ${values.guests}\nPrestaciones: ${values.features.join(', ') || 'Ninguna'}\nRequiere sillas: ${values.needChairs ? 'Sí' : 'No'}\nNúmero de sillas: ${values.chairsCount}\nNombre: ${values.name}\nEmail: ${values.email}\nTeléfono: ${values.phone || '-'}\nObservaciones: ${values.notes || '-'}\n`
+      // Prepare data for API
+      const cotizacionData = {
+        salon: values.salon,
+        fecha: values.date,
+        hora: values.time,
+        duracion: parseInt(values.duration),
+        asistentes: parseInt(values.guests),
+        prestaciones: features,
+        requiereSillas: needChairs,
+        numeroSillas: chairsCount,
+        nombre: values.name,
+        email: values.email,
+        telefono: values.phone || undefined,
+        observaciones: values.notes || undefined
+      }
 
-      summaryContent.textContent = summaryText
-      summary.hidden = false
+      // Hide previous messages
+      successMessage.hidden = true
+      errorMessage.hidden = true
 
-      // mailto link (subject + body)
-      const subject = encodeURIComponent(`Solicitud de cotización - ${values.salon} - ${values.date}`)
-      const body = encodeURIComponent(summaryText)
-      mailtoLink.href = `mailto:comunicaciones@clubelmeta.com?subject=${subject}&body=${body}`
-      mailtoLink.textContent = 'Enviar solicitud por correo a comunicaciones@clubelmeta.com'
+      // Show loading state
+      const submitBtn = form.querySelector('button[type="submit"]')
+      const originalText = submitBtn.textContent
+      submitBtn.disabled = true
+      submitBtn.textContent = 'Procesando...'
+
+      try {
+        const response = await cotizacionesAPI.crear(cotizacionData)
+
+        if (response.success && response.data) {
+          currentCotizacionId = response.data.id
+          document.getElementById('cotizacion-numero').textContent = `#${response.data.cotizacionNumero}`
+          document.getElementById('cotizacion-total').textContent = `$${response.data.valorTotal.toLocaleString('es-CO')}`
+          successMessage.hidden = false
+          form.reset()
+        } else {
+          document.getElementById('error-text').textContent = response.message || 'Ocurrió un error al procesar la cotización'
+          errorMessage.hidden = false
+        }
+      } catch (error) {
+        document.getElementById('error-text').textContent = 'Error de conexión. Por favor verifica tu conexión a internet e intenta nuevamente.'
+        errorMessage.hidden = false
+      } finally {
+        submitBtn.disabled = false
+        submitBtn.textContent = originalText
+      }
     })
   </script>
 

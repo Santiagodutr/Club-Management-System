@@ -32,6 +32,18 @@ router.get('/admin/stats', [AdminController, 'stats']).use(middleware.auth()).us
 router.post('/admin/config/update', [AdminController, 'updateConfig']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.get('/admin/usuarios', [AdminController, 'listUsuarios']).use(middleware.auth()).use(middleware.checkRole('admin'))
 
+// Cotizaciones routes
+const CotizacionController = () => import('#controllers/cotizacion_controller')
+router.post('/api/cotizaciones', [CotizacionController, 'store'])
+router.get('/api/cotizaciones/:id/pdf', [CotizacionController, 'downloadPdf'])
+
+// Espacios routes (públicas)
+const EspacioController = () => import('#controllers/espacio_controller')
+router.get('/api/espacios', [EspacioController, 'index'])
+router.get('/api/espacios/simplificado', [EspacioController, 'listarSimplificado'])
+router.get('/api/espacios/:id', [EspacioController, 'show'])
+router.get('/api/disposiciones', [EspacioController, 'listarDisposiciones'])
+
 // --- API Docs ---
 // Sirve el OpenAPI spec en JSON generado desde archivos "solo-docs"
 router.get('/openapi.json', async ({ response }) => {

@@ -6,7 +6,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * In debug mode, the exception handler will display verbose errors
    * with pretty printed stack traces.
    */
-  protected debug = !app.inProduction
+  protected debug = process.env.NODE_ENV !== 'production'
 
   /**
    * The method is used for handling errors and returning

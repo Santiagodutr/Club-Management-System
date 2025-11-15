@@ -7,56 +7,68 @@ import terrazaImg from '../assets/terraza.jpg'
 import kioskoImg from '../assets/kiosko.jpg'
 import presidencialImg from '../assets/presidencial.jpg'
 
+// Mapeo de imágenes por nombre de espacio
+const imageMap = {
+  'MI LLANURA': millanuraImg,
+  'BAR': barImg,
+  'EMPRESARIAL': empresarialImg,
+  'TERRAZA': terrazaImg,
+  'KIOSKO': kioskoImg,
+  'PRESIDENTE': presidencialImg,
+}
+
+const descriptions = {
+  'MI LLANURA': 'Salón insignia con vista a las áreas verdes, ambientación adaptable. Ideal para recepciones y eventos sociales.',
+  'BAR': 'Ambiente contemporáneo con barra integrada, iluminación escénica y sistema de sonido premium. Perfecto para cocteles y lanzamientos.',
+  'EMPRESARIAL': 'Equipado con pantallas, streaming y mobiliario modular para workshops, conferencias y directorios. Conectividad y soporte técnico continuo.',
+  'TERRAZA': 'Espacio al aire libre con pérgolas, iluminación ambiental y vista privilegiada. Eventos sunset, matrimonios y brunchs.',
+  'KIOSKO': 'Área semiabierta rodeada de jardines, piso en deck y estaciones eléctricas para música en vivo. Reuniones familiares y celebraciones.',
+  'PRESIDENTE': 'Espacio exclusivo con mobiliario ejecutivo, insonorización y servicio gourmet personalizado. Juntas corporativas y sesiones privadas.',
+}
+
+// Datos estáticos de fallback
 const espacios = [
   {
-    nombre: 'Mi Llanura',
-    descripcion:
-      'Salón insignia con vista a las áreas verdes, ambientación adaptable y capacidad para 180 asistentes.',
-    aforo: 'Hasta 180 personas',
-    destaque: 'Ideal para recepciones y eventos sociales',
+    nombre: 'MI LLANURA',
+    descripcion: descriptions['MI LLANURA'],
+    aforo: 'Hasta 100 personas',
     imagen: millanuraImg,
   },
   {
-    nombre: 'Salón Bar',
-    descripcion:
-      'Ambiente contemporáneo con barra integrada, iluminación escénica y sistema de sonido premium.',
-    aforo: 'Hasta 90 personas',
-    destaque: 'Perfecto para cocteles y lanzamientos',
+    nombre: 'BAR',
+    descripcion: descriptions['BAR'],
+    aforo: 'Hasta 60 personas',
     imagen: barImg,
   },
   {
-    nombre: 'Salón Empresarial',
-    descripcion:
-      'Equipado con pantallas, streaming y mobiliario modular para workshops, conferencias y directorios.',
-    aforo: 'Hasta 120 personas',
-    destaque: 'Conectividad y soporte técnico continuo',
+    nombre: 'EMPRESARIAL',
+    descripcion: descriptions['EMPRESARIAL'],
+    aforo: 'Hasta 35 personas',
     imagen: empresarialImg,
   },
   {
-    nombre: 'Terraza',
-    descripcion:
-      'Espacio al aire libre con pérgolas, iluminación ambiental y vista privilegiada a las zonas deportivas.',
-    aforo: 'Hasta 150 personas',
-    destaque: 'Eventos sunset, matrimonios y brunchs',
+    nombre: 'TERRAZA',
+    descripcion: descriptions['TERRAZA'],
+    aforo: 'Hasta 30 personas',
     imagen: terrazaImg,
   },
   {
-    nombre: 'Kiosco',
-    descripcion:
-      'Área semiabierta rodeada de jardines, piso en deck y estaciones eléctricas para música en vivo.',
-    aforo: 'Hasta 70 personas',
-    destaque: 'Reuniones familiares y celebraciones infantiles',
+    nombre: 'KIOSKO',
+    descripcion: descriptions['KIOSKO'],
+    aforo: 'Hasta 60 personas',
     imagen: kioskoImg,
   },
   {
-    nombre: 'Salón Presidente',
-    descripcion:
-      'Espacio exclusivo con mobiliario ejecutivo, insonorización y servicio gourmet personalizado.',
-    aforo: 'Hasta 60 personas',
-    destaque: 'Juntas corporativas y sesiones privadas',
+    nombre: 'PRESIDENTE',
+    descripcion: descriptions['PRESIDENTE'],
+    aforo: 'Hasta 15 personas',
     imagen: presidencialImg,
   },
 ]
+---
+    },
+  ]
+}
 ---
 
 <BaseLayout title="Reservas - Club del Meta">
@@ -77,7 +89,6 @@ const espacios = [
               <span class="reserva-card__badge">{espacio.aforo}</span>
               <h2>{espacio.nombre}</h2>
             </header>
-            <p class="reserva-card__highlight">{espacio.destaque}</p>
             <p>{espacio.descripcion}</p>
             <a
               class="cotizar-btn"
