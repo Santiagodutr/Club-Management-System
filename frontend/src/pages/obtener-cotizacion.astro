@@ -31,7 +31,7 @@ const espacios = [
   <section class="cotizacion">
     <header class="cotizacion__header">
       <h1>Solicita tu cotización</h1>
-      <p>Selecciona el salón, completa los datos y te enviaremos una propuesta personalizada lo antes posible.</p>
+      <p>Selecciona el salón, completa los datos y recibe tu propuesta personalizada al instante.</p>
     </header>
 
     <div class="cotizacion__container">
@@ -44,255 +44,489 @@ const espacios = [
             <li id="capacidad-info">Capacidad: hasta 100 personas</li>
             <li id="precio-4h-info">4 horas: Cargando...</li>
             <li id="precio-8h-info">8 horas: Cargando...</li>
-            <li>Climatización</li>
-            <li>Conexión eléctrica para catering y sonido</li>
-            <li>Acceso para proveedores</li>
           </ul>
         </div>
       </aside>
 
       <main class="cotizacion__form">
         <form id="cotizacion-form">
-          <div class="field">
-            <label for="salon">Salón</label>
-            <select id="salon" name="salon" required>
-              {espacios.map((espacio) => {
-                const imgSrc = imageMap[espacio.nombre]?.src || millanuraImg.src
-                return (
-                  <option 
-                    value={espacio.nombre} 
-                    data-img={imgSrc}
-                    data-capacidad={espacio.capacidadMaxima}
-                  >
-                    {espacio.nombre}
-                  </option>
-                )
-              })}
-            </select>
-          </div>
+          <!-- Paso 1: Selección del Salón y Configuración -->
+          <div class="form-section">
+            <h3>1. Salón y Configuración</h3>
+            
+            <div class="field">
+              <label for="salon">Salón *</label>
+              <select id="salon" name="salon" required>
+                {espacios.map((espacio) => {
+                  const imgSrc = imageMap[espacio.nombre]?.src || millanuraImg.src
+                  return (
+                    <option 
+                      value={JSON.stringify({ id: espacio.id, nombre: espacio.nombre })} 
+                      data-img={imgSrc}
+                      data-capacidad={espacio.capacidadMaxima}
+                    >
+                      {espacio.nombre}
+                    </option>
+                  )
+                })}
+              </select>
+            </div>
 
-          <div class="field grid-2">
-            <div>
-              <label for="date">Fecha</label>
-              <input id="date" name="date" type="date" required />
-            </div>
-            <div>
-              <label for="time">Hora de inicio</label>
-              <input id="time" name="time" type="time" required />
-            </div>
-          </div>
-
-          <div class="field grid-2">
-            <div>
-              <label for="duration">Duración (horas)</label>
-              <input id="duration" name="duration" type="number" min="1" max="72" value="4" required />
-            </div>
-            <div>
-              <label for="guests">Cantidad estimada de asistentes</label>
-              <input id="guests" name="guests" type="number" min="1" value="50" />
+            <div class="field">
+              <label for="disposicion">Disposición del Salón *</label>
+              <select id="disposicion" name="disposicion" required>
+                <option value="">Selecciona una disposición</option>
+              </select>
             </div>
           </div>
 
-          <fieldset class="field">
-            <legend>Prestaciones / servicios</legend>
-            <div class="checkboxes" id="prestaciones-checkboxes">
-              <!-- Las prestaciones se cargarán desde el backend -->
-              <label><input type="checkbox" name="features" value="Sillas" /> Sillas</label>
-              <label><input type="checkbox" name="features" value="Mesas" /> Mesas</label>
-              <label><input type="checkbox" name="features" value="Sonido" /> Sonido</label>
-              <label><input type="checkbox" name="features" value="Iluminación" /> Iluminación</label>
-              <label><input type="checkbox" name="features" value="Proyector / Pantalla" /> Proyector / Pantalla</label>
-              <label><input type="checkbox" name="features" value="WiFi" /> WiFi</label>
-              <label><input type="checkbox" name="features" value="Catering" /> Catering</label>
-              <label><input type="checkbox" name="features" value="Personal de apoyo" /> Personal de apoyo</label>
-              <label><input type="checkbox" name="features" value="Estacionamiento" /> Estacionamiento</label>
+          <!-- Paso 2: Fecha, Hora y Duración -->
+          <div class="form-section">
+            <h3>2. Fecha y Hora</h3>
+            
+            <div class="field grid-2">
+              <div>
+                <label for="date">Fecha del Evento *</label>
+                <input id="date" name="date" type="date" required />
+              </div>
+              <div>
+                <label for="time">Hora de Inicio *</label>
+                <input id="time" name="time" type="time" required />
+              </div>
             </div>
-          </fieldset>
 
-          <div class="field grid-2">
-            <div>
-              <label><input id="need-chairs" name="needChairs" type="checkbox" /> Requiere sillas</label>
-            </div>
-            <div>
-              <label for="chairs-count">Número de sillas (si aplica)</label>
-              <input id="chairs-count" name="chairsCount" type="number" min="0" value="0" />
+            <div class="field">
+              <label for="duration">Duración (horas) * - Mínimo 4h, Máximo 8h</label>
+              <input id="duration" name="duration" type="number" min="4" max="8" value="4" required />
+              <small>Las horas adicionales a 8 se cobran por separado</small>
             </div>
           </div>
 
-          <div class="field">
-            <label for="name">Nombre de contacto</label>
-            <input id="name" name="name" type="text" required />
+          <!-- Paso 3: Tipo de Evento y Asistentes -->
+          <div class="form-section">
+            <h3>3. Tipo de Evento</h3>
+            
+            <div class="field grid-2">
+              <div>
+                <label for="tipoEvento">Tipo de Evento *</label>
+                <select id="tipoEvento" name="tipoEvento" required>
+                  <option value="">Selecciona un tipo</option>
+                  <option value="social">Social (Matrimonio, Cumpleaños, Reunión)</option>
+                  <option value="empresarial">Empresarial (Conferencia, Reunión)</option>
+                  <option value="capacitacion">Capacitación / Workshop</option>
+                </select>
+              </div>
+              <div>
+                <label for="asistentes">Cantidad de Asistentes * <span id="capacidad-info-text"></span></label>
+                <input id="asistentes" name="asistentes" type="number" min="1" value="50" required />
+              </div>
+            </div>
           </div>
 
-          <div class="field grid-2">
-            <div>
-              <label for="email">Email</label>
-              <input id="email" name="email" type="email" required />
-            </div>
-            <div>
-              <label for="phone">Teléfono</label>
-              <input id="phone" name="phone" type="tel" />
+          <!-- Paso 4: Servicios Adicionales -->
+          <div class="form-section">
+            <h3>4. Servicios Adicionales</h3>
+            
+            <div class="checkboxes" id="servicios-checkboxes">
+              <!-- Los servicios se cargarán desde el backend -->
             </div>
           </div>
 
-          <div class="field">
-            <label for="notes">Observaciones adicionales</label>
-            <textarea id="notes" name="notes" rows="4" placeholder="Especifica detalles como montaje, accesos, restricciones, etc."></textarea>
+          <!-- Paso 5: Información de Contacto -->
+          <div class="form-section">
+            <h3>5. Información de Contacto</h3>
+            
+            <div class="field">
+              <label for="nombre">Nombre de Contacto *</label>
+              <input id="nombre" name="nombre" type="text" required />
+            </div>
+
+            <div class="field grid-2">
+              <div>
+                <label for="email">Email *</label>
+                <input id="email" name="email" type="email" required />
+              </div>
+              <div>
+                <label for="telefono">Teléfono</label>
+                <input id="telefono" name="telefono" type="tel" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="observaciones">Observaciones Adicionales</label>
+              <textarea id="observaciones" name="observaciones" rows="3" placeholder="Especifica detalles particulares de tu evento..."></textarea>
+            </div>
           </div>
 
           <div class="actions">
-            <button type="submit">Solicitar cotización</button>
-            <button type="button" id="reset-btn" class="secondary">Limpiar</button>
+            <button type="submit" class="btn-primary">Generar Cotización</button>
+            <button type="reset" class="btn-secondary">Limpiar Formulario</button>
           </div>
         </form>
 
-        <div id="success-message" class="success-message" hidden>
-          <h3>¡Cotización solicitada exitosamente!</h3>
-          <p>Tu cotización <strong id="cotizacion-numero"></strong> ha sido generada.</p>
-          <p>Valor total estimado: <strong id="cotizacion-total"></strong></p>
-          <button type="button" id="download-pdf-btn" class="download-btn">Descargar cotización en PDF</button>
-          <button type="button" id="nueva-cotizacion-btn" class="secondary">Nueva cotización</button>
+        <!-- Mensaje de Éxito -->
+        <div id="success-message" class="message success-message" hidden>
+          <div class="message-header">
+            <h3>✓ ¡Cotización Generada!</h3>
+          </div>
+          <div class="message-content">
+            <p><strong>Número de Cotización:</strong> <span id="cotizacion-numero"></span></p>
+            <p><strong>Valor Total:</strong> <span id="cotizacion-total"></span></p>
+            <p><strong>Monto de Abono (50%):</strong> <span id="cotizacion-abono"></span></p>
+          </div>
+          <div class="message-actions">
+            <button type="button" id="view-pdf-btn" class="btn-primary">Ver Cotización en PDF</button>
+            <button type="button" id="download-pdf-btn" class="btn-secondary">Descargar PDF</button>
+            <button type="button" id="nueva-cotizacion-btn" class="btn-tertiary">Hacer Otra Cotización</button>
+          </div>
         </div>
-        
-        <div id="error-message" class="error-message" hidden>
-          <h3>Error al procesar la cotización</h3>
-          <p id="error-text"></p>
-          <button type="button" id="retry-btn" class="secondary">Intentar nuevamente</button>
+
+        <!-- Mensaje de Error -->
+        <div id="error-message" class="message error-message" hidden>
+          <div class="message-header">
+            <h3>⚠ Oops, Algo Salió Mal</h3>
+          </div>
+          <div class="message-content">
+            <p id="error-text"></p>
+          </div>
+          <div class="message-actions">
+            <button type="button" id="retry-btn" class="btn-secondary">Intentar Nuevamente</button>
+          </div>
         </div>
       </main>
     </div>
   </section>
 
   <style>
-    .cotizacion { padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; }
-    .cotizacion__header h1 { font-size: clamp(2rem,5vw,3rem); margin: 0 0 .5rem; }
-    .cotizacion__container { display: grid; grid-template-columns: 420px 1fr; gap: 2rem; align-items: start; }
-
-    .cotizacion__media img { width: 100%; border-radius: 12px; object-fit: cover; height: 260px; display: block; }
-    .salon-info { margin-top: 1rem; color: #374151; }
-    .salon-info h2 { margin: 0 0 .25rem; font-size: 1.25rem; }
-    .salon-info p { margin: 0 0 .5rem; color: #6b7280; }
-    .salon-info ul { margin: .25rem 0 0; padding-left: 1.1rem; color: #374151; }
-
-    form { background: #fff; padding: 1.25rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(2,6,23,0.06); }
-    .field { margin-bottom: 1rem; }
-    label { display:block; font-weight:600; margin-bottom: .4rem; color:#111827 }
-    input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="time"], input[type="number"], select, textarea {
-      width:100%; padding:.6rem .75rem; border-radius:8px; border:1px solid #e5e7eb; background:#fff; box-sizing:border-box;
+    .cotizacion { 
+      padding: 3rem 2rem; 
+      max-width: 1400px; 
+      margin: 0 auto; 
     }
-    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap: .75rem; }
-    fieldset { border:1px solid #e6eef6; padding:.75rem; border-radius:8px; }
-    .checkboxes { display:grid; grid-template-columns: repeat(2, 1fr); gap:.5rem; }
-    .actions { display:flex; gap:.75rem; margin-top: .5rem; }
-    button { padding:.6rem .95rem; border-radius:999px; border:none; background:#0a4ba5; color:#fff; cursor:pointer; font-weight:700 }
-    .secondary { background:transparent; border:1px solid #c7d2fe; color:#0a4ba5 }
 
-    .summary { margin-top:1rem; background:#f8fafc; padding:1rem; border-radius:8px; }
-    .summary pre { white-space:pre-wrap; word-break:break-word; margin:0; }
-    
-    .success-message { margin-top:1rem; background:#ecfdf5; padding:1.5rem; border-radius:8px; border:1px solid #86efac; }
-    .success-message h3 { color:#065f46; margin:0 0 .5rem; }
-    .success-message p { color:#047857; margin:.25rem 0; }
-    .download-btn { background:#059669; margin-top:.75rem; }
-    .download-btn:hover { background:#047857; }
-    
-    .error-message { margin-top:1rem; background:#fef2f2; padding:1.5rem; border-radius:8px; border:1px solid #fca5a5; }
-    .error-message h3 { color:#991b1b; margin:0 0 .5rem; }
-    .error-message p { color:#dc2626; margin:.25rem 0; }
+    .cotizacion__header h1 { 
+      font-size: clamp(2rem, 5vw, 3rem); 
+      margin: 0 0 .5rem;
+      color: #0f172a;
+    }
 
-    @media (max-width: 900px) { .cotizacion__container { grid-template-columns: 1fr; } }
+    .cotizacion__header p {
+      color: #64748b;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    .cotizacion__container { 
+      display: grid; 
+      grid-template-columns: 380px 1fr; 
+      gap: 2.5rem; 
+      align-items: start;
+      margin-top: 2rem;
+    }
+
+    .cotizacion__media img { 
+      width: 100%; 
+      border-radius: 16px; 
+      object-fit: cover; 
+      height: 280px; 
+      display: block;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+    }
+
+    .salon-info { 
+      margin-top: 1.5rem; 
+      color: #374151; 
+    }
+
+    .salon-info h2 { 
+      margin: 0 0 .5rem; 
+      font-size: 1.5rem;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .salon-info p { 
+      margin: 0 0 1rem; 
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    .salon-info ul { 
+      margin: 0; 
+      padding-left: 0; 
+      list-style: none;
+      color: #374151; 
+    }
+
+    .salon-info li {
+      padding: .5rem 0;
+      font-size: .95rem;
+      color: #475569;
+    }
+
+    .cotizacion__form {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    .form-section {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .form-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .form-section h3 {
+      margin: 0 0 1.25rem;
+      font-size: 1.1rem;
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    .field { 
+      margin-bottom: 1.25rem; 
+    }
+
+    .field small {
+      display: block;
+      margin-top: .4rem;
+      color: #64748b;
+      font-size: .85rem;
+    }
+
+    label { 
+      display: block; 
+      font-weight: 600; 
+      margin-bottom: .5rem; 
+      color: #1e293b;
+      font-size: .95rem;
+    }
+
+    input[type="text"], 
+    input[type="email"], 
+    input[type="tel"], 
+    input[type="date"], 
+    input[type="time"], 
+    input[type="number"], 
+    select, 
+    textarea {
+      width: 100%; 
+      padding: .75rem; 
+      border-radius: 8px; 
+      border: 1.5px solid #e2e8f0; 
+      background: #fff; 
+      box-sizing: border-box;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #0a4ba5;
+      box-shadow: 0 0 0 3px rgba(10, 75, 165, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .grid-2 { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 1rem; 
+    }
+
+    .checkboxes { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 1rem;
+      padding: .5rem 0;
+    }
+
+    .checkboxes label {
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .checkboxes input[type="checkbox"] {
+      width: auto;
+      margin-right: .5rem;
+      cursor: pointer;
+      accent-color: #0a4ba5;
+    }
+
+    .actions { 
+      display: flex; 
+      gap: 1rem; 
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-tertiary { 
+      padding: .8rem 1.5rem; 
+      border-radius: 8px; 
+      border: none; 
+      cursor: pointer; 
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary { 
+      background: #0a4ba5; 
+      color: #fff;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .btn-primary:hover {
+      background: #083a82;
+      box-shadow: 0 4px 12px rgba(10, 75, 165, 0.3);
+    }
+
+    .btn-secondary { 
+      background: transparent; 
+      border: 1.5px solid #cbd5e1; 
+      color: #0f172a;
+    }
+
+    .btn-secondary:hover {
+      border-color: #0a4ba5;
+      color: #0a4ba5;
+      background: #f0f6ff;
+    }
+
+    .btn-tertiary {
+      background: #f1f5f9;
+      color: #0f172a;
+      border: 1.5px solid #e2e8f0;
+    }
+
+    .btn-tertiary:hover {
+      background: #e2e8f0;
+    }
+
+    .message {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid;
+    }
+
+    .message-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .message-content {
+      margin: 1rem 0;
+    }
+
+    .message-content p {
+      margin: .5rem 0;
+      font-size: .95rem;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .success-message {
+      background: #ecfdf5;
+      border-color: #86efac;
+    }
+
+    .success-message .message-header h3 {
+      color: #065f46;
+    }
+
+    .success-message .message-content {
+      color: #047857;
+    }
+
+    .error-message {
+      background: #fef2f2;
+      border-color: #fca5a5;
+    }
+
+    .error-message .message-header h3 {
+      color: #991b1b;
+    }
+
+    .error-message .message-content {
+      color: #dc2626;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 1024px) { 
+      .cotizacion__container { 
+        grid-template-columns: 1fr; 
+      }
+      .cotizacion__media {
+        max-width: 500px;
+        margin: 0 auto;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .cotizacion {
+        padding: 1.5rem 1rem;
+      }
+      .cotizacion__form {
+        padding: 1.5rem;
+      }
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .actions {
+        flex-direction: column;
+      }
+      .btn-primary,
+      .btn-secondary {
+        width: 100%;
+      }
+    }
   </style>
 
   <script type="module">
-    // API Service inline
     const API_URL = 'http://localhost:3333'
     
-    const cotizacionesAPI = {
-      async crear(data) {
-        try {
-          const response = await fetch(`${API_URL}/api/cotizaciones`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-          })
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-          return await response.json()
-        } catch (error) {
-          console.error('Error creando cotización:', error)
-          return {
-            success: false,
-            message: 'Error al crear la cotización',
-            error: error instanceof Error ? error.message : 'Unknown error',
-          }
-        }
-      },
-      getPdfUrl(cotizacionId) {
-        return `${API_URL}/api/cotizaciones/${cotizacionId}/pdf`
-      },
-      async descargarPdf(cotizacionId) {
-        try {
-          const url = this.getPdfUrl(cotizacionId)
-          window.open(url, '_blank')
-        } catch (error) {
-          console.error('Error descargando PDF:', error)
-          throw error
-        }
-      },
-    }
+    let currentCotizacionId = null
 
-    // Cargar espacios desde el backend
-    async function cargarEspacios() {
-      try {
-        const response = await fetch(`${API_URL}/api/espacios/simplificado`)
-        const result = await response.json()
-        
-        if (result.success && result.data) {
-          const salonSelect = document.getElementById('salon')
-          const imageMap = {
-            'MI LLANURA': '/src/assets/millanura.jpg',
-            'BAR': '/src/assets/bar.jpg',
-            'EMPRESARIAL': '/src/assets/empresarial.jpg',
-            'TERRAZA': '/src/assets/terraza.jpg',
-            'KIOSKO': '/src/assets/kiosko.jpg',
-            'PRESIDENTE': '/src/assets/presidencial.jpg',
-          }
-          
-          salonSelect.innerHTML = result.data.map(espacio => {
-            const imgSrc = imageMap[espacio.nombre] || '/src/assets/millanura.jpg'
-            return `<option value="${espacio.nombre}" data-img="${imgSrc}" data-capacidad="${espacio.capacidadMaxima}">${espacio.nombre}</option>`
-          }).join('')
-        }
-      } catch (error) {
-        console.error('Error cargando espacios:', error)
-      }
-    }
-
-    // Cargar prestaciones desde el backend
-    async function cargarPrestaciones() {
-      try {
-        const response = await fetch(`${API_URL}/api/prestaciones`)
-        const result = await response.json()
-        
-        if (result.success && result.data) {
-          const container = document.getElementById('prestaciones-checkboxes')
-          container.innerHTML = result.data.map(prestacion => 
-            `<label><input type="checkbox" name="features" value="${prestacion.nombre}" /> ${prestacion.nombre}</label>`
-          ).join('')
-        }
-      } catch (error) {
-        console.error('Error cargando prestaciones:', error)
-      }
-    }
-    
+    // Elementos del DOM
     const salonSelect = document.getElementById('salon')
+    const disposicionSelect = document.getElementById('disposicion')
+    const form = document.getElementById('cotizacion-form')
+    const successMessage = document.getElementById('success-message')
+    const errorMessage = document.getElementById('error-message')
     const img = document.getElementById('salon-image')
     const title = document.getElementById('salon-title')
     const desc = document.getElementById('salon-description')
     const capacidadInfo = document.getElementById('capacidad-info')
     const precio4hInfo = document.getElementById('precio-4h-info')
     const precio8hInfo = document.getElementById('precio-8h-info')
+    const asistentesInput = document.getElementById('asistentes')
+    const capacidadInfoText = document.getElementById('capacidad-info-text')
 
     const descriptions = {
       'MI LLANURA': 'Salón insignia con vista a las áreas verdes, ambientación adaptable. Ideal para recepciones, matrimonios y eventos corporativos.',
@@ -303,11 +537,85 @@ const espacios = [
       'PRESIDENTE': 'Espacio exclusivo con mobiliario ejecutivo, insonorización y servicio gourmet para reuniones privadas.'
     }
 
-    // Cargar datos iniciales
-    cargarEspacios()
-    cargarPrestaciones()
+    // CARGAR DISPOSICIONES DEL ESPACIO
+    async function cargarDisposicionesDelEspacio(espacioId) {
+      try {
+        console.log('Cargando disposiciones para espacio:', espacioId)
+        disposicionSelect.innerHTML = '<option value="">Cargando...</option>'
+        
+        const response = await fetch(`${API_URL}/api/espacios/${espacioId}/configuraciones`)
+        const result = await response.json()
+        
+        console.log('Respuesta configuraciones:', result)
+        
+        if (result.success && result.data && result.data.length > 0) {
+          let html = ''
+          result.data.forEach(config => {
+            try {
+              const disposicionNombre = config.disposicion?.nombre || 'Sin nombre'
+              const capacidad = config.capacidad || 0
+              html += `<option value="${config.id}" data-capacidad="${capacidad}">
+                ${disposicionNombre} (Capacidad: ${capacidad})
+              </option>`
+            } catch (e) {
+              console.error('Error procesando config:', config, e)
+            }
+          })
+          
+          if (html) {
+            disposicionSelect.innerHTML = html
+            console.log('Disposiciones cargadas:', result.data.length)
+            actualizarCapacidad()
+          } else {
+            disposicionSelect.innerHTML = '<option value="">Sin opciones válidas</option>'
+          }
+        } else {
+          console.warn('Sin datos:', result)
+          disposicionSelect.innerHTML = '<option value="">No hay disposiciones</option>'
+        }
+      } catch (error) {
+        console.error('Error:', error)
+        disposicionSelect.innerHTML = '<option value="">Error</option>'
+      }
+    }
 
-    // Cargar tarifas del salón
+    // ACTUALIZAR CAPACIDAD CUANDO CAMBIA DISPOSICIÓN
+    function actualizarCapacidad() {
+      const selected = disposicionSelect.selectedOptions[0]
+      if (!selected) return
+      
+      const capacidad = parseInt(selected.dataset.capacidad)
+      capacidadInfoText.textContent = `(Máx: ${capacidad})`
+      asistentesInput.max = capacidad
+      
+      if (parseInt(asistentesInput.value) > capacidad) {
+        asistentesInput.value = capacidad
+      }
+    }
+
+    // CARGAR SERVICIOS
+    async function cargarServicios() {
+      try {
+        const response = await fetch(`${API_URL}/api/servicios-adicionales`)
+        const result = await response.json()
+        
+        if (result.success && result.data) {
+          const container = document.getElementById('servicios-checkboxes')
+          let html = ''
+          result.data.forEach(s => {
+            html += `<label>
+              <input type="checkbox" name="servicios" value="${s.id}" />
+              ${s.nombre}
+            </label>`
+          })
+          container.innerHTML = html
+        }
+      } catch (error) {
+        console.error('Error cargando servicios:', error)
+      }
+    }
+
+    // CARGAR TARIFAS DEL SALÓN
     async function cargarTarifas(nombreSalon) {
       try {
         precio4hInfo.textContent = '4 horas: Cargando...'
@@ -319,152 +627,171 @@ const espacios = [
         if (data.success) {
           const precio4h = data.data.precio4Horas 
             ? `$${data.data.precio4Horas.toLocaleString('es-CO')}` 
-            : 'No disponible'
+            : 'Consultar'
           const precio8h = data.data.precio8Horas 
             ? `$${data.data.precio8Horas.toLocaleString('es-CO')}` 
-            : 'No disponible'
+            : 'Consultar'
           
           precio4hInfo.textContent = `4 horas: ${precio4h}`
           precio8hInfo.textContent = `8 horas: ${precio8h}`
-        } else {
-          precio4hInfo.textContent = '4 horas: No disponible'
-          precio8hInfo.textContent = '8 horas: No disponible'
         }
       } catch (error) {
         console.error('Error cargando tarifas:', error)
-        precio4hInfo.textContent = '4 horas: Error'
-        precio8hInfo.textContent = '8 horas: Error'
       }
     }
 
-    // Cargar tarifas iniciales
-    cargarTarifas('MI LLANURA')
-
-    // If a salon is provided as query param, preselect it and trigger change
-    try {
-      const params = new URLSearchParams(location.search)
-      const salonParam = params.get('salon')
-      if (salonParam) {
-        const match = Array.from(salonSelect.options).find((o) => o.value === salonParam)
-        if (match) {
-          salonSelect.value = salonParam
-          salonSelect.dispatchEvent(new Event('change', { bubbles: true }))
-        }
-      }
-    } catch (err) {
-      // ignore if location is not available (SSR) or any other issue
-    }
-
+    // EVENT: CAMBIO DE SALÓN
     salonSelect.addEventListener('change', (e) => {
-      const opt = e.target.selectedOptions[0]
-      const imgSrc = opt.dataset.img
-      const name = opt.value
-      const capacidad = opt.dataset.capacidad
-      
-      img.src = imgSrc
-      title.textContent = name
-      desc.textContent = descriptions[name] || ''
-      capacidadInfo.textContent = `Capacidad: hasta ${capacidad} personas`
-      
-      // Cargar tarifas del nuevo salón
-      cargarTarifas(name)
-    })
-
-    const form = document.getElementById('cotizacion-form')
-    const successMessage = document.getElementById('success-message')
-    const errorMessage = document.getElementById('error-message')
-    const resetBtn = document.getElementById('reset-btn')
-
-    let currentCotizacionId = null
-
-    resetBtn.addEventListener('click', () => { 
-      form.reset()
-      successMessage.hidden = true
-      errorMessage.hidden = true
-      currentCotizacionId = null
-    })
-
-    document.getElementById('nueva-cotizacion-btn')?.addEventListener('click', () => {
-      form.reset()
-      successMessage.hidden = true
-      errorMessage.hidden = true
-      currentCotizacionId = null
-    })
-
-    document.getElementById('retry-btn')?.addEventListener('click', () => {
-      errorMessage.hidden = true
-    })
-
-    document.getElementById('download-pdf-btn')?.addEventListener('click', () => {
-      if (currentCotizacionId) {
-        cotizacionesAPI.descargarPdf(currentCotizacionId)
+      try {
+        const salonData = JSON.parse(e.target.value)
+        const opt = e.target.selectedOptions[0]
+        const imgSrc = opt.dataset.img
+        const capacidad = opt.dataset.capacidad
+        
+        img.src = imgSrc
+        title.textContent = salonData.nombre
+        desc.textContent = descriptions[salonData.nombre] || ''
+        capacidadInfo.textContent = `Capacidad: hasta ${capacidad} personas`
+        
+        // Cargar disposiciones del nuevo salón
+        cargarDisposicionesDelEspacio(salonData.id)
+        
+        // Cargar tarifas del nuevo salón
+        cargarTarifas(salonData.nombre)
+      } catch (error) {
+        console.error('Error al cambiar salón:', error)
       }
     })
 
+    // EVENT: CAMBIO DE DISPOSICIÓN
+    disposicionSelect.addEventListener('change', actualizarCapacidad)
+
+    // EVENT: VALIDAR ASISTENTES
+    asistentesInput.addEventListener('change', () => {
+      const selected = disposicionSelect.selectedOptions[0]
+      if (!selected) return
+      
+      const capacidad = parseInt(selected.dataset.capacidad)
+      const asistentes = parseInt(asistentesInput.value)
+      
+      if (asistentes > capacidad) {
+        alert(`Máximo ${capacidad} personas para esta disposición`)
+        asistentesInput.value = capacidad
+      }
+    })
+
+    // ENVIAR FORMULARIO
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
-      const data = new FormData(form)
-      const values = Object.fromEntries(data.entries())
-      
-      // features can be multiple
-      const features = Array.from(form.querySelectorAll('input[name="features"]:checked')).map(i => i.value)
-      
-      const needChairs = form.querySelector('#need-chairs').checked
-      const chairsCount = parseInt(form.querySelector('#chairs-count').value || '0')
 
-      // basic validation
-      if (!values.salon || !values.date || !values.time || !values.name || !values.email) {
-        alert('Por favor completa los campos requeridos: salón, fecha, hora, nombre y email.')
+      // VALIDAR
+      if (!disposicionSelect.value) {
+        alert('Selecciona una disposición')
         return
       }
 
-      // Prepare data for API
-      const cotizacionData = {
-        salon: values.salon,
-        fecha: values.date,
-        hora: values.time,
-        duracion: parseInt(values.duration),
-        asistentes: parseInt(values.guests),
-        prestaciones: features,
-        requiereSillas: needChairs,
-        numeroSillas: chairsCount,
-        nombre: values.name,
-        email: values.email,
-        telefono: values.phone || undefined,
-        observaciones: values.notes || undefined
+      const selected = disposicionSelect.selectedOptions[0]
+      const capacidad = parseInt(selected.dataset.capacidad)
+      const asistentes = parseInt(asistentesInput.value)
+      
+      if (asistentes > capacidad) {
+        alert(`Máximo ${capacidad} personas`)
+        return
       }
 
-      // Hide previous messages
+      const salonData = JSON.parse(salonSelect.value)
+      const servicios = Array.from(form.querySelectorAll('input[name="servicios"]:checked')).map(i => parseInt(i.value))
+
+      const cotizacionData = {
+        espacioId: salonData.id,
+        configuracionEspacioId: parseInt(disposicionSelect.value),
+        fecha: document.getElementById('date').value,
+        horaInicio: document.getElementById('time').value,
+        duracion: parseInt(document.getElementById('duration').value),
+        tipoEvento: document.getElementById('tipoEvento').value,
+        asistentes: asistentes,
+        tipoCliente: 'particular',
+        servicios,
+        nombre: document.getElementById('nombre').value,
+        email: document.getElementById('email').value,
+        telefono: document.getElementById('telefono').value || undefined,
+        observaciones: document.getElementById('observaciones').value || undefined,
+      }
+
       successMessage.hidden = true
       errorMessage.hidden = true
 
-      // Show loading state
       const submitBtn = form.querySelector('button[type="submit"]')
       const originalText = submitBtn.textContent
       submitBtn.disabled = true
-      submitBtn.textContent = 'Procesando...'
+      submitBtn.textContent = 'Generando...'
 
       try {
-        const response = await cotizacionesAPI.crear(cotizacionData)
+        const response = await fetch(`${API_URL}/api/cotizaciones`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cotizacionData),
+        })
 
-        if (response.success && response.data) {
-          currentCotizacionId = response.data.id
-          document.getElementById('cotizacion-numero').textContent = `#${response.data.cotizacionNumero}`
-          document.getElementById('cotizacion-total').textContent = `$${response.data.valorTotal.toLocaleString('es-CO')}`
+        const result = await response.json()
+
+        if (result.success && result.data) {
+          currentCotizacionId = result.data.cotizacion.id
+          document.getElementById('cotizacion-numero').textContent = `#${result.data.cotizacion.cotizacionNumero}`
+          document.getElementById('cotizacion-total').textContent = `$${result.data.cotizacion.valorTotal.toLocaleString('es-CO')}`
+          document.getElementById('cotizacion-abono').textContent = `$${result.data.montoAbono.toLocaleString('es-CO')}`
+          
           successMessage.hidden = false
-          form.reset()
+          form.style.display = 'none'
+          
+          // Abrir PDF automáticamente
+          setTimeout(() => {
+            window.open(`${API_URL}/api/cotizaciones/${currentCotizacionId}/pdf`, '_blank')
+          }, 500)
         } else {
-          document.getElementById('error-text').textContent = response.message || 'Ocurrió un error al procesar la cotización'
+          document.getElementById('error-text').textContent = result.message || 'Error'
           errorMessage.hidden = false
         }
       } catch (error) {
-        document.getElementById('error-text').textContent = 'Error de conexión. Por favor verifica tu conexión a internet e intenta nuevamente.'
+        document.getElementById('error-text').textContent = 'Error de conexión'
         errorMessage.hidden = false
       } finally {
         submitBtn.disabled = false
         submitBtn.textContent = originalText
       }
     })
+
+    // BOTONES DE ACCIÓN
+    document.getElementById('view-pdf-btn')?.addEventListener('click', () => {
+      if (currentCotizacionId) {
+        window.open(`${API_URL}/api/cotizaciones/${currentCotizacionId}/pdf`, '_blank')
+      }
+    })
+
+    document.getElementById('download-pdf-btn')?.addEventListener('click', () => {
+      if (currentCotizacionId) {
+        window.open(`${API_URL}/api/cotizaciones/${currentCotizacionId}/pdf`, '_blank')
+      }
+    })
+
+    document.getElementById('nueva-cotizacion-btn')?.addEventListener('click', () => {
+      form.style.display = 'block'
+      form.reset()
+      successMessage.hidden = true
+      currentCotizacionId = null
+      cargarDisposicionesDelEspacio(1) // Reset a MI LLANURA
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+
+    document.getElementById('retry-btn')?.addEventListener('click', () => {
+      errorMessage.hidden = true
+    })
+
+    // INICIALIZAR
+    console.log('Iniciando...')
+    cargarServicios()
+    cargarTarifas('MI LLANURA')
+    cargarDisposicionesDelEspacio(1)
   </script>
 
 </BaseLayout>

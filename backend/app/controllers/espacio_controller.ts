@@ -115,6 +115,48 @@ export default class EspacioController {
   }
 
   /**
+   * Obtener configuraciones del espacio (disposiciones disponibles para un espacio específico)
+   */
+  async obtenerConfiguracionesEspacio({ params, response }: HttpContext) {
+    try {
+      const espacioId = parseInt(params.espacioId)
+
+      const configuraciones = await db
+        .from('configuraciones_espacio')
+        .select(
+          'configuraciones_espacio.id',
+          'configuraciones_espacio.capacidad',
+          'disposiciones.id as disposicion_id',
+          'disposiciones.nombre as disposicion_nombre'
+        )
+        .innerJoin('disposiciones', 'configuraciones_espacio.disposicion_id', 'disposiciones.id')
+        .where('configuraciones_espacio.espacio_id', espacioId)
+        .orderBy('configuraciones_espacio.id', 'asc')
+
+      console.log('Configuraciones encontradas:', configuraciones)
+
+      return response.json({
+        success: true,
+        data: configuraciones.map((config: any) => ({
+          id: config.id,
+          capacidad: config.capacidad,
+          disposicion: {
+            id: config.disposicion_id,
+            nombre: config.disposicion_nombre,
+          },
+        })),
+      })
+    } catch (error) {
+      console.error('Error al obtener configuraciones:', error)
+      return response.status(500).json({
+        success: false,
+        message: 'Error al obtener configuraciones del espacio',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+  }
+
+  /**
    * Listar prestaciones disponibles (servicios adicionales)
    */
   async listarPrestaciones({ response }: HttpContext) {
