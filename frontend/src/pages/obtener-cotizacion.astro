@@ -88,6 +88,7 @@ const espacios = [
               <div>
                 <label for="date">Fecha del Evento *</label>
                 <input id="date" name="date" type="date" required />
+                <small id="horario-info" style="display: none; margin-top: 0.5rem; padding: 0.75rem; background: #ecfdf5; border-left: 3px solid #10b981; color: #065f46; border-radius: 4px;"></small>
               </div>
               <div>
                 <label for="time">Hora de Inicio *</label>
@@ -298,6 +299,26 @@ const espacios = [
       margin-top: .4rem;
       color: #64748b;
       font-size: .85rem;
+    }
+
+    #horario-info {
+      font-size: 0.9rem !important;
+      font-weight: 500;
+      border-radius: 6px;
+      border-left-width: 4px !important;
+      border-left-style: solid !important;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     label { 
@@ -675,6 +696,17 @@ const espacios = [
       'PRESIDENTE': 'Espacio exclusivo con mobiliario ejecutivo, insonorización y servicio gourmet para reuniones privadas.'
     }
 
+    // Horarios de operación
+    const horarios = {
+      0: { nombre: 'Domingo', activo: false, inicio: '—', fin: '—' },
+      1: { nombre: 'Lunes', activo: false, inicio: '—', fin: '—' },
+      2: { nombre: 'Martes', activo: true, inicio: '08:00', fin: '22:00' },
+      3: { nombre: 'Miércoles', activo: true, inicio: '08:00', fin: '22:00' },
+      4: { nombre: 'Jueves', activo: true, inicio: '08:00', fin: '22:00' },
+      5: { nombre: 'Viernes', activo: true, inicio: '08:00', fin: '02:00' },
+      6: { nombre: 'Sábado', activo: true, inicio: '08:00', fin: '02:00' }
+    }
+
     // CARGAR DISPOSICIONES DEL ESPACIO
     async function cargarDisposicionesDelEspacio(espacioId) {
       try {
@@ -804,6 +836,36 @@ const espacios = [
     // EVENT: CAMBIO DE DISPOSICIÓN
     disposicionSelect.addEventListener('change', actualizarCapacidad)
 
+    // EVENT: CAMBIO DE FECHA - MOSTRAR HORARIO
+    const dateInput = document.getElementById('date')
+    const horarioInfo = document.getElementById('horario-info')
+    
+    dateInput.addEventListener('change', () => {
+      if (!dateInput.value) {
+        horarioInfo.style.display = 'none'
+        return
+      }
+      
+      const date = new Date(dateInput.value + 'T00:00:00')
+      const diaSemana = date.getDay()
+      const horario = horarios[diaSemana]
+      
+      if (horario) {
+        if (horario.activo) {
+          horarioInfo.innerHTML = `<strong>📅 ${horario.nombre}</strong> - Horario: ${horario.inicio} a ${horario.fin}`
+          horarioInfo.style.background = '#ecfdf5'
+          horarioInfo.style.borderLeftColor = '#10b981'
+          horarioInfo.style.color = '#065f46'
+        } else {
+          horarioInfo.innerHTML = `<strong>⛔ ${horario.nombre}</strong> - El club está cerrado este día`
+          horarioInfo.style.background = '#fef2f2'
+          horarioInfo.style.borderLeftColor = '#dc2626'
+          horarioInfo.style.color = '#991b1b'
+        }
+        horarioInfo.style.display = 'block'
+      }
+    })
+
     // EVENT: VALIDAR ASISTENTES
     asistentesInput.addEventListener('change', () => {
       const selected = disposicionSelect.selectedOptions[0]
@@ -888,11 +950,6 @@ const espacios = [
           
           successMessage.hidden = false
           form.style.display = 'none'
-          
-          // Abrir PDF automáticamente
-          setTimeout(() => {
-            window.open(`${API_URL}/api/cotizaciones/${currentCotizacionId}/pdf`, '_blank')
-          }, 500)
         } else {
           document.getElementById('error-text').textContent = result.message || 'Error'
           errorMessage.hidden = false
