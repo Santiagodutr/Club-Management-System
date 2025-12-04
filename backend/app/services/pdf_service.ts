@@ -65,7 +65,7 @@ export class PDFService {
     const abono50 = Math.round(total * 0.5)
 
     // Obtener nombre del salón desde Espacio
-    let nombreSalon = cotizacion.salon || 'A definir'
+    let nombreSalon = 'A definir'
     try {
       const espacio = await Espacio.find(cotizacion.espacioId)
       if (espacio) {

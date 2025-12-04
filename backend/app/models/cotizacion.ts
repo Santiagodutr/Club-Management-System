@@ -19,9 +19,6 @@ export default class Cotizacion extends BaseModel {
   declare id: number
 
   @column()
-  declare salon: string
-
-  @column()
   declare fecha: string // YYYY-MM-DD
 
   @column()

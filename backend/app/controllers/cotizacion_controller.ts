@@ -93,6 +93,10 @@ export default class CotizacionController {
         mensaje: resultado.mensajeDisponibilidad,
       })
 
+      // Preload espacio relation to get salon name
+      await resultado.cotizacion.load('espacio')
+      const salonNombre = resultado.cotizacion.espacio?.nombre || null
+
       // Enviar correos de notificación (async, no bloqueante)
       const datosEmail: DatosCotizacionEmail = {
         cotizacionId: resultado.cotizacion.id,
@@ -100,7 +104,7 @@ export default class CotizacionController {
         nombreCliente: resultado.cotizacion.nombre,
         emailCliente: resultado.cotizacion.email,
         telefonoCliente: resultado.cotizacion.telefono,
-        salon: resultado.cotizacion.salon,
+        salon: salonNombre,
         fecha: resultado.cotizacion.fecha,
         hora: resultado.cotizacion.hora,
         duracion: resultado.cotizacion.duracion,
@@ -343,7 +347,12 @@ export default class CotizacionController {
    */
   async enviarCorreoPrueba({ params, response }: HttpContext) {
     try {
-      const cotizacion = await Cotizacion.findOrFail(params.id)
+      const cotizacion = await Cotizacion.query()
+        .where('id', params.id)
+        .preload('espacio')
+        .firstOrFail()
+
+      const salonNombre = cotizacion.espacio?.nombre || null
 
       const datosEmail: DatosCotizacionEmail = {
         cotizacionId: cotizacion.id,
@@ -351,7 +360,7 @@ export default class CotizacionController {
         nombreCliente: cotizacion.nombre,
         emailCliente: cotizacion.email,
         telefonoCliente: cotizacion.telefono,
-        salon: cotizacion.salon,
+        salon: salonNombre,
         fecha: cotizacion.fecha,
         hora: cotizacion.hora,
         duracion: cotizacion.duracion,
