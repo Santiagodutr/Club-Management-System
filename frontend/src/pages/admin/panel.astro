@@ -1,0 +1,1509 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { salonesData } from '../../data/salones'
+---
+
+<BaseLayout title="Panel de Administración - Club del Meta" hideNavbar>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Admin Panel</span>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="#" class="sidebar-link active" data-section="dashboard">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          Dashboard
+        </a>
+        <a href="#" class="sidebar-link" data-section="salones">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          Gestión de Salones
+        </a>
+        <a href="#" class="sidebar-link" data-section="imagenes">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          Biblioteca de Imágenes
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <div class="user-details">
+            <span class="user-name" id="userName">Administrador</span>
+            <span class="user-role">Admin Demo</span>
+          </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <!-- Header -->
+      <header class="admin-header">
+        <div class="header-title">
+          <h1 id="pageTitle">Dashboard</h1>
+          <p id="pageDescription">Bienvenido al panel de administración de salones</p>
+        </div>
+        <div class="header-actions">
+          <a href="/salones" class="preview-btn" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            Ver sitio
+          </a>
+        </div>
+      </header>
+
+      <!-- Dashboard Section -->
+      <section class="content-section active" id="section-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--blue">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-value">{salonesData.length}</span>
+              <span class="stat-label">Salones Totales</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--green">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-value">{salonesData.filter(s => s.destacado).length}</span>
+              <span class="stat-label">Salones Destacados</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--purple">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-value">{salonesData.reduce((acc, s) => acc + s.imagenes.length, 0)}</span>
+              <span class="stat-label">Imágenes Totales</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--orange">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-value">{salonesData.reduce((acc, s) => acc + s.capacidad.maxima, 0)}</span>
+              <span class="stat-label">Capacidad Total</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="recent-activity">
+          <h3>Acciones Rápidas</h3>
+          <div class="quick-actions">
+            <button class="quick-action" onclick="document.querySelector('[data-section=salones]').click()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span>Editar Salones</span>
+            </button>
+            <button class="quick-action" onclick="document.querySelector('[data-section=imagenes]').click()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>Subir Imágenes</span>
+            </button>
+            <a href="/salones" target="_blank" class="quick-action">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <span>Vista Previa</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Salones Section -->
+      <section class="content-section" id="section-salones">
+        <div class="salones-list">
+          {salonesData.map((salon) => (
+            <div class="salon-admin-card" data-salon-id={salon.id}>
+              <div class="salon-admin-image" style={`background-image: url(${salon.imagenes[0]?.url})`}>
+                {salon.destacado && <span class="destacado-badge">Destacado</span>}
+              </div>
+              <div class="salon-admin-info">
+                <h3>{salon.nombre}</h3>
+                <p>{salon.descripcionCorta}</p>
+                <div class="salon-meta">
+                  <span><strong>Capacidad:</strong> {salon.capacidad.minima}-{salon.capacidad.maxima}</span>
+                  <span><strong>Imágenes:</strong> {salon.imagenes.length}</span>
+                </div>
+              </div>
+              <div class="salon-admin-actions">
+                <button class="edit-btn" data-salon-id={salon.id}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                  Editar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Imágenes Section -->
+      <section class="content-section" id="section-imagenes">
+        <div class="upload-zone" id="uploadZone">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <h3>Arrastra imágenes aquí</h3>
+          <p>o haz clic para seleccionar archivos</p>
+          <input type="file" id="fileInput" accept="image/*" multiple hidden />
+        </div>
+
+        <div class="images-gallery">
+          <h3>Galería de Imágenes</h3>
+          <div class="images-grid" id="imagesGrid">
+            {salonesData.flatMap(salon => 
+              salon.imagenes.map((img) => (
+                <div class="image-card" data-image-id={img.id}>
+                  <img src={img.url} alt={img.alt} />
+                  <div class="image-overlay">
+                    <span class="image-salon">{salon.nombre}</span>
+                    <div class="image-actions">
+                      <button class="img-btn img-btn--view" title="Ver">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                      </button>
+                      <button class="img-btn img-btn--delete" title="Eliminar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal de Edición -->
+  <div class="edit-modal" id="editModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Editar Salón: <span id="modalSalonName"></span></h2>
+        <button class="modal-close" id="closeModal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <form class="edit-form" id="editForm">
+        <div class="form-tabs">
+          <button type="button" class="tab-btn active" data-tab="general">General</button>
+          <button type="button" class="tab-btn" data-tab="contenido">Contenido</button>
+          <button type="button" class="tab-btn" data-tab="caracteristicas">Características</button>
+          <button type="button" class="tab-btn" data-tab="galeria">Galería</button>
+        </div>
+
+        <div class="tab-content active" id="tab-general">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="salonNombre">Nombre del Salón</label>
+              <input type="text" id="salonNombre" name="nombre" />
+            </div>
+            <div class="form-group">
+              <label for="salonSubtitulo">Subtítulo</label>
+              <input type="text" id="salonSubtitulo" name="subtitulo" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="salonDescCorta">Descripción Corta</label>
+            <textarea id="salonDescCorta" name="descripcionCorta" rows="3"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="salonCapMin">Capacidad Mínima</label>
+              <input type="number" id="salonCapMin" name="capacidadMin" />
+            </div>
+            <div class="form-group">
+              <label for="salonCapMax">Capacidad Máxima</label>
+              <input type="number" id="salonCapMax" name="capacidadMax" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="salonDimensiones">Dimensiones</label>
+              <input type="text" id="salonDimensiones" name="dimensiones" />
+            </div>
+            <div class="form-group">
+              <label for="salonPrecio">Precio Desde</label>
+              <input type="text" id="salonPrecio" name="precioDesde" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="salonHorario">Horario Disponible</label>
+            <input type="text" id="salonHorario" name="horarioDisponible" />
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="salonDestacado" name="destacado" />
+              <span>Marcar como Destacado</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-contenido">
+          <div class="form-group">
+            <label for="salonDescCompleta">Descripción Completa (HTML permitido)</label>
+            <textarea id="salonDescCompleta" name="descripcionCompleta" rows="15"></textarea>
+            <p class="form-hint">Puedes usar etiquetas HTML como &lt;h3&gt;, &lt;p&gt;, &lt;strong&gt;, etc.</p>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-caracteristicas">
+          <div class="form-group">
+            <label>Características (una por línea)</label>
+            <textarea id="salonCaracteristicas" name="caracteristicas" rows="8"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Servicios Incluidos (uno por línea)</label>
+            <textarea id="salonServicios" name="serviciosIncluidos" rows="6"></textarea>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-galeria">
+          <div class="gallery-editor" id="galleryEditor">
+            <!-- Las imágenes se cargarán dinámicamente -->
+          </div>
+          <button type="button" class="add-image-btn" id="addImageBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Agregar Imagen
+          </button>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" id="cancelEdit">Cancelar</button>
+          <button type="submit" class="btn-save">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <span id="toastMessage">Cambios guardados correctamente</span>
+  </div>
+</BaseLayout>
+
+<script define:vars={{ salonesDataJson: JSON.stringify(salonesData) }}>
+  // Parse salones data
+  let salonesData = JSON.parse(salonesDataJson);
+  let currentSalonId = null;
+
+  // Check authentication
+  const auth = localStorage.getItem('adminAuth');
+  if (!auth) {
+    window.location.href = '/admin/login';
+  } else {
+    const authData = JSON.parse(auth);
+    const userName = document.getElementById('userName');
+    if (userName) {
+      userName.textContent = authData.user || 'Administrador';
+    }
+  }
+
+  // Navigation
+  const sidebarLinks = document.querySelectorAll('.sidebar-link');
+  const contentSections = document.querySelectorAll('.content-section');
+  const pageTitle = document.getElementById('pageTitle');
+  const pageDescription = document.getElementById('pageDescription');
+
+  const pageTitles = {
+    dashboard: { title: 'Dashboard', desc: 'Bienvenido al panel de administración de salones' },
+    salones: { title: 'Gestión de Salones', desc: 'Edita la información de cada salón' },
+    imagenes: { title: 'Biblioteca de Imágenes', desc: 'Administra las imágenes de los salones' }
+  };
+
+  sidebarLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const section = link.getAttribute('data-section');
+      
+      sidebarLinks.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      
+      contentSections.forEach(s => s.classList.remove('active'));
+      document.getElementById(`section-${section}`)?.classList.add('active');
+      
+      if (pageTitle && pageTitles[section]) {
+        pageTitle.textContent = pageTitles[section].title;
+        pageDescription.textContent = pageTitles[section].desc;
+      }
+    });
+  });
+
+  // Logout
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    localStorage.removeItem('adminAuth');
+    window.location.href = '/admin/login';
+  });
+
+  // Modal handling
+  const editModal = document.getElementById('editModal');
+  const closeModal = document.getElementById('closeModal');
+  const cancelEdit = document.getElementById('cancelEdit');
+  const editForm = document.getElementById('editForm');
+  const modalSalonName = document.getElementById('modalSalonName');
+
+  // Tab handling
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.getAttribute('data-tab');
+      
+      tabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      tabContents.forEach(c => c.classList.remove('active'));
+      document.getElementById(`tab-${tab}`)?.classList.add('active');
+    });
+  });
+
+  // Open edit modal
+  document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const salonId = btn.getAttribute('data-salon-id');
+      const salon = salonesData.find(s => s.id === salonId);
+      
+      if (salon) {
+        currentSalonId = salonId;
+        modalSalonName.textContent = salon.nombre;
+        
+        // Populate form
+        document.getElementById('salonNombre').value = salon.nombre;
+        document.getElementById('salonSubtitulo').value = salon.subtitulo;
+        document.getElementById('salonDescCorta').value = salon.descripcionCorta;
+        document.getElementById('salonCapMin').value = salon.capacidad.minima;
+        document.getElementById('salonCapMax').value = salon.capacidad.maxima;
+        document.getElementById('salonDimensiones').value = salon.dimensiones;
+        document.getElementById('salonPrecio').value = salon.precioDesde;
+        document.getElementById('salonHorario').value = salon.horarioDisponible;
+        document.getElementById('salonDestacado').checked = salon.destacado;
+        document.getElementById('salonDescCompleta').value = salon.descripcionCompleta;
+        document.getElementById('salonCaracteristicas').value = salon.caracteristicas.join('\n');
+        document.getElementById('salonServicios').value = salon.serviciosIncluidos.join('\n');
+        
+        // Load gallery
+        const galleryEditor = document.getElementById('galleryEditor');
+        galleryEditor.innerHTML = salon.imagenes.map((img, index) => `
+          <div class="gallery-item" data-image-id="${img.id}">
+            <img src="${img.url}" alt="${img.alt}" />
+            <div class="gallery-item-controls">
+              <input type="text" value="${img.alt}" placeholder="Texto alternativo" class="img-alt-input" />
+              <label class="main-checkbox">
+                <input type="radio" name="mainImage" ${img.isMain ? 'checked' : ''} />
+                Principal
+              </label>
+              <button type="button" class="remove-img-btn" data-index="${index}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `).join('');
+        
+        // Show modal
+        editModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Reset to first tab
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabBtns[0].classList.add('active');
+        tabContents.forEach(c => c.classList.remove('active'));
+        tabContents[0].classList.add('active');
+      }
+    });
+  });
+
+  // Close modal
+  function closeEditModal() {
+    editModal.classList.remove('active');
+    document.body.style.overflow = '';
+    currentSalonId = null;
+  }
+
+  closeModal?.addEventListener('click', closeEditModal);
+  cancelEdit?.addEventListener('click', closeEditModal);
+  editModal?.addEventListener('click', (e) => {
+    if (e.target === editModal) closeEditModal();
+  });
+
+  // Save form
+  editForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    if (currentSalonId) {
+      const salonIndex = salonesData.findIndex(s => s.id === currentSalonId);
+      
+      if (salonIndex !== -1) {
+        // Update salon data
+        salonesData[salonIndex] = {
+          ...salonesData[salonIndex],
+          nombre: document.getElementById('salonNombre').value,
+          subtitulo: document.getElementById('salonSubtitulo').value,
+          descripcionCorta: document.getElementById('salonDescCorta').value,
+          capacidad: {
+            minima: parseInt(document.getElementById('salonCapMin').value),
+            maxima: parseInt(document.getElementById('salonCapMax').value)
+          },
+          dimensiones: document.getElementById('salonDimensiones').value,
+          precioDesde: document.getElementById('salonPrecio').value,
+          horarioDisponible: document.getElementById('salonHorario').value,
+          destacado: document.getElementById('salonDestacado').checked,
+          descripcionCompleta: document.getElementById('salonDescCompleta').value,
+          caracteristicas: document.getElementById('salonCaracteristicas').value.split('\n').filter(c => c.trim()),
+          serviciosIncluidos: document.getElementById('salonServicios').value.split('\n').filter(s => s.trim()),
+          fechaActualizacion: new Date().toISOString().split('T')[0]
+        };
+        
+        // Store in localStorage for demo persistence
+        localStorage.setItem('salonesData', JSON.stringify(salonesData));
+        
+        // Show toast
+        showToast('Cambios guardados correctamente');
+        
+        // Close modal
+        closeEditModal();
+        
+        // Update UI
+        updateSalonCard(salonesData[salonIndex]);
+      }
+    }
+  });
+
+  // Update salon card in UI
+  function updateSalonCard(salon) {
+    const card = document.querySelector(`[data-salon-id="${salon.id}"]`);
+    if (card) {
+      card.querySelector('h3').textContent = salon.nombre;
+      card.querySelector('p').textContent = salon.descripcionCorta;
+      const meta = card.querySelector('.salon-meta');
+      meta.innerHTML = `
+        <span><strong>Capacidad:</strong> ${salon.capacidad.minima}-${salon.capacidad.maxima}</span>
+        <span><strong>Imágenes:</strong> ${salon.imagenes.length}</span>
+      `;
+      
+      const badge = card.querySelector('.destacado-badge');
+      if (salon.destacado && !badge) {
+        const imgDiv = card.querySelector('.salon-admin-image');
+        imgDiv.innerHTML += '<span class="destacado-badge">Destacado</span>';
+      } else if (!salon.destacado && badge) {
+        badge.remove();
+      }
+    }
+  }
+
+  // Toast notification
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+    
+    toastMessage.textContent = message;
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
+  // File upload handling
+  const uploadZone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('fileInput');
+
+  uploadZone?.addEventListener('click', () => fileInput?.click());
+  
+  uploadZone?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+  });
+
+  uploadZone?.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('dragover');
+  });
+
+  uploadZone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    
+    const files = e.dataTransfer.files;
+    handleFiles(files);
+  });
+
+  fileInput?.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
+  });
+
+  function handleFiles(files) {
+    // In demo mode, just show a toast
+    showToast(`${files.length} imagen(es) subida(s) - Modo Demo`);
+    
+    // In production, you would upload to a server/cloud storage
+    console.log('Files to upload:', files);
+  }
+
+  // Delete image handling
+  document.querySelectorAll('.img-btn--delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const card = btn.closest('.image-card');
+      
+      if (confirm('¿Estás seguro de eliminar esta imagen?')) {
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.8)';
+        setTimeout(() => {
+          card.remove();
+          showToast('Imagen eliminada - Modo Demo');
+        }, 300);
+      }
+    });
+  });
+
+  // Load saved data on page load
+  const savedData = localStorage.getItem('salonesData');
+  if (savedData) {
+    salonesData = JSON.parse(savedData);
+  }
+</script>
+
+<style>
+  /* Layout */
+  .admin-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+    background: #f1f5f9;
+  }
+
+  /* Sidebar */
+  .admin-sidebar {
+    background: #1e293b;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 260px;
+    z-index: 50;
+  }
+
+  .sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .sidebar-nav {
+    padding: 1rem 0;
+    flex: 1;
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .sidebar-link:hover,
+  .sidebar-link.active {
+    background: rgba(255,255,255,0.1);
+    color: white;
+  }
+
+  .sidebar-link.active {
+    border-left: 3px solid var(--color-primary);
+  }
+
+  .sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    background: #334155;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .user-details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .user-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .user-role {
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
+
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 8px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+
+  .logout-btn:hover {
+    background: rgba(255,255,255,0.15);
+    color: white;
+  }
+
+  /* Main Content */
+  .admin-main {
+    margin-left: 260px;
+    padding: 2rem;
+  }
+
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+  }
+
+  .header-title h1 {
+    font-size: 1.75rem;
+    color: #1e293b;
+    margin: 0 0 0.25rem;
+  }
+
+  .header-title p {
+    color: #64748b;
+    margin: 0;
+  }
+
+  .preview-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #475569;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .preview-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  /* Content Sections */
+  .content-section {
+    display: none;
+  }
+
+  .content-section.active {
+    display: block;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stat-icon--blue { background: #dbeafe; color: #2563eb; }
+  .stat-icon--green { background: #dcfce7; color: #16a34a; }
+  .stat-icon--purple { background: #f3e8ff; color: #9333ea; }
+  .stat-icon--orange { background: #ffedd5; color: #ea580c; }
+
+  .stat-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+  }
+
+  /* Quick Actions */
+  .recent-activity {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .recent-activity h3 {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    color: #1e293b;
+  }
+
+  .quick-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem 2rem;
+    background: #f8fafc;
+    border: 2px dashed #e2e8f0;
+    border-radius: 12px;
+    color: #475569;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    font-size: 0.9rem;
+  }
+
+  .quick-action:hover {
+    border-color: var(--color-primary);
+    background: #f0f7ff;
+    color: var(--color-primary);
+  }
+
+  /* Salones List */
+  .salones-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .salon-admin-card {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .salon-admin-image {
+    height: 150px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+
+  .destacado-badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    background: var(--color-accent);
+    color: white;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .salon-admin-info {
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .salon-admin-info h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    color: #1e293b;
+  }
+
+  .salon-admin-info p {
+    margin: 0 0 0.75rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .salon-meta {
+    display: flex;
+    gap: 1.5rem;
+    color: #94a3b8;
+    font-size: 0.85rem;
+  }
+
+  .salon-admin-actions {
+    display: flex;
+    align-items: center;
+    padding-right: 1.5rem;
+  }
+
+  .edit-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--color-primary);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .edit-btn:hover {
+    background: #083d8a;
+  }
+
+  /* Upload Zone */
+  .upload-zone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 3rem;
+    text-align: center;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 2rem;
+  }
+
+  .upload-zone:hover,
+  .upload-zone.dragover {
+    border-color: var(--color-primary);
+    background: #f0f7ff;
+  }
+
+  .upload-zone svg {
+    color: #94a3b8;
+    margin-bottom: 1rem;
+  }
+
+  .upload-zone h3 {
+    margin: 0 0 0.5rem;
+    color: #1e293b;
+  }
+
+  .upload-zone p {
+    margin: 0;
+    color: #64748b;
+  }
+
+  /* Images Gallery */
+  .images-gallery {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .images-gallery h3 {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    color: #1e293b;
+  }
+
+  .images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+
+  .image-card {
+    position: relative;
+    aspect-ratio: 4/3;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .image-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0.75rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .image-card:hover .image-overlay {
+    opacity: 1;
+  }
+
+  .image-salon {
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .image-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .img-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .img-btn--view {
+    background: white;
+    color: #1e293b;
+  }
+
+  .img-btn--delete {
+    background: #ef4444;
+    color: white;
+  }
+
+  .img-btn:hover {
+    transform: scale(1.1);
+  }
+
+  /* Edit Modal */
+  .edit-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    padding: 2rem;
+  }
+
+  .edit-modal.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #1e293b;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  .edit-form {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .form-tabs {
+    display: flex;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0 1.5rem;
+    background: #f8fafc;
+  }
+
+  .tab-btn {
+    padding: 1rem 1.25rem;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+    font-family: inherit;
+  }
+
+  .tab-btn:hover {
+    color: #1e293b;
+  }
+
+  .tab-btn.active {
+    color: var(--color-primary);
+  }
+
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-primary);
+  }
+
+  .tab-content {
+    display: none;
+    padding: 1.5rem;
+    overflow-y: auto;
+    max-height: 50vh;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #475569;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+
+  .form-group textarea {
+    resize: vertical;
+  }
+
+  .form-hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+
+  .checkbox-label input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary);
+  }
+
+  /* Gallery Editor */
+  .gallery-editor {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .gallery-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+  }
+
+  .gallery-item-controls {
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .gallery-item-controls input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+
+  .gallery-item-controls .main-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  .remove-img-btn {
+    align-self: flex-end;
+    background: #fee2e2;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem;
+    color: #dc2626;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .remove-img-btn:hover {
+    background: #fecaca;
+  }
+
+  .add-image-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 2px dashed #e2e8f0;
+    border-radius: 8px;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    font-size: 0.9rem;
+  }
+
+  .add-image-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  /* Form Actions */
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+  }
+
+  .btn-cancel {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #64748b;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .btn-cancel:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+  }
+
+  .btn-save {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--color-primary);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-save:hover {
+    background: #083d8a;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: #1e293b;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 300;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .toast svg {
+    color: #10b981;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .admin-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s;
+    }
+
+    .admin-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .admin-main {
+      margin-left: 0;
+    }
+
+    .salon-admin-card {
+      grid-template-columns: 1fr;
+    }
+
+    .salon-admin-image {
+      height: 180px;
+    }
+
+    .salon-admin-info {
+      padding: 1rem;
+    }
+
+    .salon-admin-actions {
+      padding: 0 1rem 1rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .form-tabs {
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      white-space: nowrap;
+    }
+  }
+</style>

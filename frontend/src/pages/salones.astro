@@ -1,0 +1,267 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { salonesData } from '../data/salones'
+---
+
+<BaseLayout title="Nuestros Salones - Club del Meta">
+  <section class="salones">
+    <header class="salones__header">
+      <h1>Nuestros Salones</h1>
+      <p>
+        Descubre los espacios únicos del Club del Meta. Cada salón tiene su propia personalidad 
+        y está diseñado para hacer de tu evento una experiencia memorable.
+      </p>
+    </header>
+
+    <div class="salones-grid">
+      {salonesData.map((salon) => (
+        <article class="salon-card" data-destacado={salon.destacado}>
+          <div class="salon-card__image" style={`background-image: url(${salon.imagenes[0]?.url || '/src/assets/millanura.jpg'})`}>
+            {salon.destacado && <span class="salon-card__destacado">Destacado</span>}
+          </div>
+          <div class="salon-card__content">
+            <div class="salon-card__header">
+              <h2>{salon.nombre}</h2>
+              <span class="salon-card__capacidad">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                {salon.capacidad.minima} - {salon.capacidad.maxima} personas
+              </span>
+            </div>
+            <p class="salon-card__subtitulo">{salon.subtitulo}</p>
+            <p class="salon-card__descripcion">{salon.descripcionCorta}</p>
+            <div class="salon-card__footer">
+              <span class="salon-card__precio">Desde {salon.precioDesde}</span>
+              <a href={`/salones/${salon.slug}`} class="salon-card__btn">
+                Ver más detalles
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <!-- Botón de Admin -->
+    <a href="/admin/login" class="admin-btn" title="Acceso Administrador">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        <path d="M9 12l2 2 4-4"></path>
+      </svg>
+      Soy Admin
+    </a>
+  </section>
+</BaseLayout>
+
+<style>
+  .salones {
+    padding: 2rem 0;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  .salones__header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .salones__header h1 {
+    font-size: 2.5rem;
+    color: var(--color-primary);
+    margin: 0 0 1rem;
+    font-weight: 700;
+  }
+
+  .salones__header p {
+    color: #64748b;
+    max-width: 600px;
+    margin: 0 auto;
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+
+  .salones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 2rem;
+  }
+
+  .salon-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .salon-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  }
+
+  .salon-card[data-destacado="true"] {
+    border: 2px solid var(--color-accent);
+  }
+
+  .salon-card__image {
+    height: 220px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+
+  .salon-card__destacado {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--color-accent);
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .salon-card__content {
+    padding: 1.5rem;
+  }
+
+  .salon-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+    gap: 1rem;
+  }
+
+  .salon-card__header h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .salon-card__capacidad {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #64748b;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .salon-card__subtitulo {
+    color: var(--color-primary);
+    font-weight: 500;
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .salon-card__descripcion {
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0 0 1.25rem;
+  }
+
+  .salon-card__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .salon-card__precio {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.95rem;
+  }
+
+  .salon-card__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: gap 0.2s ease;
+  }
+
+  .salon-card__btn:hover {
+    gap: 0.75rem;
+  }
+
+  .salon-card__btn svg {
+    transition: transform 0.2s ease;
+  }
+
+  .salon-card__btn:hover svg {
+    transform: translateX(4px);
+  }
+
+  /* Botón Admin flotante */
+  .admin-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    color: white;
+    padding: 0.875rem 1.25rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    z-index: 100;
+  }
+
+  .admin-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .salones__header h1 {
+      font-size: 2rem;
+    }
+
+    .salones-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .salon-card__header {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .salon-card__footer {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .admin-btn {
+      bottom: 1rem;
+      right: 1rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+    }
+  }
+</style>
