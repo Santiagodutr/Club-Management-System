@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Cotizacion from '#models/cotizacion'
 import { PDFService } from '#services/pdf_service'
 import { CotizacionService, type SolicitudCotizacion } from '#services/cotizacion_service'
+import { EmailService, type DatosCotizacionEmail } from '#services/email_service'
 import vine from '@vinejs/vine'
 
 export default class CotizacionController {
@@ -91,6 +92,32 @@ export default class CotizacionController {
         detallesCount: resultado.detalles.length,
         mensaje: resultado.mensajeDisponibilidad,
       })
+
+      // Enviar correos de notificación (async, no bloqueante)
+      const datosEmail: DatosCotizacionEmail = {
+        cotizacionId: resultado.cotizacion.id,
+        cotizacionNumero: resultado.cotizacion.cotizacionNumero,
+        nombreCliente: resultado.cotizacion.nombre,
+        emailCliente: resultado.cotizacion.email,
+        telefonoCliente: resultado.cotizacion.telefono,
+        salon: resultado.cotizacion.salon,
+        fecha: resultado.cotizacion.fecha,
+        hora: resultado.cotizacion.hora,
+        duracion: resultado.cotizacion.duracion,
+        asistentes: resultado.cotizacion.asistentes,
+        tipoEvento: resultado.cotizacion.tipoEvento || 'No especificado',
+        valorTotal: Number(resultado.cotizacion.valorTotal),
+        montoAbono: resultado.montoAbono,
+      }
+
+      // Enviar emails en background (no esperar respuesta)
+      EmailService.enviarCorreosCotizacion(datosEmail)
+        .then((res) => {
+          console.log('📧 Resultado envío emails:', res)
+        })
+        .catch((err) => {
+          console.error('📧 Error enviando emails:', err)
+        })
 
       return response.status(201).json({
         success: true,
@@ -305,6 +332,46 @@ export default class CotizacionController {
       return response.status(500).json({
         success: false,
         message: 'Error al generar el documento',
+        error: error instanceof Error ? error.message : 'desconocido',
+      })
+    }
+  }
+
+  /**
+   * Endpoint de prueba: enviar correos de una cotización existente
+   * POST /api/cotizaciones/:id/enviar-correo
+   */
+  async enviarCorreoPrueba({ params, response }: HttpContext) {
+    try {
+      const cotizacion = await Cotizacion.findOrFail(params.id)
+
+      const datosEmail: DatosCotizacionEmail = {
+        cotizacionId: cotizacion.id,
+        cotizacionNumero: cotizacion.cotizacionNumero,
+        nombreCliente: cotizacion.nombre,
+        emailCliente: cotizacion.email,
+        telefonoCliente: cotizacion.telefono,
+        salon: cotizacion.salon,
+        fecha: cotizacion.fecha,
+        hora: cotizacion.hora,
+        duracion: cotizacion.duracion,
+        asistentes: cotizacion.asistentes,
+        tipoEvento: cotizacion.tipoEvento || 'No especificado',
+        valorTotal: Number(cotizacion.valorTotal),
+        montoAbono: cotizacion.calcularMontoAbono(),
+      }
+
+      const resultado = await EmailService.enviarCorreosCotizacion(datosEmail)
+
+      return response.json({
+        success: true,
+        message: 'Correos enviados',
+        data: resultado,
+      })
+    } catch (error) {
+      return response.status(500).json({
+        success: false,
+        message: 'Error al enviar correos',
         error: error instanceof Error ? error.message : 'desconocido',
       })
     }

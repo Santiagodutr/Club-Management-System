@@ -28,6 +28,12 @@ export default class DatosEmpresa extends BaseModel {
   @column()
   declare lng: string | null
 
+  @column({ columnName: 'email_gerente' })
+  declare emailGerente: string | null
+
+  @column({ columnName: 'whatsapp_gerente' })
+  declare whatsappGerente: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

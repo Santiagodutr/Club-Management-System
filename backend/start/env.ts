@@ -36,4 +36,19 @@ export default await Env.create(new URL('../', import.meta.url), {
   */
   SUPABASE_URL: Env.schema.string({ format: 'url' }),
   SUPABASE_SECRET_KEY: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for Resend email service
+  |----------------------------------------------------------
+  */
+  RESEND_API_KEY: Env.schema.string(),
+  RESEND_FROM_EMAIL: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Frontend URL for email links
+  |----------------------------------------------------------
+  */
+  FRONTEND_URL: Env.schema.string.optional(),
 })

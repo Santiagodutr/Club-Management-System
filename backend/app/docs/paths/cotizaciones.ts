@@ -277,5 +277,48 @@
  *         description: Cotización no encontrada
  *       '500':
  *         description: Error al generar PDF
+ *
+ * /api/cotizaciones/{id}/enviar-correo:
+ *   post:
+ *     tags: [Cotizaciones]
+ *     summary: Enviar correos de notificación de una cotización (prueba)
+ *     description: Envía los correos de notificación al cliente y al gerente para una cotización existente. Útil para reenviar o probar el sistema de emails.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la cotización
+ *     responses:
+ *       '200':
+ *         description: Correos enviados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     clienteEnviado:
+ *                       type: boolean
+ *                       description: Si el correo al cliente fue enviado
+ *                     gerenteEnviado:
+ *                       type: boolean
+ *                       description: Si el correo al gerente fue enviado
+ *                     errores:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: Lista de errores si los hubo
+ *       '404':
+ *         description: Cotización no encontrada
+ *       '500':
+ *         description: Error al enviar correos
  */
 export const openapicotizacionesPaths = {}

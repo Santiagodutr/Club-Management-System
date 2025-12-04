@@ -41,6 +41,7 @@ router.get('/api/cotizaciones/:id', [CotizacionController, 'mostrarCotizacion'])
 router.post('/api/cotizaciones/:id/confirmar', [CotizacionController, 'confirmarCotizacion'])
 router.post('/api/cotizaciones/:id/pago', [CotizacionController, 'registrarPago'])
 router.get('/api/cotizaciones/:id/pdf', [CotizacionController, 'descargarPDF'])
+router.post('/api/cotizaciones/:id/enviar-correo', [CotizacionController, 'enviarCorreoPrueba'])
 
 // Horarios routes (admin)
 const HorariosController = () => import('#controllers/horarios_controller')
