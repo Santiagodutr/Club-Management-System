@@ -38,3 +38,22 @@ export const http = defineConfig({
     sameSite: 'lax',
   },
 })
+
+/**
+ * Configuración de validación de fechas para cotizaciones
+ * Puedes modificar estos valores según tus necesidades
+ */
+export const cotizacionConfig = {
+  /**
+   * Días máximos en el futuro permitidos para reservas
+   * Por defecto: 30 días (1 mes)
+   */
+  diasMaximosFuturo: 30,
+
+  /**
+   * Permitir reservas para el día actual
+   * true = se permiten reservas para hoy
+   * false = solo fechas futuras
+   */
+  permitirHoy: true,
+}
