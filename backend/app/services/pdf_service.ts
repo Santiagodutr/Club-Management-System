@@ -190,7 +190,8 @@ export class PDFService {
 
     // Reemplazar datos del evento
     html = html.replace('{{evento.fecha}}', variables.evento.fecha)
-    html = html.replace('{{evento.hora}}', variables.evento.hora)
+    html = html.replace('{{evento.horaInicio}}', variables.evento.horaInicio)
+    html = html.replace('{{evento.horaFin}}', variables.evento.horaFin)
     html = html.replace('{{evento.duracion}}', variables.evento.duracion)
     html = html.replace('{{evento.asistentes}}', variables.evento.asistentes)
     html = html.replace('{{evento.salon}}', variables.evento.salon)

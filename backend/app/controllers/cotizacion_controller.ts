@@ -13,45 +13,10 @@ export default class CotizacionController {
    */
   async crearCotizacion({ request, response }: HttpContext) {
     try {
-      // Validador personalizado para fecha
-      const fechaValida = vine.createRule((value, options, field) => {
-        if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-          field.report('La fecha debe estar en formato YYYY-MM-DD', 'fechaInvalida', field)
-          return
-        }
-
-        const fecha = DateTime.fromISO(value, { zone: 'America/Bogota' })
-        if (!fecha.isValid) {
-          field.report('La fecha proporcionada no es válida', 'fechaInvalida', field)
-          return
-        }
-
-        const hoy = DateTime.now().setZone('America/Bogota').startOf('day')
-        const fechaMinima = cotizacionConfig.permitirHoy ? hoy : hoy.plus({ days: 1 })
-        const fechaMaxima = hoy.plus({ days: cotizacionConfig.diasMaximosFuturo })
-
-        if (fecha < fechaMinima) {
-          const mensaje = cotizacionConfig.permitirHoy
-            ? 'La fecha debe ser hoy o posterior'
-            : 'La fecha debe ser posterior a hoy'
-          field.report(mensaje, 'fechaPasada', field)
-          return
-        }
-
-        if (fecha > fechaMaxima) {
-          field.report(
-            `La fecha no puede ser mayor a ${cotizacionConfig.diasMaximosFuturo} días en el futuro`,
-            'fechaMuyLejana',
-            field
-          )
-          return
-        }
-      })
-
       const schema = vine.object({
         espacioId: vine.number(),
         configuracionEspacioId: vine.number(),
-        fecha: vine.string().use(fechaValida),
+        fecha: vine.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         horaInicio: vine.string().regex(/^\d{2}:\d{2}$/), // HH:mm
         duracion: vine.number().min(4).max(8), // Máximo 8 horas (base), horas adicionales se cobran aparte
         tipoEvento: vine.enum(['social', 'empresarial', 'capacitacion']),
@@ -66,6 +31,36 @@ export default class CotizacionController {
       })
 
       const data = await vine.validate({ schema, data: request.all() })
+
+      // Validación manual de fecha después de vine
+      const fecha = DateTime.fromISO(data.fecha, { zone: 'America/Bogota' })
+      if (!fecha.isValid) {
+        return response.badRequest({
+          success: false,
+          message: 'La fecha proporcionada no es válida',
+        })
+      }
+
+      const hoy = DateTime.now().setZone('America/Bogota').startOf('day')
+      const fechaMinima = cotizacionConfig.permitirHoy ? hoy : hoy.plus({ days: 1 })
+      const fechaMaxima = hoy.plus({ days: cotizacionConfig.diasMaximosFuturo })
+
+      if (fecha < fechaMinima) {
+        const mensaje = cotizacionConfig.permitirHoy
+          ? 'La fecha debe ser hoy o posterior'
+          : 'La fecha debe ser posterior a hoy'
+        return response.badRequest({
+          success: false,
+          message: mensaje,
+        })
+      }
+
+      if (fecha > fechaMaxima) {
+        return response.badRequest({
+          success: false,
+          message: `La fecha no puede ser mayor a ${cotizacionConfig.diasMaximosFuturo} días en el futuro`,
+        })
+      }
 
       // Crear cotización directamente (sin validar socio, ya que todos tienen mismo precio)
       const solicitud: SolicitudCotizacion = {
@@ -254,45 +249,10 @@ export default class CotizacionController {
         })
       }
 
-      // Validador personalizado para fecha (mismo que crear)
-      const fechaValida = vine.createRule((value, options, field) => {
-        if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-          field.report('La fecha debe estar en formato YYYY-MM-DD', 'fechaInvalida', field)
-          return
-        }
-
-        const fecha = DateTime.fromISO(value, { zone: 'America/Bogota' })
-        if (!fecha.isValid) {
-          field.report('La fecha proporcionada no es válida', 'fechaInvalida', field)
-          return
-        }
-
-        const hoy = DateTime.now().setZone('America/Bogota').startOf('day')
-        const fechaMinima = cotizacionConfig.permitirHoy ? hoy : hoy.plus({ days: 1 })
-        const fechaMaxima = hoy.plus({ days: cotizacionConfig.diasMaximosFuturo })
-
-        if (fecha < fechaMinima) {
-          const mensaje = cotizacionConfig.permitirHoy
-            ? 'La fecha debe ser hoy o posterior'
-            : 'La fecha debe ser posterior a hoy'
-          field.report(mensaje, 'fechaPasada', field)
-          return
-        }
-
-        if (fecha > fechaMaxima) {
-          field.report(
-            `La fecha no puede ser mayor a ${cotizacionConfig.diasMaximosFuturo} días en el futuro`,
-            'fechaMuyLejana',
-            field
-          )
-          return
-        }
-      })
-
       const schema = vine.object({
         espacioId: vine.number().optional(),
         configuracionEspacioId: vine.number().optional(),
-        fecha: vine.string().use(fechaValida).optional(),
+        fecha: vine.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
         horaInicio: vine.string().regex(/^\d{2}:\d{2}$/).optional(),
         duracion: vine.number().min(1).optional(), // Gerente puede poner cualquier duración
         tipoEvento: vine.enum(['social', 'empresarial', 'capacitacion']).optional(),
@@ -306,6 +266,38 @@ export default class CotizacionController {
       })
 
       const data = await vine.validate({ schema, data: request.all() })
+
+      // Validación manual de fecha si fue proporcionada
+      if (data.fecha) {
+        const fecha = DateTime.fromISO(data.fecha, { zone: 'America/Bogota' })
+        if (!fecha.isValid) {
+          return response.badRequest({
+            success: false,
+            message: 'La fecha proporcionada no es válida',
+          })
+        }
+
+        const hoy = DateTime.now().setZone('America/Bogota').startOf('day')
+        const fechaMinima = cotizacionConfig.permitirHoy ? hoy : hoy.plus({ days: 1 })
+        const fechaMaxima = hoy.plus({ days: cotizacionConfig.diasMaximosFuturo })
+
+        if (fecha < fechaMinima) {
+          const mensaje = cotizacionConfig.permitirHoy
+            ? 'La fecha debe ser hoy o posterior'
+            : 'La fecha debe ser posterior a hoy'
+          return response.badRequest({
+            success: false,
+            message: mensaje,
+          })
+        }
+
+        if (fecha > fechaMaxima) {
+          return response.badRequest({
+            success: false,
+            message: `La fecha no puede ser mayor a ${cotizacionConfig.diasMaximosFuturo} días en el futuro`,
+          })
+        }
+      }
 
       // Si se cambian datos del evento, recalcular cotización
       const cambiaEvento = data.espacioId || data.configuracionEspacioId || data.fecha || 

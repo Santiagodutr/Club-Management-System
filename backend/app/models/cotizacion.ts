@@ -21,7 +21,15 @@ export default class Cotizacion extends BaseModel {
   @column()
   declare fecha: string // YYYY-MM-DD
 
-  @column()
+  @column({
+    consume: (value: string) => {
+      // Asegurar que siempre esté en formato HH:mm sin segundos ni milisegundos
+      if (value && value.length > 5) {
+        return value.substring(0, 5)
+      }
+      return value
+    },
+  })
   declare hora: string // HH:mm
 
   @column()

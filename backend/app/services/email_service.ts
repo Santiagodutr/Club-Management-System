@@ -457,6 +457,7 @@ async function enviarNotificacionConfirmacion(datos: {
                 <!-- Header -->
                 <tr>
                   <td style="background: linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.primaryDark} 100%); padding: 40px 30px; text-align: center;">
+                    <img src="cid:logo-corpmeta" alt="Club El Meta" style="width: 80px; height: auto; margin-bottom: 20px;" />
                     <h1 style="margin: 0; color: ${COLORS.white}; font-size: 28px; font-weight: 700;">
                       ✅ ¡Reserva Confirmada!
                     </h1>
@@ -565,11 +566,20 @@ async function enviarNotificacionConfirmacion(datos: {
       </html>
     `
 
+    const logoBuffer = cargarLogoBuffer()
+    
     await resend.emails.send({
       from: FROM_EMAIL,
       to: [datos.emailCliente],
       subject: `✅ Reserva Confirmada #${datos.cotizacionId} - ${datos.salon}`,
       html,
+      attachments: logoBuffer ? [{
+        content: logoBuffer,
+        filename: 'logo-club-el-meta.png',
+        contentType: 'image/png',
+        disposition: 'inline',
+        contentId: 'logo-corpmeta',
+      }] : undefined,
     })
 
     return true
@@ -595,6 +605,7 @@ async function enviarNotificacionCancelacion(datos: {
   try {
     const fechaLegible = formatearFechaLegible(datos.fecha)
     const esAutomatico = datos.tipoRechazo === 'automatico'
+    const logoBuffer = cargarLogoBuffer()
 
     const html = `
       <!DOCTYPE html>
@@ -612,6 +623,7 @@ async function enviarNotificacionCancelacion(datos: {
                 <!-- Header -->
                 <tr>
                   <td style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 40px 30px; text-align: center;">
+                    <img src="cid:logo-corpmeta" alt="Club El Meta" style="width: 80px; height: auto; margin-bottom: 20px;" />
                     <h1 style="margin: 0; color: ${COLORS.white}; font-size: 28px; font-weight: 700;">
                       ❌ Cotización ${esAutomatico ? 'Cancelada' : 'Rechazada'}
                     </h1>
@@ -702,6 +714,13 @@ async function enviarNotificacionCancelacion(datos: {
       to: [datos.emailCliente],
       subject: `${esAutomatico ? '❌ Cotización Cancelada' : '❌ Cotización Rechazada'} #${datos.cotizacionId}`,
       html,
+      attachments: logoBuffer ? [{
+        content: logoBuffer,
+        filename: 'logo-club-el-meta.png',
+        contentType: 'image/png',
+        disposition: 'inline',
+        contentId: 'logo-corpmeta',
+      }] : undefined,
     })
 
     return true
@@ -735,6 +754,7 @@ async function enviarNotificacionesCancelacionBatch(
     const batchSize = 100
     let totalSuccess = 0
     let totalFailed = 0
+    const logoBuffer = cargarLogoBuffer()
 
     for (let i = 0; i < cotizaciones.length; i += batchSize) {
       const batch = cotizaciones.slice(i, i + batchSize)
@@ -758,6 +778,7 @@ async function enviarNotificacionesCancelacionBatch(
                   <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: ${COLORS.white}; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                     <tr>
                       <td style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 40px 30px; text-align: center;">
+                        <img src="cid:logo-corpmeta" alt="Club El Meta" style="width: 80px; height: auto; margin-bottom: 20px;" />
                         <h1 style="margin: 0; color: ${COLORS.white}; font-size: 28px; font-weight: 700;">
                           ❌ Cotización ${esAutomatico ? 'Cancelada' : 'Rechazada'}
                         </h1>
@@ -840,6 +861,13 @@ async function enviarNotificacionesCancelacionBatch(
           to: [datos.emailCliente],
           subject: `${esAutomatico ? '❌ Cotización Cancelada' : '❌ Cotización Rechazada'} #${datos.cotizacionId}`,
           html,
+          attachments: logoBuffer ? [{
+            content: logoBuffer,
+            filename: 'logo-club-el-meta.png',
+            contentType: 'image/png',
+            disposition: 'inline',
+            contentId: 'logo-corpmeta',
+          }] : undefined,
         }
       })
 
