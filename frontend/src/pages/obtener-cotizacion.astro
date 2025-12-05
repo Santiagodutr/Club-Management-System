@@ -78,6 +78,21 @@ const espacios = [
                 <option value="">Selecciona una disposición</option>
               </select>
             </div>
+
+            <!-- Sección desplegable de explicación de disposiciones -->
+            <details class="disposiciones-explicacion" id="disposiciones-info">
+              <summary>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                ¿Qué significan las disposiciones?
+              </summary>
+              <div class="disposiciones-contenido" id="disposiciones-contenido">
+                <p style="text-align: center; color: #64748b;">Cargando disposiciones...</p>
+              </div>
+            </details>
           </div>
 
           <!-- Paso 2: Fecha, Hora y Duración -->
@@ -354,6 +369,98 @@ const espacios = [
       margin-top: .4rem;
       color: #64748b;
       font-size: .85rem;
+    }
+
+    /* Estilos para la sección de explicación de disposiciones */
+    .disposiciones-explicacion {
+      margin-top: 1rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    .disposiciones-explicacion summary {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1rem;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      color: #0a4ba5;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      list-style: none;
+    }
+
+    .disposiciones-explicacion summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .disposiciones-explicacion summary svg {
+      flex-shrink: 0;
+    }
+
+    .disposiciones-explicacion summary:hover {
+      background: #e0f2fe;
+    }
+
+    .disposiciones-explicacion[open] summary {
+      background: #e0f2fe;
+      border-bottom: 1.5px solid #e2e8f0;
+    }
+
+    .disposiciones-contenido {
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      background: white;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .disposicion-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 1.25rem;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      transition: all 0.2s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .disposicion-card:hover {
+      border-color: #0a4ba5;
+      box-shadow: 0 4px 12px rgba(10, 75, 165, 0.15);
+      transform: translateY(-3px);
+    }
+
+    .disposicion-card-imagen {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+
+    .disposicion-card-titulo {
+      display: block;
+      font-size: 1rem;
+      color: #0f172a;
+      font-weight: bold;
+      margin-bottom: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .disposicion-card-descripcion {
+      font-size: 0.813rem;
+      color: #64748b;
+      line-height: 1.5;
     }
 
     #horario-info {
@@ -907,6 +1014,29 @@ const espacios = [
     const asistentesInput = document.getElementById('asistentes')
     const capacidadInfoText = document.getElementById('capacidad-info-text')
 
+    // Pre-seleccionar salón desde URL si viene el parámetro
+    function preseleccionarSalonDesdeURL() {
+      const urlParams = new URLSearchParams(window.location.search)
+      const salonParam = urlParams.get('salon')
+      
+      if (salonParam) {
+        console.log('Pre-seleccionando salón desde URL:', salonParam)
+        
+        // Buscar la opción que coincida con el nombre del salón
+        const opciones = salonSelect.options
+        for (let i = 0; i < opciones.length; i++) {
+          const opcionData = JSON.parse(opciones[i].value)
+          if (opcionData.nombre.toLowerCase() === salonParam.toLowerCase()) {
+            salonSelect.selectedIndex = i
+            // Disparar el evento change para actualizar la UI
+            salonSelect.dispatchEvent(new Event('change'))
+            console.log('Salón pre-seleccionado:', opcionData.nombre)
+            break
+          }
+        }
+      }
+    }
+
     const descriptions = {
       'MI LLANURA': 'Salón insignia con vista a las áreas verdes, ambientación adaptable. Ideal para recepciones, matrimonios y eventos corporativos.',
       'BAR': 'Ambiente contemporáneo con barra integrada, iluminación escénica y sistema de sonido premium. Recomendado para cocteles y lanzamientos.',
@@ -982,7 +1112,9 @@ const espacios = [
         console.log('Respuesta configuraciones:', result)
         
         if (result.success && result.data && result.data.length > 0) {
-          let html = ''
+          // Agregar opción por defecto para obligar a seleccionar
+          let html = '<option value="">Selecciona una disposición</option>'
+          
           result.data.forEach(config => {
             try {
               const disposicionNombre = config.disposicion?.nombre || 'Sin nombre'
@@ -995,13 +1127,11 @@ const espacios = [
             }
           })
           
-          if (html) {
-            disposicionSelect.innerHTML = html
-            console.log('Disposiciones cargadas:', result.data.length)
-            actualizarCapacidad()
-          } else {
-            disposicionSelect.innerHTML = '<option value="">Sin opciones válidas</option>'
-          }
+          disposicionSelect.innerHTML = html
+          console.log('Disposiciones cargadas:', result.data.length)
+          
+          // Limpiar la información de capacidad hasta que seleccionen una disposición
+          capacidadInfoText.textContent = ''
         } else {
           console.warn('Sin datos:', result)
           disposicionSelect.innerHTML = '<option value="">No hay disposiciones</option>'
@@ -1015,7 +1145,11 @@ const espacios = [
     // ACTUALIZAR CAPACIDAD CUANDO CAMBIA DISPOSICIÓN
     function actualizarCapacidad() {
       const selected = disposicionSelect.selectedOptions[0]
-      if (!selected) return
+      if (!selected || !selected.value) {
+        // Si no hay disposición seleccionada, limpiar la info de capacidad
+        capacidadInfoText.textContent = ''
+        return
+      }
       
       const capacidad = parseInt(selected.dataset.capacidad)
       capacidadInfoText.textContent = `(Máx: ${capacidad})`
@@ -1045,6 +1179,42 @@ const espacios = [
         }
       } catch (error) {
         console.error('Error cargando servicios:', error)
+      }
+    }
+
+    // CARGAR DISPOSICIONES CON DESCRIPCIONES DEL SALÓN ACTUAL
+    async function cargarDisposicionesInfo(espacioId) {
+      try {
+        const response = await fetch(`${API_URL}/api/espacios/${espacioId}/configuraciones`)
+        const result = await response.json()
+        
+        if (result.success && result.data) {
+          const container = document.getElementById('disposiciones-contenido')
+          let html = ''
+          
+          result.data.forEach(config => {
+            const disp = config.disposicion
+            if (disp && disp.descripcion) {
+              html += `
+                <div class="disposicion-card">
+                  ${disp.imagen_url ? `<img src="${disp.imagen_url}" alt="${disp.nombre}" class="disposicion-card-imagen" />` : ''}
+                  <strong class="disposicion-card-titulo">${disp.nombre}</strong>
+                  <div class="disposicion-card-descripcion">${disp.descripcion}</div>
+                </div>
+              `
+            }
+          })
+          
+          if (html) {
+            container.innerHTML = html
+          } else {
+            container.innerHTML = '<p style="text-align: center; color: #64748b; grid-column: 1/-1;">No hay información disponible</p>'
+          }
+        }
+      } catch (error) {
+        console.error('Error cargando disposiciones:', error)
+        const container = document.getElementById('disposiciones-contenido')
+        container.innerHTML = '<p style="text-align: center; color: #ef4444; grid-column: 1/-1;">Error al cargar las disposiciones</p>'
       }
     }
 
@@ -1143,6 +1313,9 @@ const espacios = [
         
         // Cargar disposiciones del nuevo salón
         cargarDisposicionesDelEspacio(salonData.id)
+        
+        // Cargar info de disposiciones del nuevo salón
+        cargarDisposicionesInfo(salonData.id)
         
         // Cargar tarifas del nuevo salón
         cargarTarifas(salonData.id)
@@ -1529,8 +1702,15 @@ const espacios = [
     // INICIALIZAR
     console.log('Iniciando...')
     cargarServicios()
-    cargarTarifas(1)
-    cargarDisposicionesDelEspacio(1)
+    
+    // Pre-seleccionar salón desde URL si viene el parámetro
+    preseleccionarSalonDesdeURL()
+    
+    // Cargar datos del salón seleccionado (por defecto el primero o el pre-seleccionado)
+    const salonInicial = JSON.parse(salonSelect.value)
+    cargarTarifas(salonInicial.id)
+    cargarDisposicionesDelEspacio(salonInicial.id)
+    cargarDisposicionesInfo(salonInicial.id)
   </script>
 
 </BaseLayout>

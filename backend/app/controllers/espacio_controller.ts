@@ -128,7 +128,9 @@ export default class EspacioController {
           'configuraciones_espacio.id',
           'configuraciones_espacio.capacidad',
           'disposiciones.id as disposicion_id',
-          'disposiciones.nombre as disposicion_nombre'
+          'disposiciones.nombre as disposicion_nombre',
+          'disposiciones.descripcion as disposicion_descripcion',
+          'disposiciones.imagen_url as disposicion_imagen_url'
         )
         .innerJoin('disposiciones', 'configuraciones_espacio.disposicion_id', 'disposiciones.id')
         .where('configuraciones_espacio.espacio_id', espacioId)
@@ -144,6 +146,8 @@ export default class EspacioController {
           disposicion: {
             id: config.disposicion_id,
             nombre: config.disposicion_nombre,
+            descripcion: config.disposicion_descripcion,
+            imagen_url: config.disposicion_imagen_url,
           },
         })),
       })

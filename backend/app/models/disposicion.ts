@@ -12,6 +12,12 @@ export default class Disposicion extends BaseModel {
   @column()
   declare nombre: string
 
+  @column()
+  declare descripcion: string | null
+
+  @column({ columnName: 'imagen_url' })
+  declare imagenUrl: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
