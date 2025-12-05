@@ -401,3 +401,82 @@ export function getBadgeClass(estado: string): string {
   return badges[estado] || 'badge-secondary'
 }
 
+// ============================================
+// SALON POSTS (Blog de Salones)
+// ============================================
+
+export interface SalonPost {
+  id: number
+  espacioId: number | null
+  titulo: string
+  slug: string
+  excerpt: string | null
+  content: string
+  mainImageUrl: string | null
+  publicado: boolean
+  publishedAt: string | null
+  createdAt: string
+  updatedAt: string
+  espacio?: {
+    id: number
+    nombre: string
+  }
+}
+
+export interface SalonPostInput {
+  espacioId?: number | null
+  titulo: string
+  slug?: string
+  excerpt?: string
+  content: string
+  mainImageUrl?: string | null
+  publicado?: boolean
+}
+
+export const salonPostsAPI = {
+  // Listar todos los posts (admin - incluye borradores)
+  listarAdmin: async (): Promise<{ success: boolean; data: SalonPost[] }> => {
+    return fetchAPI('/admin/salon-posts')
+  },
+
+  // Listar posts por espacio
+  listarPorEspacio: async (espacioId: number): Promise<{ success: boolean; data: SalonPost[] }> => {
+    return fetchAPI(`/admin/salon-posts?espacio_id=${espacioId}`)
+  },
+
+  // Obtener un post por ID (admin)
+  obtener: async (id: number): Promise<{ success: boolean; data: SalonPost }> => {
+    return fetchAPI(`/admin/salon-posts/${id}`)
+  },
+
+  // Crear un nuevo post
+  crear: async (data: SalonPostInput): Promise<{ success: boolean; data: SalonPost; message: string }> => {
+    return fetchAPI('/admin/salon-posts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  // Actualizar un post
+  actualizar: async (id: number, data: Partial<SalonPostInput>): Promise<{ success: boolean; data: SalonPost; message: string }> => {
+    return fetchAPI(`/admin/salon-posts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  },
+
+  // Eliminar un post
+  eliminar: async (id: number): Promise<{ success: boolean; message: string }> => {
+    return fetchAPI(`/admin/salon-posts/${id}`, {
+      method: 'DELETE',
+    })
+  },
+
+  // Publicar/Despublicar un post
+  togglePublicar: async (id: number, publicado: boolean): Promise<{ success: boolean; data: SalonPost; message: string }> => {
+    return fetchAPI(`/admin/salon-posts/${id}/publish`, {
+      method: 'POST',
+      body: JSON.stringify({ publicado }),
+    })
+  },
+}

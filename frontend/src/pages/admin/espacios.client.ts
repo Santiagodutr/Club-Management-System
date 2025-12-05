@@ -1,4 +1,4 @@
-import { espaciosAdminAPI } from '../../services/api'
+import { espaciosAdminAPI, salonPostsAPI, type SalonPost } from '../../services/api'
 import { supabase } from '../../lib/supabase'
 
 type Maybe<T> = T | null
@@ -40,9 +40,27 @@ async function main() {
   const nuevoDescripcion = qs<HTMLTextAreaElement>('#nuevoDescripcion')
   const nuevoActivo = qs<HTMLInputElement>('#nuevoActivo')
 
+  // Posts elements
+  const postsSection = qs<HTMLElement>('#postsSection')
+  const postsSectionTitle = qs<HTMLElement>('#postsSectionTitle')
+  const postsList = qs<HTMLDivElement>('#postsList')
+  const btnNuevoPost = qs<HTMLButtonElement>('#btnNuevoPost')
+  const postEditorCard = qs<HTMLElement>('#postEditorCard')
+  const postEditorTitle = qs<HTMLElement>('#postEditorTitle')
+  const postTitulo = qs<HTMLInputElement>('#postTitulo')
+  const postSlug = qs<HTMLInputElement>('#postSlug')
+  const postImageUrl = qs<HTMLInputElement>('#postImageUrl')
+  const postExcerpt = qs<HTMLTextAreaElement>('#postExcerpt')
+  const postContent = qs<HTMLTextAreaElement>('#postContent')
+  const postPublicado = qs<HTMLInputElement>('#postPublicado')
+  const btnGuardarPost = qs<HTMLButtonElement>('#btnGuardarPost')
+  const btnCancelarPost = qs<HTMLButtonElement>('#btnCancelarPost')
+
   let disposiciones: any[] = []
   let espacios: any[] = []
   let seleccionado: number | null = null
+  let posts: SalonPost[] = []
+  let editingPostId: number | null = null
 
   function setBadge(text: string, state: 'active' | 'inactive' | 'muted') {
     if (!estadoBadge) return
@@ -229,6 +247,12 @@ async function main() {
     const val = Number((e.target as HTMLSelectElement).value)
     seleccionado = val || null
     showEspacio(seleccionado)
+    if (seleccionado) {
+      loadPosts()
+    } else {
+      if (postsSection) postsSection.hidden = true
+      if (postEditorCard) postEditorCard.hidden = true
+    }
   })
 
   btnGuardarEspacio?.addEventListener('click', guardarEspacio)
@@ -252,9 +276,273 @@ async function main() {
     if (action === 'eliminar-config') eliminarConfig(configId, espacioId)
   })
 
+  // ============================================
+  // SALON POSTS FUNCTIONALITY
+  // ============================================
+
+  function generateSlug(titulo: string): string {
+    return titulo
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/[^a-z0-9\s-]/g, '') // Only alphanumeric and spaces
+      .replace(/\s+/g, '-') // Spaces to hyphens
+      .replace(/-+/g, '-') // Multiple hyphens to one
+      .trim()
+  }
+
+  async function loadPosts() {
+    if (!seleccionado || !postsSection || !postsList) return
+    
+    try {
+      const resp = await salonPostsAPI.listarAdmin()
+      const allPosts = resp.data || []
+      
+      // Filter posts for current espacio
+      posts = allPosts.filter(p => p.espacioId === seleccionado)
+      
+      console.log('=== LOAD POSTS DEBUG ===')
+      console.log('Selected espacio ID:', seleccionado)
+      console.log('Total posts from API:', allPosts.length)
+      console.log('Filtered posts:', posts.length)
+      console.log('Sample post structure:', allPosts[0])
+      console.log('Posts for this espacio:', posts)
+      
+      const espacioNombre = espacios.find(e => e.id === seleccionado)?.nombre || 'este salón'
+      if (postsSectionTitle) {
+        postsSectionTitle.textContent = `Posts de ${espacioNombre}`
+      }
+      
+      postsSection.hidden = false
+      renderPostsList()
+    } catch (err) {
+      console.error('Error loading posts:', err)
+      posts = []
+      renderPostsList()
+    }
+  }
+
+  function renderPostsList() {
+    if (!postsList) return
+    
+    if (!posts.length) {
+      postsList.innerHTML = '<div class="placeholder">No hay posts para este salón.</div>'
+      return
+    }
+
+    postsList.innerHTML = posts.map(post => `
+      <div class="post-card" data-post-id="${post.id}">
+        <div class="post-info">
+          <h4 class="post-title">${post.titulo}</h4>
+          <p class="post-excerpt">${post.excerpt || 'Sin resumen'}</p>
+          <div class="post-meta">
+            <span class="post-status ${post.publicado ? 'published' : 'draft'}">
+              ${post.publicado ? '✓ Publicado' : '📝 Borrador'}
+            </span>
+            <span style="color: #6b7280; font-size: 0.85rem;">${post.slug}</span>
+          </div>
+        </div>
+        <div class="post-actions">
+          <button class="btn secondary" data-action="editar-post" data-id="${post.id}">
+            Editar
+          </button>
+          <button class="btn ghost" data-action="eliminar-post" data-id="${post.id}">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    `).join('')
+  }
+
+  async function showPostEditor(postId: number | null = null) {
+    if (!postEditorCard) return
+    
+    console.log('=== SHOW POST EDITOR DEBUG ===')
+    console.log('Requested post ID:', postId)
+    
+    editingPostId = postId
+    
+    // Find or fetch the post
+    let post: any = null
+    if (postId) {
+      // First try to find in local array
+      post = posts.find(p => p.id === postId)
+      
+      // If not found, fetch from API
+      if (!post) {
+        console.log('Post not in local array, fetching from API...')
+        try {
+          const resp = await salonPostsAPI.obtener(postId)
+          post = resp.data
+          console.log('Fetched post from API:', post)
+        } catch (err) {
+          console.error('Error fetching post:', err)
+          alert('Error: No se pudo cargar el post. Intenta refrescar la página.')
+          return
+        }
+      } else {
+        console.log('Found post in local array:', post)
+      }
+    }
+    
+    if (postEditorTitle) {
+      postEditorTitle.textContent = post ? 'Editar post' : 'Nuevo post'
+    }
+    
+    // Populate fields
+    if (postTitulo) {
+      postTitulo.value = post?.titulo || ''
+      console.log('✓ Titulo:', postTitulo.value)
+    }
+    
+    if (postSlug) {
+      postSlug.value = post?.slug || ''
+      console.log('✓ Slug:', postSlug.value)
+    }
+    
+    if (postImageUrl) {
+      postImageUrl.value = post?.mainImageUrl || ''
+      console.log('✓ ImageUrl:', postImageUrl.value)
+    }
+    
+    if (postExcerpt) {
+      postExcerpt.value = post?.excerpt || ''
+      console.log('✓ Excerpt:', postExcerpt.value)
+    }
+    
+    if (postContent) {
+      postContent.value = post?.content || ''
+      console.log('✓ Content (length):', postContent.value.length, 'chars')
+    }
+    
+    if (postPublicado) {
+      postPublicado.checked = post?.publicado ?? false
+      console.log('✓ Publicado:', postPublicado.checked)
+    }
+    
+    console.log('=== END DEBUG ===')
+    
+    postEditorCard.hidden = false
+    setTimeout(() => {
+      postEditorCard?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
+  }
+
+  function hidePostEditor() {
+    if (!postEditorCard) return
+    postEditorCard.hidden = true
+    editingPostId = null
+  }
+
+  async function guardarPost() {
+    if (!seleccionado) {
+      alert('Selecciona un salón primero')
+      return
+    }
+
+    const titulo = postTitulo?.value?.trim()
+    if (!titulo) {
+      alert('El título es requerido')
+      return
+    }
+
+    const content = postContent?.value?.trim()
+    if (!content) {
+      alert('El contenido es requerido')
+      return
+    }
+
+    let slug = postSlug?.value?.trim()
+    if (!slug) {
+      slug = generateSlug(titulo)
+      if (postSlug) postSlug.value = slug
+    }
+
+    const data = {
+      espacioId: seleccionado,
+      titulo,
+      slug,
+      excerpt: postExcerpt?.value?.trim() || null,
+      content,
+      mainImageUrl: postImageUrl?.value?.trim() || null,
+      publicado: postPublicado?.checked || false,
+    }
+
+    try {
+      if (editingPostId) {
+        await salonPostsAPI.actualizar(editingPostId, data)
+        alert('Post actualizado')
+      } else {
+        await salonPostsAPI.crear(data)
+        alert('Post creado')
+      }
+      hidePostEditor()
+      await loadPosts()
+    } catch (err: any) {
+      alert(err?.message || 'Error al guardar el post')
+    }
+  }
+
+  async function togglePublicarPost(postId: number) {
+    const post = posts.find(p => p.id === postId)
+    if (!post) return
+
+    try {
+      await salonPostsAPI.togglePublicar(postId, !post.publicado)
+      await loadPosts()
+      alert(post.publicado ? 'Post despublicado' : 'Post publicado')
+    } catch (err: any) {
+      alert(err?.message || 'Error al cambiar estado del post')
+    }
+  }
+
+  async function eliminarPost(postId: number) {
+    if (!confirm('¿Eliminar este post? Esta acción no se puede deshacer.')) return
+
+    try {
+      await salonPostsAPI.eliminar(postId)
+      await loadPosts()
+      alert('Post eliminado')
+    } catch (err: any) {
+      alert(err?.message || 'Error al eliminar el post')
+    }
+  }
+
+  // Auto-generate slug when title changes
+  postTitulo?.addEventListener('input', (e) => {
+    const titulo = (e.target as HTMLInputElement).value
+    if (!editingPostId && titulo && postSlug) {
+      postSlug.value = generateSlug(titulo)
+    }
+  })
+
+  btnNuevoPost?.addEventListener('click', () => showPostEditor(null))
+  btnCancelarPost?.addEventListener('click', hidePostEditor)
+  btnGuardarPost?.addEventListener('click', guardarPost)
+
+  postsList?.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement
+    // Find the button element (in case we clicked on text inside button)
+    const button = target.closest('button[data-action]') as HTMLElement
+    if (!button?.dataset) return
+    
+    const action = button.dataset.action
+    const postId = Number(button.dataset.id)
+    
+    console.log('Post action clicked:', action, 'for post ID:', postId)
+    
+    if (!action || !postId) return
+
+    if (action === 'editar-post') showPostEditor(postId)
+    if (action === 'eliminar-post') eliminarPost(postId)
+  })
+
   await ensureSession()
   await loadDisposiciones()
   await loadEspacios()
+  if (seleccionado) {
+    await loadPosts()
+  }
 }
 
 window.addEventListener('DOMContentLoaded', () => {

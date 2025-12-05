@@ -35,6 +35,60 @@ import AdminLayout from '../../layouts/AdminLayout.astro'
         </div>
       </section>
 
+      <section class="card" id="postsSection" hidden>
+        <div class="card__header">
+          <div>
+            <p class="eyebrow">Blog del salón</p>
+            <h2 id="postsSectionTitle">Posts de información</h2>
+          </div>
+          <button id="btnNuevoPost" class="btn primary">+ Nuevo post</button>
+        </div>
+        <div id="postsList" class="posts-list">
+          <div class="placeholder">Selecciona un salón para ver sus posts.</div>
+        </div>
+      </section>
+
+      <section class="card" id="postEditorCard" hidden>
+        <div class="card__header">
+          <div>
+            <p class="eyebrow">Editor de post</p>
+            <h2 id="postEditorTitle">Nuevo post</h2>
+          </div>
+          <div class="inline-actions">
+            <button id="btnCancelarPost" class="btn ghost">Cancelar</button>
+            <button id="btnGuardarPost" class="btn primary">Guardar post</button>
+          </div>
+        </div>
+        <div class="form">
+          <div class="form-grid">
+            <label>
+              Título
+              <input id="postTitulo" type="text" placeholder="Título del post" />
+            </label>
+            <label>
+              Slug (URL)
+              <input id="postSlug" type="text" placeholder="url-del-post" />
+            </label>
+            <label class="wide">
+              Imagen principal (URL)
+              <input id="postImageUrl" type="text" placeholder="https://..." />
+            </label>
+            <label class="wide">
+              Extracto (resumen corto)
+              <textarea id="postExcerpt" rows="2" placeholder="Resumen corto para listados..."></textarea>
+            </label>
+            <label class="wide">
+              Contenido (Markdown)
+              <textarea id="postContent" rows="12" placeholder="# Título&#10;&#10;Contenido en **Markdown**..."></textarea>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="postPublicado" />
+              <span>Publicado (visible en el sitio web)</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
       <section class="card" id="espacioFormCard">
         <div class="card__header">
           <div>
@@ -104,6 +158,47 @@ import AdminLayout from '../../layouts/AdminLayout.astro'
         </div>
         <div class="actions-end">
           <button id="btnCrearEspacio" class="btn primary">Crear salón</button>
+        </div>
+      </section>
+
+      <section class="card" id="postEditorCard" hidden>
+        <div class="card__header">
+          <div>
+            <p class="eyebrow">Editor de post</p>
+            <h2 id="postEditorTitle">Nuevo post</h2>
+          </div>
+          <div class="inline-actions">
+            <button id="btnCancelarPost" class="btn ghost">Cancelar</button>
+            <button id="btnGuardarPost" class="btn primary">Guardar post</button>
+          </div>
+        </div>
+        <div class="form">
+          <div class="form-grid">
+            <label>
+              Título
+              <input id="postTitulo" type="text" placeholder="Título del post" />
+            </label>
+            <label>
+              Slug (URL)
+              <input id="postSlug" type="text" placeholder="url-del-post" />
+            </label>
+            <label class="wide">
+              Imagen principal (URL)
+              <input id="postImageUrl" type="text" placeholder="https://..." />
+            </label>
+            <label class="wide">
+              Extracto (resumen corto)
+              <textarea id="postExcerpt" rows="2" placeholder="Resumen corto para listados..."></textarea>
+            </label>
+            <label class="wide">
+              Contenido (Markdown)
+              <textarea id="postContent" rows="12" placeholder="# Título&#10;&#10;Contenido en **Markdown**..."></textarea>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="postPublicado" />
+              <span>Publicado (visible en el sitio web)</span>
+            </label>
+          </div>
         </div>
       </section>
     </div>
@@ -190,10 +285,49 @@ import AdminLayout from '../../layouts/AdminLayout.astro'
   }
   .switch { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; color: #4b5563; }
   .switch input { width: 18px; height: 18px; }
+  .posts-list { display: grid; gap: 0.75rem; margin-top: 0.75rem; }
+  :global(.post-card) { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: start; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 12px; background: #ffffff; box-shadow: 0 6px 16px rgba(15,23,42,0.04); transition: box-shadow 0.2s ease; }
+  :global(.post-card:hover) { box-shadow: 0 10px 24px rgba(15,23,42,0.08); }
+  :global(.post-info) { display: grid; gap: 0.35rem; }
+  :global(.post-title) { font-weight: 700; color: #0f172a; font-size: 1.05rem; margin: 0; }
+  :global(.post-excerpt) { color: #6b7280; font-size: 0.9rem; margin: 0; }
+  :global(.post-meta) { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+  :global(.post-status) { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 600; font-size: 0.8rem; }
+  :global(.post-status.published) { background: #ecfdf3; color: #166534; border: 1px solid #bbf7d0; }
+  :global(.post-status.draft) { background: #fef2f2; color: #b91c1c; border: 1px solid #fecdd3; }
+  :global(.post-actions) { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+  :global(.post-actions .btn) { 
+    font-size: 0.85rem; 
+    padding: 0.5rem 0.85rem; 
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  :global(.post-actions .btn.secondary) {
+    background: #eef2ff;
+    color: #1d4ed8;
+    border: 1px solid #dbeafe;
+    box-shadow: 0 4px 10px rgba(37,99,235,0.1);
+  }
+  :global(.post-actions .btn.secondary:hover) {
+    background: #dbeafe;
+    box-shadow: 0 6px 14px rgba(37,99,235,0.15);
+  }
+  :global(.post-actions .btn.ghost) {
+    background: #ffffff;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    box-shadow: 0 4px 10px rgba(220,38,38,0.08);
+  }
+  :global(.post-actions .btn.ghost:hover) {
+    background: #fef2f2;
+    border-color: #dc2626;
+    box-shadow: 0 6px 14px rgba(220,38,38,0.12);
+  }
   @media (max-width: 900px) {
     .panel__header { flex-direction: column; }
     .card__header { flex-direction: column; align-items: flex-start; }
     .config-card { grid-template-columns: 1fr; }
     .inline-actions { width: 100%; justify-content: space-between; }
+    :global(.post-card) { grid-template-columns: 1fr; }
   }
 </style>
