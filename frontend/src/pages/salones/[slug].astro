@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import Navbar from '../../components/Navbar.astro'
 import { salonesData, getSalonBySlug } from '../../data/salones'
 
 export function getStaticPaths() {
@@ -17,30 +18,38 @@ if (!salon) {
 }
 ---
 
-<BaseLayout title={`${salon.nombre} - Club del Meta`}>
-  <article class="salon-detail">
-    <!-- Hero del Salón -->
-    <header class="salon-hero">
-      <div class="salon-hero__background" style={`background-image: url(${salon.imagenes[0]?.url || '/src/assets/millanura.jpg'})`}></div>
-      <div class="salon-hero__overlay"></div>
-      <div class="salon-hero__content">
-        <a href="/salones" class="salon-hero__back">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<BaseLayout title={`${salon.nombre} - Club del Meta`} hideNavbar fullWidth>
+  <!-- Hero del Salón -->
+  <section class="salon-hero">
+    <div 
+      class="salon-hero__background" 
+      style={`background-image: linear-gradient(rgba(4, 14, 32, 0.6), rgba(4, 14, 32, 0.8)), url(${salon.imagenes[0]?.url || '/src/assets/millanura.jpg'})`}
+    ></div>
+
+    <div class="navbar-wrapper">
+      <Navbar />
+    </div>
+
+    <div class="salon-hero__content">
+      {salon.destacado && <span class="salon-hero__destacado">Salón Destacado</span>}
+      <h1>{salon.nombre}</h1>
+      <p class="salon-hero__subtitulo">{salon.subtitulo}</p>
+    </div>
+  </section>
+
+  <!-- Contenido Principal -->
+  <section class="salon-content-section">
+    <div class="salon-content">
+      <!-- Sidebar con información rápida -->
+      <aside class="salon-sidebar">
+        <a href="/salones" class="back-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
           Volver a Salones
         </a>
-        {salon.destacado && <span class="salon-hero__destacado">Salón Destacado</span>}
-        <h1>{salon.nombre}</h1>
-        <p class="salon-hero__subtitulo">{salon.subtitulo}</p>
-      </div>
-    </header>
 
-    <!-- Contenido Principal -->
-    <div class="salon-content">
-      <!-- Sidebar con información rápida -->
-      <aside class="salon-sidebar">
         <div class="salon-info-card">
           <h3>Información Rápida</h3>
           
@@ -200,7 +209,7 @@ if (!salon) {
         </section>
       </main>
     </div>
-  </article>
+  </section>
 
   <!-- Modal de Imagen -->
   <div class="image-modal" id="imageModal" role="dialog" aria-hidden="true">
@@ -287,11 +296,13 @@ if (!salon) {
   /* Hero Section */
   .salon-hero {
     position: relative;
-    height: 50vh;
-    min-height: 400px;
+    min-height: 70vh;
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
+    color: #ffffff;
     overflow: hidden;
+    margin: 0;
+    width: 100%;
   }
 
   .salon-hero__background {
@@ -299,62 +310,75 @@ if (!salon) {
     inset: 0;
     background-size: cover;
     background-position: center;
+    width: 100%;
   }
 
-  .salon-hero__overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%);
+  .navbar-wrapper {
+    position: relative;
+    z-index: 10;
+  }
+
+  .navbar-wrapper :global(.navbar) {
+    background: transparent !important;
+    box-shadow: none !important;
+    position: relative !important;
+  }
+
+  .navbar-wrapper :global(.navbar__link) {
+    color: #ffffff !important;
+  }
+
+  .navbar-wrapper :global(.navbar__link:hover) {
+    color: #60a5fa !important;
+  }
+
+  .navbar-wrapper :global(.navbar__toggle span) {
+    background: #ffffff !important;
   }
 
   .salon-hero__content {
     position: relative;
-    padding: 2rem;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .salon-hero__back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: white;
-    text-decoration: none;
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-    opacity: 0.9;
-    transition: opacity 0.2s;
-  }
-
-  .salon-hero__back:hover {
-    opacity: 1;
+    text-align: center;
+    max-width: 900px;
+    margin: auto;
+    padding: 3rem 2rem;
+    z-index: 1;
   }
 
   .salon-hero__destacado {
     display: inline-block;
     background: var(--color-accent);
     color: white;
-    padding: 0.35rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 30px;
+    font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
   }
 
   .salon-hero h1 {
     color: white;
-    font-size: 3rem;
-    margin: 0 0 0.5rem;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    margin: 0 0 1rem;
     font-weight: 700;
+    letter-spacing: 0.02em;
   }
 
   .salon-hero__subtitulo {
-    color: rgba(255,255,255,0.9);
-    font-size: 1.25rem;
-    margin: 0;
+    color: rgba(255, 255, 255, 0.95);
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    line-height: 1.7;
+    margin: 0 auto;
+    max-width: 600px;
+  }
+
+  /* Content Section */
+  .salon-content-section {
+    background: #ffffff;
+    padding: 3rem 2rem;
+    width: 100%;
   }
 
   /* Content Layout */
@@ -362,7 +386,6 @@ if (!salon) {
     display: grid;
     grid-template-columns: 320px 1fr;
     gap: 3rem;
-    padding: 2rem 0;
     max-width: 1200px;
     margin: 0 auto;
   }
@@ -372,6 +395,35 @@ if (!salon) {
     position: sticky;
     top: 100px;
     height: fit-content;
+  }
+
+  .salon-sidebar .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background: #f1f5f9;
+    margin-bottom: 1.5rem;
+    white-space: nowrap;
+  }
+
+  .salon-sidebar .back-button:hover {
+    background: #e2e8f0;
+    transform: translateX(-4px);
+  }
+
+  .salon-sidebar .back-button svg {
+    transition: transform 0.2s ease;
+  }
+
+  .salon-sidebar .back-button:hover svg {
+    transform: translateX(-2px);
   }
 
   .salon-info-card {
@@ -459,6 +511,7 @@ if (!salon) {
     font-size: 1rem;
     transition: all 0.3s ease;
     box-shadow: 0 4px 14px rgba(10, 75, 165, 0.3);
+    box-sizing: border-box;
   }
 
   .cta-button:hover {
@@ -720,6 +773,7 @@ if (!salon) {
   @media (max-width: 1024px) {
     .salon-content {
       grid-template-columns: 1fr;
+      padding: 2rem 1.5rem;
     }
 
     .salon-sidebar {
@@ -734,8 +788,22 @@ if (!salon) {
       margin-bottom: 0;
     }
 
+    .cta-button {
+      align-self: start;
+    }
+
     .sidebar-updated {
       grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 968px) {
+    .salon-hero .navbar-wrapper :global(.navbar__links) {
+      background: rgba(10, 75, 165, 0.98) !important;
+    }
+
+    .salon-hero {
+      min-height: 60vh;
     }
   }
 
@@ -750,6 +818,10 @@ if (!salon) {
 
     .salon-sidebar {
       grid-template-columns: 1fr;
+    }
+
+    .cta-button {
+      width: 100%;
     }
 
     .gallery-grid {
