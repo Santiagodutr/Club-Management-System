@@ -133,41 +133,81 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     }
   });
 
-  // Form submission - DEMO BYPASS
-  form?.addEventListener('submit', (e) => {
+  // Form submission - Real API authentication with demo fallback
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const email = (document.getElementById('email') as HTMLInputElement).value;
     const password = (document.getElementById('password') as HTMLInputElement).value;
+    const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
     
-    // Demo credentials (bypass)
-    const validCredentials = [
+    // Disable button
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Iniciando sesión...';
+    
+    // Demo credentials bypass
+    const demoCredentials = [
       { email: 'admin@clubdelmeta.com', password: 'demo1234' },
-      { email: 'admin', password: 'admin' },
-      { email: 'demo', password: 'demo' }
+      { email: 'admin', password: 'admin' }
     ];
     
-    const isValid = validCredentials.some(
+    const isDemoUser = demoCredentials.some(
       cred => cred.email === email && cred.password === password
     );
     
-    if (isValid) {
-      // Store admin session in localStorage (for demo purposes)
+    if (isDemoUser) {
+      // Demo login
       localStorage.setItem('adminAuth', JSON.stringify({
+        token: 'demo-token',
+        user: { email },
         isAuthenticated: true,
-        user: email,
+        loginTime: new Date().toISOString()
+      }));
+      
+      window.location.href = '/admin/panel';
+      return;
+    }
+    
+    // Try real API authentication
+    try {
+      const response = await fetch('http://localhost:3333/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Credenciales inválidas');
+      }
+
+      // Store admin session with real auth token
+      localStorage.setItem('adminAuth', JSON.stringify({
+        token: data.session.access_token,
+        user: data.user,
+        expiresAt: data.session.expires_at,
+        isAuthenticated: true,
         loginTime: new Date().toISOString()
       }));
       
       // Redirect to admin panel
       window.location.href = '/admin/panel';
-    } else {
+    } catch (error) {
       // Show error
       if (errorMessage) {
+        const message = error instanceof Error ? error.message : 'Error al iniciar sesión';
+        errorMessage.textContent = message;
         errorMessage.style.display = 'flex';
         errorMessage.classList.add('shake');
         setTimeout(() => errorMessage.classList.remove('shake'), 500);
       }
+      
+      // Re-enable button
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Iniciar Sesión';
     }
   });
 </script>

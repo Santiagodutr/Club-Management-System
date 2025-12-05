@@ -26,12 +26,43 @@ import { salonesData } from '../../data/salones'
           </svg>
           Dashboard
         </a>
-        <a href="#" class="sidebar-link" data-section="salones">
+        <a href="#" class="sidebar-link" data-section="reservas">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          Gestión de Reservas
+        </a>
+        <a href="#" class="sidebar-link" data-section="calendario">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+            <path d="M8 14h.01"></path>
+            <path d="M12 14h.01"></path>
+            <path d="M16 14h.01"></path>
+            <path d="M8 18h.01"></path>
+            <path d="M12 18h.01"></path>
+            <path d="M16 18h.01"></path>
+          </svg>
+          Calendario
+        </a>
+        <a href="#" class="sidebar-link" data-section="espacios">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
           </svg>
-          Gestión de Salones
+          Gestión de Espacios
+        </a>
+        <a href="#" class="sidebar-link" data-section="salones">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          Salones (Contenido)
         </a>
         <a href="#" class="sidebar-link" data-section="imagenes">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -167,6 +198,125 @@ import { salonesData } from '../../data/salones'
               <span>Vista Previa</span>
             </a>
           </div>
+        </div>
+      </section>
+
+      <!-- Reservas/Cotizaciones Section -->
+      <section class="content-section" id="section-reservas">
+        <div class="filters-bar">
+          <div class="search-box">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="text" id="searchReservas" placeholder="Buscar por nombre, email o teléfono..." />
+          </div>
+          <div class="filters-row">
+            <select id="filterEstado">
+              <option value="">Todos los estados</option>
+              <option value="pendiente">Pendientes</option>
+              <option value="aceptada">Aceptadas</option>
+              <option value="rechazada">Rechazadas</option>
+            </select>
+            <select id="filterEstadoPago">
+              <option value="">Estado de pago</option>
+              <option value="sin_pagar">Sin pagar</option>
+              <option value="abonado">Abonado</option>
+              <option value="pagado">Pagado</option>
+            </select>
+            <input type="date" id="filterFechaDesde" placeholder="Fecha desde" />
+            <input type="date" id="filterFechaHasta" placeholder="Fecha hasta" />
+            <button class="btn-primary" id="btnFiltrar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+              Filtrar
+            </button>
+            <button class="btn-secondary" id="btnLimpiarFiltros">Limpiar</button>
+          </div>
+        </div>
+
+        <div class="reservas-container">
+          <div class="loading-state" id="loadingReservas">
+            <div class="spinner"></div>
+            <p>Cargando reservas...</p>
+          </div>
+          <div class="reservas-list" id="reservasList">
+            <!-- Las reservas se cargarán dinámicamente -->
+          </div>
+          <div class="empty-state" id="emptyReservas" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <h3>No hay reservas</h3>
+            <p>No se encontraron cotizaciones con los filtros aplicados</p>
+          </div>
+        </div>
+
+        <div class="pagination" id="paginationReservas" style="display: none;">
+          <!-- La paginación se generará dinámicamente -->
+        </div>
+      </section>
+
+      <!-- Calendario Section -->
+      <section class="content-section" id="section-calendario">
+        <div class="calendario-controls">
+          <button class="btn-nav" id="prevMonth">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <h2 id="calendarTitle">Diciembre 2025</h2>
+          <button class="btn-nav" id="nextMonth">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <div class="calendario-grid" id="calendarGrid">
+          <!-- El calendario se generará dinámicamente -->
+        </div>
+
+        <div class="calendario-leyenda">
+          <div class="leyenda-item">
+            <span class="dot dot-disponible"></span>
+            <span>Disponible</span>
+          </div>
+          <div class="leyenda-item">
+            <span class="dot dot-reservado"></span>
+            <span>Reservado</span>
+          </div>
+          <div class="leyenda-item">
+            <span class="dot dot-bloqueado"></span>
+            <span>Bloqueado</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Espacios Admin Section -->
+      <section class="content-section" id="section-espacios">
+        <div class="section-header">
+          <h2>Gestión de Espacios</h2>
+          <button class="btn-primary" id="btnNuevoEspacio">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Nuevo Espacio
+          </button>
+        </div>
+
+        <div class="loading-state" id="loadingEspacios">
+          <div class="spinner"></div>
+          <p>Cargando espacios...</p>
+        </div>
+
+        <div class="espacios-grid" id="espaciosGrid">
+          <!-- Los espacios se cargarán dinámicamente -->
         </div>
       </section>
 
@@ -367,6 +517,186 @@ import { salonesData } from '../../data/salones'
     </div>
   </div>
 
+  <!-- Modal Detalle de Reserva -->
+  <div class="modal" id="modalDetalleReserva">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2>Detalle de Reserva <span id="modalReservaNumero"></span></h2>
+        <button class="modal-close" onclick="closeModal('modalDetalleReserva')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modalReservaContent">
+        <!-- El contenido se cargará dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Cerrar Reserva -->
+  <div class="modal" id="modalCerrarReserva">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Cerrar Reserva</h2>
+        <button class="modal-close" onclick="closeModal('modalCerrarReserva')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="formCerrarReserva">
+          <div class="form-group">
+            <label>Estado de Pago</label>
+            <select id="cerrarEstadoPago" required>
+              <option value="">Seleccione...</option>
+              <option value="abonado">Abonado (50%)</option>
+              <option value="pagado">Pagado Completo (100%)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Monto Recibido</label>
+            <input type="number" id="cerrarMonto" placeholder="Ingrese el monto" required />
+            <p class="form-hint" id="cerrarMontoHint"></p>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="closeModal('modalCerrarReserva')">Cancelar</button>
+            <button type="submit" class="btn-primary">Confirmar y Cerrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Registrar Pago -->
+  <div class="modal" id="modalRegistrarPago">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Registrar Pago Adicional</h2>
+        <button class="modal-close" onclick="closeModal('modalRegistrarPago')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="formRegistrarPago">
+          <div class="form-group">
+            <label>Monto</label>
+            <input type="number" id="pagoMonto" placeholder="Ingrese el monto" required />
+            <p class="form-hint" id="pagoMontoHint"></p>
+          </div>
+          <div class="form-group">
+            <label>Método de Pago</label>
+            <select id="pagoMetodo">
+              <option value="efectivo">Efectivo</option>
+              <option value="transferencia">Transferencia</option>
+              <option value="tarjeta">Tarjeta</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Observaciones</label>
+            <textarea id="pagoObservaciones" rows="3"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="closeModal('modalRegistrarPago')">Cancelar</button>
+            <button type="submit" class="btn-primary">Registrar Pago</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Editar/Crear Espacio -->
+  <div class="modal" id="modalEspacio">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalEspacioTitle">Nuevo Espacio</h2>
+        <button class="modal-close" onclick="closeModal('modalEspacio')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="formEspacio">
+          <div class="form-group">
+            <label>Nombre del Espacio *</label>
+            <input type="text" id="espacioNombre" required />
+          </div>
+          <div class="form-group">
+            <label>Descripción</label>
+            <textarea id="espacioDescripcion" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="espacioActivo" checked />
+              <span>Espacio Activo</span>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="closeModal('modalEspacio')">Cancelar</button>
+            <button type="submit" class="btn-primary">Guardar Espacio</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Configuraciones -->
+  <div class="modal" id="modalConfiguraciones">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2>Configuraciones de <span id="modalConfigEspacioNombre"></span></h2>
+        <button class="modal-close" onclick="closeModal('modalConfiguraciones')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="section-header">
+          <h3>Disposiciones y Capacidades</h3>
+          <button class="btn-primary btn-sm" id="btnAgregarConfig">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Agregar
+          </button>
+        </div>
+        <div id="configuracionesList">
+          <!-- Las configuraciones se cargarán dinámicamente -->
+        </div>
+        
+        <form id="formAgregarConfig" style="display: none;" class="config-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Disposición</label>
+              <select id="configDisposicion" required>
+                <option value="">Seleccione...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Capacidad</label>
+              <input type="number" id="configCapacidad" min="1" required />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary btn-sm" id="btnCancelarConfig">Cancelar</button>
+            <button type="submit" class="btn-primary btn-sm">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div class="toast" id="toast">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -382,15 +712,231 @@ import { salonesData } from '../../data/salones'
   let salonesData = JSON.parse(salonesDataJson);
   let currentSalonId = null;
 
-  // Check authentication
+  // ============================================
+  // API CLIENT - Inline para evitar problemas de importación
+  // ============================================
+  const API_BASE_URL = 'http://localhost:3333';
+
+  async function fetchAPI(endpoint, options = {}) {
+    const url = `${API_BASE_URL}${endpoint}`;
+    
+    const defaultHeaders = {
+      'Content-Type': 'application/json',
+    };
+
+    const auth = localStorage.getItem('adminAuth');
+    if (auth) {
+      try {
+        const authData = JSON.parse(auth);
+        if (authData.token && authData.token !== 'demo-token') {
+          defaultHeaders['Authorization'] = `Bearer ${authData.token}`;
+        }
+      } catch (e) {
+        console.warn('Error parsing auth data:', e);
+      }
+    }
+
+    const config = {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers,
+      },
+    };
+
+    try {
+      const response = await fetch(url, config);
+      
+      if (response.status === 401) {
+        localStorage.removeItem('adminAuth');
+        alert('Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
+        window.location.href = '/admin/login';
+        throw new Error('No autorizado');
+      }
+      
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error en la petición');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  }
+
+  const cotizacionesAPI = {
+    async listar(filtros = {}) {
+      const params = new URLSearchParams();
+      Object.entries(filtros).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params.append(key, String(value));
+        }
+      });
+      
+      const queryString = params.toString();
+      const endpoint = queryString ? `/api/cotizaciones?${queryString}` : '/api/cotizaciones';
+      
+      return fetchAPI(endpoint);
+    },
+
+    async obtener(id) {
+      return fetchAPI(`/api/cotizaciones/${id}`);
+    },
+
+    async actualizar(id, datos) {
+      return fetchAPI(`/api/cotizaciones/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(datos),
+      });
+    },
+
+    async cerrar(id, datos) {
+      return fetchAPI(`/api/cotizaciones/${id}/cerrar`, {
+        method: 'POST',
+        body: JSON.stringify(datos),
+      });
+    },
+
+    async rechazar(id, motivo) {
+      return fetchAPI(`/api/cotizaciones/${id}/rechazar`, {
+        method: 'POST',
+        body: JSON.stringify({ motivo }),
+      });
+    },
+
+    async registrarPago(id, datos) {
+      return fetchAPI(`/api/cotizaciones/${id}/registrar-pago`, {
+        method: 'POST',
+        body: JSON.stringify(datos),
+      });
+    },
+  };
+
+  const espaciosAdminAPI = {
+    async listarEspacios() {
+      return fetchAPI('/admin/espacios');
+    },
+
+    async obtenerEspacio(id) {
+      return fetchAPI(`/admin/espacios/${id}`);
+    },
+
+    async crearEspacio(datos) {
+      return fetchAPI('/admin/espacios', {
+        method: 'POST',
+        body: JSON.stringify(datos),
+      });
+    },
+
+    async actualizarEspacio(id, datos) {
+      return fetchAPI(`/admin/espacios/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(datos),
+      });
+    },
+
+    async agregarConfiguracion(espacioId, datos) {
+      return fetchAPI(`/admin/espacios/${espacioId}/configuraciones`, {
+        method: 'POST',
+        body: JSON.stringify(datos),
+      });
+    },
+
+    async actualizarConfiguracion(espacioId, configId, datos) {
+      return fetchAPI(`/admin/espacios/${espacioId}/configuraciones/${configId}`, {
+        method: 'PUT',
+        body: JSON.stringify(datos),
+      });
+    },
+
+    async eliminarConfiguracion(espacioId, configId) {
+      return fetchAPI(`/admin/espacios/${espacioId}/configuraciones/${configId}`, {
+        method: 'DELETE',
+      });
+    },
+
+    async listarDisposiciones() {
+      return fetchAPI('/admin/disposiciones');
+    },
+  };
+
+  // Utility functions
+  function formatearPrecio(valor) {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+    }).format(valor);
+  }
+
+  function formatearFecha(fecha) {
+    const date = new Date(fecha + 'T00:00:00');
+    return new Intl.DateTimeFormat('es-CO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(date);
+  }
+
+  function formatearHora(hora) {
+    const [hours, minutes] = hora.split(':');
+    const h = parseInt(hours);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hour12 = h % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  }
+
+  function getBadgeClass(estado) {
+    const badges = {
+      'Pendiente de aprobación': 'badge-warning',
+      'Aceptada': 'badge-success',
+      'Rechazada': 'badge-danger',
+      'Vencida': 'badge-secondary',
+      'Sin pagar': 'badge-secondary',
+      'Abono pendiente': 'badge-warning',
+      'Abonado': 'badge-info',
+      'Pagado completamente': 'badge-success',
+    };
+    return badges[estado] || 'badge-secondary';
+  }
+
+  // ============================================
+  // Check authentication and validate token
+  // ============================================
   const auth = localStorage.getItem('adminAuth');
   if (!auth) {
     window.location.href = '/admin/login';
   } else {
-    const authData = JSON.parse(auth);
-    const userName = document.getElementById('userName');
-    if (userName) {
-      userName.textContent = authData.user || 'Administrador';
+    try {
+      const authData = JSON.parse(auth);
+      
+      // Verificar que tenga token válido
+      if (!authData.token || !authData.isAuthenticated) {
+        throw new Error('Invalid auth data');
+      }
+      
+      // Verificar expiración si existe
+      if (authData.expiresAt) {
+        const expiresAt = new Date(authData.expiresAt * 1000);
+        if (expiresAt < new Date()) {
+          throw new Error('Session expired');
+        }
+      }
+      
+      // Mostrar nombre de usuario
+      const userName = document.getElementById('userName');
+      if (userName && authData.user) {
+        const email = authData.user.email || authData.user;
+        userName.textContent = typeof email === 'string' ? email : 'Administrador';
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
+      localStorage.removeItem('adminAuth');
+      alert('Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
+      window.location.href = '/admin/login';
     }
   }
 
@@ -402,6 +948,9 @@ import { salonesData } from '../../data/salones'
 
   const pageTitles = {
     dashboard: { title: 'Dashboard', desc: 'Bienvenido al panel de administración de salones' },
+    reservas: { title: 'Gestión de Reservas', desc: 'Administra cotizaciones y reservas confirmadas' },
+    calendario: { title: 'Calendario', desc: 'Vista del calendario de disponibilidad y bloqueos' },
+    espacios: { title: 'Gestión de Espacios', desc: 'Administra espacios, disposiciones y capacidades' },
     salones: { title: 'Gestión de Salones', desc: 'Edita la información de cada salón' },
     imagenes: { title: 'Biblioteca de Imágenes', desc: 'Administra las imágenes de los salones' }
   };
@@ -659,6 +1208,846 @@ import { salonesData } from '../../data/salones'
   if (savedData) {
     salonesData = JSON.parse(savedData);
   }
+
+  // ============================================
+  // GESTIÓN DE RESERVAS
+  // ============================================
+  
+  let currentReservaId = null;
+  let currentPage = 1;
+  let currentFilters = {};
+
+  // Función helper para cerrar modales
+  window.closeModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  };
+
+  // Función helper para abrir modales
+  function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  // Cargar reservas
+  async function cargarReservas(filtros = {}, page = 1) {
+    const loadingEl = document.getElementById('loadingReservas');
+    const listEl = document.getElementById('reservasList');
+    const emptyEl = document.getElementById('emptyReservas');
+    
+    if (loadingEl) loadingEl.style.display = 'flex';
+    if (listEl) listEl.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = 'none';
+    
+    try {
+      const response = await cotizacionesAPI.listar({ ...filtros, page });
+      
+      if (loadingEl) loadingEl.style.display = 'none';
+      
+      if (response.success && response.data && response.data.length > 0) {
+        renderReservas(response.data);
+        renderPaginacion(response.pagination);
+      } else {
+        if (emptyEl) emptyEl.style.display = 'flex';
+      }
+    } catch (error) {
+      console.error('Error cargando reservas:', error);
+      if (loadingEl) loadingEl.style.display = 'none';
+      if (emptyEl) {
+        emptyEl.style.display = 'flex';
+        emptyEl.querySelector('p').textContent = 'Error al cargar las reservas';
+      }
+      showToast('Error al cargar las reservas', 'error');
+    }
+  }
+
+  // Renderizar lista de reservas
+  function renderReservas(reservas) {
+    const listEl = document.getElementById('reservasList');
+    if (!listEl) return;
+    
+    listEl.innerHTML = reservas.map(reserva => `
+      <div class="reserva-card" data-reserva-id="${reserva.id}">
+        <div class="reserva-header">
+          <div>
+            <h3>${reserva.cliente.nombre}</h3>
+            <p class="text-muted">${reserva.numero}</p>
+          </div>
+          <div class="reserva-badges">
+            <span class="badge ${getBadgeClass(reserva.estado)}">${reserva.estado}</span>
+            <span class="badge ${getBadgeClass(reserva.estado_pago)}">${reserva.estado_pago}</span>
+          </div>
+        </div>
+        <div class="reserva-info">
+          <div class="info-row">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>${formatearFecha(reserva.evento.fecha)} • ${formatearHora(reserva.evento.hora)}</span>
+          </div>
+          <div class="info-row">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            <span>${reserva.evento.salon || 'N/A'}</span>
+          </div>
+          <div class="info-row">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+            </svg>
+            <span>${reserva.evento.asistentes} personas</span>
+          </div>
+        </div>
+        <div class="reserva-totales">
+          <div class="total-item">
+            <span>Total:</span>
+            <strong>${formatearPrecio(reserva.totales.valor_total)}</strong>
+          </div>
+          <div class="total-item">
+            <span>Pagado:</span>
+            <strong class="${reserva.totales.total_pagado > 0 ? 'text-success' : ''}">${formatearPrecio(reserva.totales.total_pagado)}</strong>
+          </div>
+          <div class="total-item">
+            <span>Saldo:</span>
+            <strong class="${reserva.totales.saldo_pendiente > 0 ? 'text-danger' : ''}">${formatearPrecio(reserva.totales.saldo_pendiente)}</strong>
+          </div>
+        </div>
+        <div class="reserva-actions">
+          <button class="btn-sm btn-secondary" onclick="verDetalleReserva(${reserva.id})">Ver Detalle</button>
+          ${reserva.estado === 'Pendiente de aprobación' ? `
+            <button class="btn-sm btn-success" onclick="abrirCerrarReserva(${reserva.id})">Cerrar Reserva</button>
+            <button class="btn-sm btn-danger" onclick="rechazarReserva(${reserva.id})">Rechazar</button>
+          ` : ''}
+          ${reserva.estado === 'Aceptada' && reserva.totales.saldo_pendiente > 0 ? `
+            <button class="btn-sm btn-primary" onclick="abrirRegistrarPago(${reserva.id})">Registrar Pago</button>
+          ` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Renderizar paginación
+  function renderPaginacion(pagination) {
+    const paginationEl = document.getElementById('paginationReservas');
+    if (!paginationEl || !pagination) return;
+    
+    if (pagination.last_page > 1) {
+      paginationEl.style.display = 'flex';
+      paginationEl.innerHTML = `
+        <button class="btn-pagination" ${pagination.current_page === 1 ? 'disabled' : ''} 
+          onclick="cambiarPagina(${pagination.current_page - 1})">Anterior</button>
+        <span>Página ${pagination.current_page} de ${pagination.last_page}</span>
+        <button class="btn-pagination" ${pagination.current_page === pagination.last_page ? 'disabled' : ''} 
+          onclick="cambiarPagina(${pagination.current_page + 1})">Siguiente</button>
+      `;
+    } else {
+      paginationEl.style.display = 'none';
+    }
+  }
+
+  // Cambiar página
+  window.cambiarPagina = function(page) {
+    currentPage = page;
+    cargarReservas(currentFilters, page);
+  };
+
+  // Ver detalle de reserva
+  window.verDetalleReserva = async function(id) {
+    try {
+      const response = await cotizacionesAPI.obtener(id);
+      
+      if (response.success) {
+        const reserva = response.data;
+        const modalContent = document.getElementById('modalReservaContent');
+        const modalNumero = document.getElementById('modalReservaNumero');
+        
+        if (modalNumero) modalNumero.textContent = `#${reserva.numero}`;
+        
+        if (modalContent) {
+          modalContent.innerHTML = `
+            <div class="detalle-grid">
+              <div class="detalle-section">
+                <h3>Información del Cliente</h3>
+                <dl>
+                  <dt>Nombre:</dt>
+                  <dd>${reserva.cliente.nombre}</dd>
+                  <dt>Email:</dt>
+                  <dd><a href="mailto:${reserva.cliente.email}">${reserva.cliente.email}</a></dd>
+                  <dt>Teléfono:</dt>
+                  <dd>${reserva.cliente.telefono || 'N/A'}</dd>
+                </dl>
+              </div>
+              <div class="detalle-section">
+                <h3>Detalles del Evento</h3>
+                <dl>
+                  <dt>Fecha:</dt>
+                  <dd>${formatearFecha(reserva.evento.fecha)}</dd>
+                  <dt>Hora:</dt>
+                  <dd>${formatearHora(reserva.evento.hora)}</dd>
+                  <dt>Duración:</dt>
+                  <dd>${reserva.evento.duracion} horas</dd>
+                  <dt>Asistentes:</dt>
+                  <dd>${reserva.evento.asistentes} personas</dd>
+                  <dt>Tipo de Evento:</dt>
+                  <dd>${reserva.evento.tipo}</dd>
+                </dl>
+              </div>
+            </div>
+            
+            <div class="detalle-section">
+              <h3>Detalles de Cotización</h3>
+              <table class="detalle-table">
+                <thead>
+                  <tr>
+                    <th>Servicio</th>
+                    <th>Cantidad</th>
+                    <th>Valor Unitario</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${reserva.detalles.map(d => `
+                    <tr>
+                      <td>${d.servicio}</td>
+                      <td>${d.cantidad}</td>
+                      <td>${formatearPrecio(d.valorUnitario)}</td>
+                      <td>${formatearPrecio(d.total)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3"><strong>VALOR TOTAL:</strong></td>
+                    <td><strong>${formatearPrecio(reserva.totales.valor_total)}</strong></td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">Abono Requerido (50%):</td>
+                    <td>${formatearPrecio(reserva.totales.abono_requerido)}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">Total Pagado:</td>
+                    <td class="text-success"><strong>${formatearPrecio(reserva.totales.total_pagado)}</strong></td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">Saldo Pendiente:</td>
+                    <td class="${reserva.totales.saldo_pendiente > 0 ? 'text-danger' : 'text-success'}">
+                      <strong>${formatearPrecio(reserva.totales.saldo_pendiente)}</strong>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            
+            ${reserva.observaciones ? `
+              <div class="detalle-section">
+                <h3>Observaciones</h3>
+                <p>${reserva.observaciones}</p>
+              </div>
+            ` : ''}
+            
+            <div class="detalle-actions">
+              <a href="${api.cotizacionesAPI.getPdfUrl(id)}" target="_blank" class="btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Descargar PDF
+              </a>
+            </div>
+          `;
+        }
+        
+        openModal('modalDetalleReserva');
+      }
+    } catch (error) {
+      console.error('Error cargando detalle:', error);
+      showToast('Error al cargar el detalle', 'error');
+    }
+  };
+
+  // Abrir modal cerrar reserva
+  window.abrirCerrarReserva = async function(id) {
+    currentReservaId = id;
+    try {
+      const response = await cotizacionesAPI.obtener(id);
+      
+      if (response.success) {
+        const reserva = response.data;
+        const hintEl = document.getElementById('cerrarMontoHint');
+        
+        if (hintEl) {
+          hintEl.textContent = `Abono 50%: ${formatearPrecio(reserva.totales.abono_requerido)} | Total: ${formatearPrecio(reserva.totales.valor_total)}`;
+        }
+        
+        openModal('modalCerrarReserva');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error al cargar información', 'error');
+    }
+  };
+
+  // Form cerrar reserva
+  const formCerrarReserva = document.getElementById('formCerrarReserva');
+  if (formCerrarReserva) {
+    formCerrarReserva.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!currentReservaId) return;
+      
+      const estadoPago = document.getElementById('cerrarEstadoPago').value;
+      const monto = parseFloat(document.getElementById('cerrarMonto').value);
+      
+      if (confirm('¿Confirmar el cierre de esta reserva? Esto bloqueará el calendario y cancelará cotizaciones conflictivas.')) {
+        try {
+          const response = await cotizacionesAPI.cerrar(currentReservaId, {
+            estadoPago,
+            montoPago: monto
+          });
+          
+          if (response.success) {
+            showToast('Reserva cerrada exitosamente');
+            closeModal('modalCerrarReserva');
+            cargarReservas(currentFilters, currentPage);
+            formCerrarReserva.reset();
+          } else {
+            showToast(response.message || 'Error al cerrar reserva', 'error');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showToast('Error al cerrar la reserva', 'error');
+        }
+      }
+    });
+  }
+
+  // Abrir modal registrar pago
+  window.abrirRegistrarPago = async function(id) {
+    currentReservaId = id;
+    try {
+      const response = await cotizacionesAPI.obtener(id);
+      
+      if (response.success) {
+        const reserva = response.data;
+        const hintEl = document.getElementById('pagoMontoHint');
+        
+        if (hintEl) {
+          hintEl.textContent = `Saldo pendiente: ${formatearPrecio(reserva.totales.saldo_pendiente)}`;
+        }
+        
+        openModal('modalRegistrarPago');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error al cargar información', 'error');
+    }
+  };
+
+  // Form registrar pago
+  const formRegistrarPago = document.getElementById('formRegistrarPago');
+  if (formRegistrarPago) {
+    formRegistrarPago.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!currentReservaId) return;
+      
+      const monto = parseFloat(document.getElementById('pagoMonto').value);
+      const metodoPago = document.getElementById('pagoMetodo').value;
+      const observaciones = document.getElementById('pagoObservaciones').value;
+      
+      try {
+        const response = await cotizacionesAPI.registrarPago(currentReservaId, {
+          monto,
+          metodoPago,
+          observaciones
+        });
+        
+        if (response.success) {
+          showToast('Pago registrado exitosamente');
+          closeModal('modalRegistrarPago');
+          cargarReservas(currentFilters, currentPage);
+          formRegistrarPago.reset();
+        } else {
+          showToast(response.message || 'Error al registrar pago', 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showToast('Error al registrar el pago', 'error');
+      }
+    });
+  }
+
+  // Rechazar reserva
+  window.rechazarReserva = async function(id) {
+    const motivo = prompt('Motivo del rechazo (opcional):');
+    
+    if (motivo !== null) {
+      try {
+        const response = await cotizacionesAPI.rechazar(id, motivo);
+        
+        if (response.success) {
+          showToast('Reserva rechazada');
+          cargarReservas(currentFilters, currentPage);
+        } else {
+          showToast(response.message || 'Error al rechazar', 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showToast('Error al rechazar la reserva', 'error');
+      }
+    }
+  };
+
+  // Filtros
+  const btnFiltrar = document.getElementById('btnFiltrar');
+  const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
+  const searchReservas = document.getElementById('searchReservas');
+  
+  if (btnFiltrar) {
+    btnFiltrar.addEventListener('click', () => {
+      currentFilters = {
+        estado: document.getElementById('filterEstado')?.value,
+        estado_pago: document.getElementById('filterEstadoPago')?.value,
+        fecha_desde: document.getElementById('filterFechaDesde')?.value,
+        fecha_hasta: document.getElementById('filterFechaHasta')?.value,
+        buscar: searchReservas?.value,
+      };
+      currentPage = 1;
+      cargarReservas(currentFilters, currentPage);
+    });
+  }
+  
+  if (btnLimpiarFiltros) {
+    btnLimpiarFiltros.addEventListener('click', () => {
+      if (searchReservas) searchReservas.value = '';
+      const filterEstado = document.getElementById('filterEstado');
+      const filterEstadoPago = document.getElementById('filterEstadoPago');
+      const filterFechaDesde = document.getElementById('filterFechaDesde');
+      const filterFechaHasta = document.getElementById('filterFechaHasta');
+      
+      if (filterEstado) filterEstado.value = '';
+      if (filterEstadoPago) filterEstadoPago.value = '';
+      if (filterFechaDesde) filterFechaDesde.value = '';
+      if (filterFechaHasta) filterFechaHasta.value = '';
+      
+      currentFilters = {};
+      currentPage = 1;
+      cargarReservas(currentFilters, currentPage);
+    });
+  }
+
+  // ============================================
+  // GESTIÓN DE ESPACIOS
+  // ============================================
+  
+  let currentEspacioId = null;
+  let disposicionesCache = [];
+
+  // Cargar espacios
+  async function cargarEspacios() {
+    const loadingEl = document.getElementById('loadingEspacios');
+    const gridEl = document.getElementById('espaciosGrid');
+    
+    if (loadingEl) loadingEl.style.display = 'flex';
+    if (gridEl) gridEl.innerHTML = '';
+    
+    try {
+      const response = await espaciosAdminAPI.listarEspacios();
+      
+      if (loadingEl) loadingEl.style.display = 'none';
+      
+      if (response.success && response.data) {
+        renderEspacios(response.data);
+      }
+    } catch (error) {
+      console.error('Error cargando espacios:', error);
+      if (loadingEl) loadingEl.style.display = 'none';
+      showToast('Error al cargar espacios', 'error');
+    }
+  }
+
+  // Renderizar espacios
+  function renderEspacios(espacios) {
+    const gridEl = document.getElementById('espaciosGrid');
+    if (!gridEl) return;
+    
+    gridEl.innerHTML = espacios.map(espacio => `
+      <div class="espacio-card ${!espacio.activo ? 'inactive' : ''}" data-espacio-id="${espacio.id}">
+        <div class="espacio-header">
+          <h3>${espacio.nombre}</h3>
+          ${!espacio.activo ? '<span class="badge badge-secondary">Inactivo</span>' : ''}
+        </div>
+        <p class="text-muted">${espacio.descripcion || 'Sin descripción'}</p>
+        <div class="espacio-configs">
+          <strong>Configuraciones:</strong>
+          ${espacio.configuraciones.length > 0 ? `
+            <ul>
+              ${espacio.configuraciones.map(c => `
+                <li>${c.disposicionNombre}: ${c.capacidad} personas</li>
+              `).join('')}
+            </ul>
+          ` : '<p class="text-muted">Sin configuraciones</p>'}
+        </div>
+        <div class="espacio-actions">
+          <button class="btn-sm btn-secondary" onclick="editarEspacio(${espacio.id})">Editar</button>
+          <button class="btn-sm btn-primary" onclick="gestionarConfiguraciones(${espacio.id})">Configuraciones</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Nuevo espacio
+  const btnNuevoEspacio = document.getElementById('btnNuevoEspacio');
+  if (btnNuevoEspacio) {
+    btnNuevoEspacio.addEventListener('click', () => {
+      currentEspacioId = null;
+      document.getElementById('modalEspacioTitle').textContent = 'Nuevo Espacio';
+      document.getElementById('formEspacio').reset();
+      document.getElementById('espacioActivo').checked = true;
+      openModal('modalEspacio');
+    });
+  }
+
+  // Editar espacio
+  window.editarEspacio = async function(id) {
+    currentEspacioId = id;
+    try {
+      const response = await espaciosAdminAPI.obtenerEspacio(id);
+      
+      if (response.success) {
+        const espacio = response.data;
+        document.getElementById('modalEspacioTitle').textContent = 'Editar Espacio';
+        document.getElementById('espacioNombre').value = espacio.nombre;
+        document.getElementById('espacioDescripcion').value = espacio.descripcion || '';
+        document.getElementById('espacioActivo').checked = espacio.activo;
+        openModal('modalEspacio');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error al cargar espacio', 'error');
+    }
+  };
+
+  // Form espacio
+  const formEspacio = document.getElementById('formEspacio');
+  if (formEspacio) {
+    formEspacio.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const datos = {
+        nombre: document.getElementById('espacioNombre').value,
+        descripcion: document.getElementById('espacioDescripcion').value,
+        activo: document.getElementById('espacioActivo').checked
+      };
+      
+      try {
+        const response = currentEspacioId
+          ? await espaciosAdminAPI.actualizarEspacio(currentEspacioId, datos)
+          : await espaciosAdminAPI.crearEspacio(datos);
+        
+        if (response.success) {
+          showToast(currentEspacioId ? 'Espacio actualizado' : 'Espacio creado');
+          closeModal('modalEspacio');
+          cargarEspacios();
+          formEspacio.reset();
+        } else {
+          showToast(response.message || 'Error', 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showToast('Error al guardar espacio', 'error');
+      }
+    });
+  }
+
+  // Gestionar configuraciones
+  window.gestionarConfiguraciones = async function(espacioId) {
+    currentEspacioId = espacioId;
+    
+    try {
+      const [espacioRes, disposRes] = await Promise.all([
+        espaciosAdminAPI.obtenerEspacio(espacioId),
+        espaciosAdminAPI.listarDisposiciones()
+      ]);
+      
+      if (espacioRes.success && disposRes.success) {
+        const espacio = espacioRes.data;
+        disposicionesCache = disposRes.data;
+        
+        document.getElementById('modalConfigEspacioNombre').textContent = espacio.nombre;
+        renderConfiguraciones(espacio.configuraciones);
+        
+        // Llenar select de disposiciones
+        const selectDisp = document.getElementById('configDisposicion');
+        if (selectDisp) {
+          selectDisp.innerHTML = '<option value="">Seleccione...</option>' +
+            disposicionesCache.map(d => `<option value="${d.id}">${d.nombre}</option>`).join('');
+        }
+        
+        openModal('modalConfiguraciones');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error al cargar configuraciones', 'error');
+    }
+  };
+
+  // Renderizar configuraciones
+  function renderConfiguraciones(configuraciones) {
+    const listEl = document.getElementById('configuracionesList');
+    if (!listEl) return;
+    
+    listEl.innerHTML = configuraciones.length > 0 ? `
+      <table class="config-table">
+        <thead>
+          <tr>
+            <th>Disposición</th>
+            <th>Capacidad</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${configuraciones.map(c => `
+            <tr>
+              <td>${c.disposicionNombre}</td>
+              <td>${c.capacidad} personas</td>
+              <td>
+                <button class="btn-sm btn-danger" onclick="eliminarConfiguracion(${c.id})">Eliminar</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    ` : '<p class="text-muted">No hay configuraciones</p>';
+  }
+
+  // Botón agregar configuración
+  const btnAgregarConfig = document.getElementById('btnAgregarConfig');
+  const formAgregarConfig = document.getElementById('formAgregarConfig');
+  const btnCancelarConfig = document.getElementById('btnCancelarConfig');
+  
+  if (btnAgregarConfig && formAgregarConfig) {
+    btnAgregarConfig.addEventListener('click', () => {
+      formAgregarConfig.style.display = 'block';
+    });
+  }
+  
+  if (btnCancelarConfig && formAgregarConfig) {
+    btnCancelarConfig.addEventListener('click', () => {
+      formAgregarConfig.style.display = 'none';
+      formAgregarConfig.reset();
+    });
+  }
+
+  // Form agregar configuración
+  if (formAgregarConfig) {
+    formAgregarConfig.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!currentEspacioId) return;
+      
+      const datos = {
+        disposicionId: parseInt(document.getElementById('configDisposicion').value),
+        capacidad: parseInt(document.getElementById('configCapacidad').value)
+      };
+      
+      try {
+        const response = await espaciosAdminAPI.agregarConfiguracion(currentEspacioId, datos);
+        
+        if (response.success) {
+          showToast('Configuración agregada');
+          formAgregarConfig.style.display = 'none';
+          formAgregarConfig.reset();
+          // Recargar configuraciones
+          gestionarConfiguraciones(currentEspacioId);
+        } else {
+          showToast(response.message || 'Error', 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showToast('Error al agregar configuración', 'error');
+      }
+    });
+  }
+
+  // Eliminar configuración
+  window.eliminarConfiguracion = async function(configId) {
+    if (!currentEspacioId) return;
+    
+    if (confirm('¿Eliminar esta configuración?')) {
+      try {
+        const response = await espaciosAdminAPI.eliminarConfiguracion(currentEspacioId, configId);
+        
+        if (response.success) {
+          showToast('Configuración eliminada');
+          gestionarConfiguraciones(currentEspacioId);
+        } else {
+          showToast(response.message || 'Error', 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showToast('Error al eliminar', 'error');
+      }
+    }
+  };
+
+  // ============================================
+  // CALENDARIO
+  // ============================================
+  
+  let currentMonth = new Date().getMonth();
+  let currentYear = new Date().getFullYear();
+  
+  function renderCalendario() {
+    // Por ahora, simple placeholder
+    const gridEl = document.getElementById('calendarGrid');
+    const titleEl = document.getElementById('calendarTitle');
+    
+    if (!gridEl || !titleEl) return;
+    
+    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    titleEl.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+    
+    // Aquí iría la lógica completa del calendario
+    gridEl.innerHTML = `
+      <div class="calendario-placeholder">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <h3>Vista de Calendario</h3>
+        <p>Próximamente: Vista completa del calendario con disponibilidad y bloqueos</p>
+      </div>
+    `;
+  }
+  
+  const prevMonth = document.getElementById('prevMonth');
+  const nextMonth = document.getElementById('nextMonth');
+  
+  if (prevMonth) {
+    prevMonth.addEventListener('click', () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendario();
+    });
+  }
+  
+  if (nextMonth) {
+    nextMonth.addEventListener('click', () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendario();
+    });
+  }
+
+  // ============================================
+  // UTILIDADES
+  // ============================================
+  
+  function formatearPrecio(valor) {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+    }).format(valor);
+  }
+
+  function formatearFecha(fecha) {
+    const date = new Date(fecha + 'T00:00:00');
+    return new Intl.DateTimeFormat('es-CO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(date);
+  }
+
+  function formatearHora(hora) {
+    const [hours, minutes] = hora.split(':');
+    const h = parseInt(hours);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hour12 = h % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  }
+
+  function getBadgeClass(estado) {
+    const badges = {
+      'Pendiente de aprobación': 'badge-warning',
+      'Aceptada': 'badge-success',
+      'Rechazada': 'badge-danger',
+      'Vencida': 'badge-secondary',
+      'Sin pagar': 'badge-secondary',
+      'Abono pendiente': 'badge-warning',
+      'Abonado': 'badge-info',
+      'Pagado completamente': 'badge-success',
+    };
+    return badges[estado] || 'badge-secondary';
+  }
+
+  // Toast mejorado
+  function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+    
+    if (!toast || !toastMessage) return;
+    
+    toastMessage.textContent = message;
+    toast.classList.remove('toast-success', 'toast-error');
+    toast.classList.add(`toast-${type}`);
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
+  // ============================================
+  // INICIALIZACIÓN
+  // ============================================
+  
+  // Observer para detectar cuando se cambia a la sección de reservas o espacios
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        const target = mutation.target;
+        if (target.classList.contains('active')) {
+          if (target.id === 'section-reservas') {
+            cargarReservas();
+          } else if (target.id === 'section-espacios') {
+            cargarEspacios();
+          } else if (target.id === 'section-calendario') {
+            renderCalendario();
+          }
+        }
+      }
+    });
+  });
+  
+  contentSections.forEach(section => {
+    observer.observe(section, { attributes: true });
+  });
 </script>
 
 <style>
@@ -682,6 +2071,15 @@ import { salonesData } from '../../data/salones'
     height: 100vh;
     width: 260px;
     z-index: 50;
+    overflow-y: auto;
+  }
+
+  /* Main Content Area */
+  .admin-main {
+    margin-left: 260px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
   .sidebar-header {
@@ -782,7 +2180,11 @@ import { salonesData } from '../../data/salones'
   /* Main Content */
   .admin-main {
     margin-left: 260px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     padding: 2rem;
+    padding-bottom: 4rem;
   }
 
   .admin-header {
@@ -790,6 +2192,7 @@ import { salonesData } from '../../data/salones'
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 2rem;
+    flex-shrink: 0;
   }
 
   .header-title h1 {
@@ -825,6 +2228,8 @@ import { salonesData } from '../../data/salones'
   /* Content Sections */
   .content-section {
     display: none;
+    flex: 1;
+    padding-bottom: 2rem;
   }
 
   .content-section.active {
@@ -1504,6 +2909,670 @@ import { salonesData } from '../../data/salones'
 
     .tab-btn {
       white-space: nowrap;
+    }
+  }
+
+  /* ============================================ */
+  /* NUEVOS ESTILOS PARA RESERVAS Y ESPACIOS */
+  /* ============================================ */
+
+  /* Filtros y búsqueda */
+  .filters-bar {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .search-box {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+
+  .search-box svg {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+
+  .filters-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .filters-row select,
+  .filters-row input[type="date"] {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    flex: 1;
+    min-width: 150px;
+  }
+
+  /* Loading state */
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    gap: 1rem;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Empty state */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+
+  .empty-state svg {
+    color: #cbd5e1;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state h3 {
+    margin: 0 0 0.5rem;
+    color: #475569;
+  }
+
+  .empty-state p {
+    margin: 0;
+    color: #94a3b8;
+  }
+
+  /* Reservas container */
+  .reservas-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    min-height: 400px;
+  }
+
+  .reservas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Reserva card */
+  .reserva-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.2s;
+  }
+
+  .reserva-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: #cbd5e1;
+  }
+
+  .reserva-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .reserva-header h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+    color: #1e293b;
+  }
+
+  .reserva-badges {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .badge-warning { background: #fef3c7; color: #92400e; }
+  .badge-success { background: #dcfce7; color: #166534; }
+  .badge-danger { background: #fee2e2; color: #991b1b; }
+  .badge-secondary { background: #f1f5f9; color: #475569; }
+  .badge-info { background: #dbeafe; color: #1e40af; }
+
+  .reserva-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .info-row svg {
+    flex-shrink: 0;
+  }
+
+  .reserva-totales {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .total-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .total-item span {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  .total-item strong {
+    font-size: 1.1rem;
+    color: #1e293b;
+  }
+
+  .text-success { color: #16a34a !important; }
+  .text-danger { color: #dc2626 !important; }
+  .text-muted { color: #94a3b8 !important; }
+
+  .reserva-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  /* Botones */
+  .btn-primary, .btn-secondary, .btn-success, .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #083d8a;
+  }
+
+  .btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  .btn-secondary:hover {
+    background: #e2e8f0;
+  }
+
+  .btn-success {
+    background: #16a34a;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: #15803d;
+  }
+
+  .btn-danger {
+    background: #dc2626;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #b91c1c;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  /* Paginación */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .btn-pagination {
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-pagination:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: var(--color-primary);
+  }
+
+  .btn-pagination:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Modales */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    padding: 2rem;
+  }
+
+  .modal.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal-large {
+    max-width: 900px;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  /* Detalle de reserva */
+  .detalle-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .detalle-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .detalle-section h3 {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    color: #1e293b;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  .detalle-section dl {
+    margin: 0;
+  }
+
+  .detalle-section dt {
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+  }
+
+  .detalle-section dd {
+    margin: 0 0 0.75rem;
+    color: #1e293b;
+  }
+
+  .detalle-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .detalle-table th,
+  .detalle-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .detalle-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.9rem;
+  }
+
+  .detalle-table tfoot td {
+    font-weight: 600;
+    padding-top: 1rem;
+  }
+
+  .detalle-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+  }
+
+  /* Calendario */
+  .calendario-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .calendario-controls h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #1e293b;
+  }
+
+  .btn-nav {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-nav:hover {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .calendario-grid {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    min-height: 500px;
+  }
+
+  .calendario-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+  }
+
+  .calendario-placeholder svg {
+    color: #cbd5e1;
+    margin-bottom: 1rem;
+  }
+
+  .calendario-leyenda {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+  }
+
+  .leyenda-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .dot-disponible { background: #16a34a; }
+  .dot-reservado { background: #dc2626; }
+  .dot-bloqueado { background: #94a3b8; }
+
+  /* Espacios */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-header h2,
+  .section-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1e293b;
+  }
+
+  .espacios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .espacio-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+  }
+
+  .espacio-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .espacio-card.inactive {
+    opacity: 0.6;
+  }
+
+  .espacio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+  }
+
+  .espacio-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1e293b;
+  }
+
+  .espacio-configs {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+  }
+
+  .espacio-configs strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #475569;
+    font-size: 0.9rem;
+  }
+
+  .espacio-configs ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .espacio-configs li {
+    margin-bottom: 0.25rem;
+  }
+
+  .espacio-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  /* Configuraciones */
+  .config-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+  }
+
+  .config-table th,
+  .config-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .config-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.9rem;
+  }
+
+  .config-form {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+
+  /* Toast mejorado */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: #1e293b;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 300;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .toast.toast-success svg {
+    color: #10b981;
+  }
+
+  .toast.toast-error {
+    background: #dc2626;
+  }
+
+  .toast.toast-error svg {
+    color: white;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .admin-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+
+    .admin-main {
+      margin-left: 0;
+      padding: 1rem;
+    }
+
+    .filters-row {
+      flex-direction: column;
+    }
+
+    .reserva-totales {
+      grid-template-columns: 1fr;
+    }
+
+    .detalle-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .espacios-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .modal {
+      padding: 1rem;
+    }
+
+    .modal-body {
+      max-height: 70vh;
     }
   }
 </style>
