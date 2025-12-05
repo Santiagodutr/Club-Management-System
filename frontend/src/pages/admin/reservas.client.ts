@@ -12,6 +12,15 @@ function dateKey(value: string | Date): string {
   return Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10)
 }
 
+function stateClass(estado?: string): string {
+  if (!estado) return 'state-otro'
+  const e = estado.toLowerCase()
+  if (e.includes('pend')) return 'state-pendiente'
+  if (e.includes('acept') || e.includes('aprob')) return 'state-aceptada'
+  if (e.includes('rech')) return 'state-rechazada'
+  return 'state-otro'
+}
+
 function formatFullDate(key: string): string {
   const d = new Date(key)
   return Number.isNaN(d.getTime())
@@ -96,7 +105,10 @@ async function main() {
       const cellDate = new Date(y, m, day)
       const key = dateKey(cellDate)
       const eventos = eventosPorFecha[key] || []
-      const uniqueSalones = Array.from(new Set(eventos.map((e) => e.evento?.salon).filter(Boolean)))
+      const chips = eventos.slice(0, 3).map((e) => ({
+        salon: e.evento?.salon ?? 'Salón',
+        estado: e.estado,
+      }))
 
       const el = document.createElement('button')
       el.type = 'button'
@@ -108,8 +120,16 @@ async function main() {
       el.innerHTML = `
         <div class="day__number">${day}</div>
         <div class="day__chips">
-          ${uniqueSalones.slice(0, 2).map((s) => `<span class="chip">${s}</span>`).join('')}
-          ${uniqueSalones.length > 2 ? `<span class="chip more">+${uniqueSalones.length - 2}</span>` : ''}
+          ${chips
+            .map(
+              (c) => `
+                <span class="chip ${stateClass(c.estado)}">
+                  <span class="dot dot--event"></span>${c.salon}
+                </span>
+              `
+            )
+            .join('')}
+          ${eventos.length > chips.length ? `<span class="chip more">+${eventos.length - chips.length}</span>` : ''}
         </div>
       `
 
@@ -152,11 +172,17 @@ async function main() {
             <div class="tag">${c.evento?.salon ?? 'Salón'}</div>
           </div>
           <div class="day-card__body">
-            <div class="meta">${c.cliente.email}${c.cliente.telefono ? ' · ' + c.cliente.telefono : ''}</div>
-            <div class="meta">${c.evento?.hora ?? ''} · ${c.evento?.asistentes ?? ''} pax</div>
-            <div class="meta">#${c.numero}</div>
-            <div class="meta tags">
-              <span class="tag state">${c.estado}</span>
+            <div class="meta-row">
+              <div class="meta"><strong>Email:</strong> ${c.cliente.email}</div>
+              ${c.cliente.telefono ? `<div class="meta"><strong>Tel:</strong> ${c.cliente.telefono}</div>` : ''}
+            </div>
+            <div class="meta-row">
+              <div class="meta"><strong>Hora:</strong> ${c.evento?.hora ?? ''}</div>
+              <div class="meta"><strong>Asistentes:</strong> ${c.evento?.asistentes ?? ''} pax</div>
+            </div>
+            <div class="meta"><strong>#:</strong> ${c.numero}</div>
+            <div class="meta-row">
+              <span class="tag state ${c.estado ? c.estado.toLowerCase() : ''}">${c.estado}</span>
               <span class="tag pay">${c.estado_pago}</span>
             </div>
           </div>
