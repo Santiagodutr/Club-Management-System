@@ -904,40 +904,57 @@ import { salonesData } from '../../data/salones'
   }
 
   // ============================================
-  // Check authentication and validate token
+  // Check authentication and validate token with Supabase
   // ============================================
-  const auth = localStorage.getItem('adminAuth');
-  if (!auth) {
-    window.location.href = '/admin/login';
-  } else {
+  async function checkAuth() {
     try {
-      const authData = JSON.parse(auth);
+      const { getSession, getCurrentUser } = await import('../../lib/auth');
+      const session = await getSession();
       
-      // Verificar que tenga token válido
-      if (!authData.token || !authData.isAuthenticated) {
-        throw new Error('Invalid auth data');
+      if (!session) {
+        throw new Error('No active session');
       }
       
-      // Verificar expiración si existe
-      if (authData.expiresAt) {
-        const expiresAt = new Date(authData.expiresAt * 1000);
-        if (expiresAt < new Date()) {
-          throw new Error('Session expired');
-        }
+      // Verificar expiración
+      const expiresAt = session.expires_at;
+      if (expiresAt && expiresAt * 1000 < Date.now()) {
+        throw new Error('Session expired');
       }
+      
+      // Obtener usuario actual
+      const user = await getCurrentUser();
+      
+      // Actualizar localStorage con sesión válida
+      localStorage.setItem('adminAuth', JSON.stringify({
+        token: session.access_token,
+        refresh_token: session.refresh_token,
+        user: user,
+        expiresAt: session.expires_at,
+        isAuthenticated: true,
+        loginTime: new Date().toISOString()
+      }));
       
       // Mostrar nombre de usuario
       const userName = document.getElementById('userName');
-      if (userName && authData.user) {
-        const email = authData.user.email || authData.user;
-        userName.textContent = typeof email === 'string' ? email : 'Administrador';
+      if (userName && user) {
+        userName.textContent = user.email || 'Administrador';
       }
+      
+      const userRole = document.querySelector('.user-role');
+      if (userRole) {
+        userRole.textContent = 'Administrador';
+      }
+      
     } catch (error) {
       console.error('Auth error:', error);
       localStorage.removeItem('adminAuth');
       alert('Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
       window.location.href = '/admin/login';
     }
+  }
+  
+  // Ejecutar validación de autenticación
+  checkAuth();
   }
 
   // Navigation
@@ -974,9 +991,17 @@ import { salonesData } from '../../data/salones'
   });
 
   // Logout
-  document.getElementById('logoutBtn')?.addEventListener('click', () => {
-    localStorage.removeItem('adminAuth');
-    window.location.href = '/admin/login';
+  document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    try {
+      const { logout } = await import('../../lib/auth');
+      await logout();
+      localStorage.removeItem('adminAuth');
+      window.location.href = '/admin/login';
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      localStorage.removeItem('adminAuth');
+      window.location.href = '/admin/login';
+    }
   });
 
   // Modal handling

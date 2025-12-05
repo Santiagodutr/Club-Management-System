@@ -28,8 +28,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
               type="email" 
               id="email" 
               name="email" 
-              placeholder="admin@clubdelmeta.com"
-              value="admin@clubdelmeta.com"
+              placeholder="correo@ejemplo.com"
               required
             />
           </div>
@@ -47,7 +46,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
               id="password" 
               name="password" 
               placeholder="••••••••"
-              value="demo1234"
               required
             />
             <button type="button" class="toggle-password" aria-label="Mostrar contraseña">
@@ -90,15 +88,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
         </button>
       </form>
 
-      <div class="demo-notice">
-        <div class="demo-badge">MODO DEMO</div>
-        <p>
-          Este es un entorno de demostración. Las credenciales están pre-llenadas.<br>
-          <strong>Usuario:</strong> admin@clubdelmeta.com<br>
-          <strong>Contraseña:</strong> demo1234
-        </p>
-      </div>
-
       <a href="/salones" class="back-link">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -111,6 +100,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 </BaseLayout>
 
 <script>
+  import { login } from '../../lib/auth'
+  
   const form = document.getElementById('loginForm') as HTMLFormElement;
   const errorMessage = document.getElementById('errorMessage');
   const togglePassword = document.querySelector('.toggle-password');
@@ -133,7 +124,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     }
   });
 
-  // Form submission - Real API authentication with demo fallback
+  // Form submission - Real Supabase authentication
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -141,65 +132,45 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
     const password = (document.getElementById('password') as HTMLInputElement).value;
     const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
     
-    // Disable button
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Iniciando sesión...';
-    
-    // Demo credentials bypass
-    const demoCredentials = [
-      { email: 'admin@clubdelmeta.com', password: 'demo1234' },
-      { email: 'admin', password: 'admin' }
-    ];
-    
-    const isDemoUser = demoCredentials.some(
-      cred => cred.email === email && cred.password === password
-    );
-    
-    if (isDemoUser) {
-      // Demo login
-      localStorage.setItem('adminAuth', JSON.stringify({
-        token: 'demo-token',
-        user: { email },
-        isAuthenticated: true,
-        loginTime: new Date().toISOString()
-      }));
-      
-      window.location.href = '/admin/panel';
-      return;
+    // Hide any previous error
+    if (errorMessage) {
+      errorMessage.style.display = 'none';
     }
     
-    // Try real API authentication
+    // Disable button and show loading state
+    submitBtn.disabled = true;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span>Iniciando sesión...</span>';
+    
     try {
-      const response = await fetch('http://localhost:3333/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      // Authenticate with Supabase
+      const { user, session } = await login(email, password);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Credenciales inválidas');
+      if (!session) {
+        throw new Error('No se pudo iniciar sesión. Intenta de nuevo.');
       }
 
-      // Store admin session with real auth token
+      // Store session data
       localStorage.setItem('adminAuth', JSON.stringify({
-        token: data.session.access_token,
-        user: data.user,
-        expiresAt: data.session.expires_at,
+        token: session.access_token,
+        refresh_token: session.refresh_token,
+        user: user,
+        expiresAt: session.expires_at,
         isAuthenticated: true,
         loginTime: new Date().toISOString()
       }));
       
       // Redirect to admin panel
       window.location.href = '/admin/panel';
+      
     } catch (error) {
-      // Show error
+      // Show error message
       if (errorMessage) {
         const message = error instanceof Error ? error.message : 'Error al iniciar sesión';
-        errorMessage.textContent = message;
+        const errorSpan = errorMessage.querySelector('span');
+        if (errorSpan) {
+          errorSpan.textContent = message;
+        }
         errorMessage.style.display = 'flex';
         errorMessage.classList.add('shake');
         setTimeout(() => errorMessage.classList.remove('shake'), 500);
@@ -207,7 +178,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
       
       // Re-enable button
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Iniciar Sesión';
+      submitBtn.innerHTML = originalText;
     }
   });
 </script>
