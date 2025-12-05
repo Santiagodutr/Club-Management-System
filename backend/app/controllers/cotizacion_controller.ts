@@ -160,7 +160,7 @@ export default class CotizacionController {
         page = 1,
       } = request.qs()
 
-      let query = Cotizacion.query().preload('espacio')
+      let query = Cotizacion.query()
 
       // Filtro por email del cliente
       if (email) {
@@ -237,6 +237,13 @@ export default class CotizacionController {
         .orderBy('created_at', 'desc')
         .limit(limitNum)
         .offset(offset)
+
+      // Manually load espacio for each cotizacion to avoid undefined foreign key errors
+      for (const cotizacion of cotizaciones) {
+        if (cotizacion.espacioId) {
+          await cotizacion.load('espacio')
+        }
+      }
 
       return response.json({
         success: true,

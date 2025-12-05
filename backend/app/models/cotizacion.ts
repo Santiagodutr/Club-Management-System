@@ -102,13 +102,13 @@ export default class Cotizacion extends BaseModel {
   declare montoPagado: number | string
 
   @column({ columnName: 'espacio_id' })
-  declare espacioId: number | null
+  declare espacioId: number | null = null
 
   @column({ columnName: 'configuracion_espacio_id' })
-  declare configuracionEspacioId: number | null
+  declare configuracionEspacioId: number | null = null
 
   @column({ columnName: 'disposicion_id' })
-  declare disposicionId: number | null
+  declare disposicionId: number | null = null
 
   @column({ columnName: 'montaje_tiempo_horas' })
   declare montajeTiempoHoras: number | null
