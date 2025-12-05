@@ -16,11 +16,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro'
       </div>
     </header>
 
-    <section class="card">
+    <section class="card card--stretch">
       <div class="card__header">
         <div>
-          <p class="eyebrow">Reservas</p>
-          <h2>Cotizaciones / Reservas</h2>
+          <p class="eyebrow">Calendario</p>
+          <h2>Calendario de cotizaciones</h2>
         </div>
         <div class="filters">
           <label>
@@ -42,12 +42,39 @@ import AdminLayout from '../../layouts/AdminLayout.astro'
               <option value="pagado">Pagado</option>
             </select>
           </label>
-          <button id="btnFiltrar" class="btn primary">Filtrar</button>
+          <button id="btnFiltrar" class="btn primary">Aplicar</button>
         </div>
       </div>
 
-      <div id="cotizacionesTabla" class="table-wrapper">
-        <div class="placeholder">Cargando cotizaciones...</div>
+      <div class="calendar">
+        <div class="calendar__header">
+          <div class="calendar__nav">
+            <button id="prevMonth" class="btn ghost" aria-label="Mes anterior">◀</button>
+            <h3 id="monthLabel"></h3>
+            <button id="nextMonth" class="btn ghost" aria-label="Mes siguiente">▶</button>
+          </div>
+          <div class="calendar__legend">
+            <span class="dot dot--event"></span> Cotizaciones/Reservas
+          </div>
+        </div>
+        <div class="calendar__weekdays">
+          <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+        </div>
+        <div id="calendarDays" class="calendar__grid">
+          <div class="placeholder">Cargando calendario...</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card details">
+      <div class="card__header">
+        <div>
+          <p class="eyebrow">Detalle del día</p>
+          <h2 id="dayTitle">Selecciona un día</h2>
+        </div>
+      </div>
+      <div id="dayList" class="day-list">
+        <div class="placeholder">Elige una fecha en el calendario para ver cotizaciones o reservas.</div>
       </div>
     </section>
   </section>
@@ -63,14 +90,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro'
   h2 { margin: 0; color: #111827; }
   .muted { color: #4b5563; margin: 0.4rem 0 0; max-width: 640px; }
   .actions { display: flex; gap: 0.5rem; align-items: center; }
-  .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 1.25rem; box-shadow: 0 10px 30px rgba(15,23,42,0.06); margin-top: 1.5rem; }
+  .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin-top: 1.5rem; align-items: start; }
+  .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 1.25rem; box-shadow: 0 10px 30px rgba(15,23,42,0.06); }
+  .card--stretch { height: 100%; }
   .card__header { display: flex; justify-content: space-between; gap: 1rem; align-items: center; flex-wrap: wrap; }
   .filters { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
   label { font-size: 0.9rem; color: #4b5563; display: flex; flex-direction: column; gap: 0.25rem; }
   select, input, textarea { border: 1px solid #d1d5db; border-radius: 8px; padding: 0.55rem 0.75rem; font: inherit; background: #ffffff; color: #111827; }
-  table { width: 100%; border-collapse: collapse; }
-  th, td { padding: 0.65rem 0.5rem; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: middle; }
-  th { font-weight: 600; color: #0f172a; background: #f8fafc; }
   .placeholder { padding: 1rem; color: #6b7280; text-align: center; }
   .error { padding: 1rem; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; text-align: center; }
   .btn { border: none; border-radius: 10px; padding: 0.65rem 1rem; font-weight: 600; cursor: pointer; font: inherit; transition: transform 0.1s ease, box-shadow 0.2s ease; }
@@ -80,13 +106,77 @@ import AdminLayout from '../../layouts/AdminLayout.astro'
   .btn:hover { transform: translateY(-1px); }
   .table-wrapper { overflow-x: auto; margin-top: 1rem; }
   .badge { display: inline-block; background: #e0f2fe; color: #075985; padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.8rem; border: 1px solid #bae6fd; }
-  .actions-cell { display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; }
-  .link { background: #eff6ff; border: 1px solid #dbeafe; color: #1d4ed8; cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
-  .link.danger { color: #b91c1c; background: #fef2f2; border-color: #fecdd3; }
+  :global(.actions-cell) { display: flex; flex-wrap: wrap; gap: 0.4rem 0.6rem; }
+  :global(.link) {
+    appearance: none;
+    border: 1px solid #dbeafe;
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    color: #1d4ed8;
+    cursor: pointer;
+    padding: 0.45rem 0.65rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    box-shadow: 0 6px 12px rgba(37,99,235,0.12);
+    transition: transform 0.12s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  :global(.link:hover) { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(37,99,235,0.18); }
+  :global(.link:focus) { outline: 2px solid #bfdbfe; outline-offset: 2px; }
+  :global(.link.danger) {
+    border-color: #fecdd3;
+    background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+    color: #b91c1c;
+    box-shadow: 0 6px 12px rgba(185,28,28,0.12);
+  }
   .cell-strong { font-weight: 600; color: #0f172a; }
   .cell-muted { color: #6b7280; font-size: 0.95rem; }
+  .calendar { display: grid; gap: 0.5rem; }
+  .calendar__header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .calendar__nav { display: flex; align-items: center; gap: 0.75rem; }
+  .calendar__nav h3 { margin: 0; font-size: 1.3rem; color: #0f172a; }
+  .calendar__legend { display: flex; gap: 0.4rem; align-items: center; color: #4b5563; font-size: 0.9rem; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .dot--event { background: #2563eb; box-shadow: 0 0 0 4px rgba(37,99,235,0.12); }
+  .calendar__weekdays { display: grid; grid-template-columns: repeat(7, 1fr); color: #6b7280; font-weight: 600; font-size: 0.9rem; }
+  .calendar__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; min-height: 420px; }
+  .day {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    min-height: 110px;
+    padding: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  }
+  .day:hover { border-color: #bfdbfe; box-shadow: 0 10px 24px rgba(15,23,42,0.08); transform: translateY(-1px); }
+  .day.is-today { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.16); }
+  .day.is-selected { border-color: #0a4ba5; box-shadow: 0 12px 28px rgba(10,75,165,0.16); background: #eef2ff; }
+  .day__number { font-weight: 700; color: #0f172a; }
+  .day__chips { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+  .chip { padding: 0.2rem 0.45rem; border-radius: 999px; font-size: 0.78rem; background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+  .chip.more { background: #ede9fe; color: #5b21b6; border-color: #ddd6fe; }
+  .day.empty { background: #f9fafb; border-style: dashed; cursor: default; }
+  .details { min-height: 100%; }
+  .day-list { display: grid; gap: 0.75rem; }
+  .day-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 0.75rem; background: #ffffff; box-shadow: 0 6px 16px rgba(15,23,42,0.05); }
+  .day-card__header { display: flex; justify-content: space-between; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+  .day-card__title { font-weight: 700; color: #0f172a; }
+  .meta { color: #6b7280; font-size: 0.9rem; }
+  .tag { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.25rem 0.5rem; border-radius: 999px; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f8fafc; color: #0f172a; }
+  .tag.state { background: #ecfdf3; color: #166534; border-color: #bbf7d0; }
+  .tag.pay { background: #eef2ff; color: #1d4ed8; border-color: #dbeafe; }
+  .day-card__body { display: grid; gap: 0.25rem; }
+  .day-card__actions { margin-top: 0.5rem; }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
   @media (max-width: 900px) {
     .panel__header { flex-direction: column; }
     .card__header { flex-direction: column; align-items: flex-start; }
+    .calendar__grid { min-height: 320px; }
   }
 </style>

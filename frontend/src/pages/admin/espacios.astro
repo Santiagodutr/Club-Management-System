@@ -145,11 +145,33 @@ import AdminLayout from '../../layouts/AdminLayout.astro'
   .subcard__header { display: flex; justify-content: space-between; gap: 1rem; align-items: center; flex-wrap: wrap; }
   .add-config { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
   .config-list { display: grid; gap: 0.75rem; margin-top: 0.75rem; }
-  .config-card { display: grid; grid-template-columns: 1fr auto auto; gap: 0.75rem; align-items: center; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 10px; background: #ffffff; box-shadow: 0 6px 16px rgba(15,23,42,0.04); }
+  :global(.config-card) { display: grid; grid-template-columns: 1fr auto auto; gap: 0.75rem; align-items: center; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 10px; background: #ffffff; box-shadow: 0 6px 16px rgba(15,23,42,0.04); }
   .config-title { font-weight: 600; color: #0f172a; }
   .actions-end { display: flex; justify-content: flex-end; margin-top: 0.5rem; }
-  .link { background: #eff6ff; border: 1px solid #dbeafe; color: #1d4ed8; cursor: pointer; padding: 0.4rem 0.6rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
-  .link.danger { color: #b91c1c; background: #fef2f2; border-color: #fecdd3; }
+  :global(.link) {
+    appearance: none;
+    border: 1px solid #dbeafe;
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    color: #1d4ed8;
+    cursor: pointer;
+    padding: 0.45rem 0.65rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    box-shadow: 0 6px 12px rgba(37,99,235,0.12);
+    transition: transform 0.12s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  :global(.link:hover) { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(37,99,235,0.18); }
+  :global(.link:focus) { outline: 2px solid #bfdbfe; outline-offset: 2px; }
+  :global(.link.danger) {
+    border-color: #fecdd3;
+    background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+    color: #b91c1c;
+    box-shadow: 0 6px 12px rgba(185,28,28,0.12);
+  }
   .switch { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; color: #4b5563; }
   .switch input { width: 18px; height: 18px; }
   @media (max-width: 900px) {
