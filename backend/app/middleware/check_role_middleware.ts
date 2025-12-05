@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
-import { supabase } from '#services/supabase_service'
+import db from '@adonisjs/lucid/services/db'
 
 /**
  * Middleware para verificar que el usuario autenticado tiene un rol específico.
@@ -27,15 +27,20 @@ export default class CheckRoleMiddleware {
       })
     }
 
-    // Consultar la BD para obtener el rol del usuario
+    // Consultar la BD para obtener el rol del usuario (bypassing RLS)
     try {
-      const { data: usuario, error } = await supabase
+      console.log('[CheckRoleMiddleware] Buscando usuario con ID:', user.id)
+      
+      const usuario = await db
         .from('usuarios')
         .select('rol')
-        .eq('id', user.id)
-        .single()
+        .where('id', user.id)
+        .first()
 
-      if (error || !usuario) {
+      console.log('[CheckRoleMiddleware] Resultado query:', usuario)
+
+      if (!usuario) {
+        console.error('[CheckRoleMiddleware] Usuario no encontrado en la tabla usuarios')
         return response.forbidden({
           message: 'Usuario no encontrado en BD o sin permiso.',
         })
@@ -43,10 +48,13 @@ export default class CheckRoleMiddleware {
 
       // Verificar que el rol coincida
       if (usuario.rol !== requiredRole) {
+        console.log(`[CheckRoleMiddleware] Rol no coincide. Requerido: ${requiredRole}, Tiene: ${usuario.rol}`)
         return response.forbidden({
           message: `Se requiere rol: ${requiredRole}. Tienes: ${usuario.rol}`,
         })
       }
+      
+      console.log('[CheckRoleMiddleware] Rol verificado correctamente:', usuario.rol)
     } catch (err) {
       console.error('[CheckRoleMiddleware] Error:', err)
       return response.internalServerError({
