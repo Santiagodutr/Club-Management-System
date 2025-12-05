@@ -1,5 +1,6 @@
 // API Service - Centraliza todas las llamadas al backend
-const API_BASE_URL = 'http://localhost:3333'
+// Usa BACKEND_URL desde .env para apuntar al backend correcto
+const API_BASE_URL = (import.meta as any).env?.BACKEND_URL || 'http://localhost:3333'
 
 // Helper para hacer peticiones
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
