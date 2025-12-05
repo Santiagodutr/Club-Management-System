@@ -13,8 +13,8 @@ export default class SalonPostsController {
       
       const query = SalonPost.query()
         .where('publicado', true)
+        .preload('espacio')
         .orderBy('published_at', 'desc')
-        .select(['id', 'espacioId', 'titulo', 'slug', 'excerpt', 'mainImageUrl', 'publishedAt'])
 
       if (espacioId) {
         query.where('espacioId', espacioId)
