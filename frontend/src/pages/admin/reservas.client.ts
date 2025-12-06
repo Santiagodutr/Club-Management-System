@@ -186,6 +186,7 @@ async function main() {
   const vistaCalendario = qs<HTMLDivElement>('#vistaCalendario')
   const vistaLista = qs<HTMLDivElement>('#vistaLista')
   const detalleDelDia = qs<HTMLElement>('#detalleDelDia')
+  const eyebrowVista = qs<HTMLElement>('#eyebrowVista')
 
   let cotizaciones: any[] = []
   let allCotizaciones: any[] = [] // Mantener todas las cotizaciones sin filtrar
@@ -308,62 +309,64 @@ async function main() {
       return
     }
 
-    // Ordenar por fecha más reciente primero
-    const sortedCotizaciones = [...cotizaciones].sort((a, b) => {
-      const dateA = new Date(a.evento?.fecha || 0).getTime()
-      const dateB = new Date(b.evento?.fecha || 0).getTime()
-      return dateB - dateA
-    })
+    // Agrupar por fecha
+    const fechasOrdenadas = Object.keys(eventosPorFecha).sort().reverse()
+    
+    if (fechasOrdenadas.length === 0) {
+      listaContainer.innerHTML = '<div class="placeholder">No hay cotizaciones para mostrar con los filtros aplicados.</div>'
+      return
+    }
 
-    const html = sortedCotizaciones
-      .map((c) => {
-        const valorTotal = Number(c.valor_total) || 0
-        const abonoRequerido = valorTotal * 0.5
-        const totalPagado = Number(c.monto_pagado) || 0
+    const html = fechasOrdenadas.map(fecha => {
+      const items = eventosPorFecha[fecha] || []
+      const fechaFormateada = formatFullDate(fecha)
+      
+      const cotizacionesHTML = items.map(c => {
+        const valorTotal = typeof c.totales?.valor_total === 'string' 
+          ? parseFloat(c.totales.valor_total) 
+          : (c.totales?.valor_total || 0)
+        const totalPagado = typeof c.totales?.total_pagado === 'string'
+          ? parseFloat(c.totales.total_pagado)
+          : (c.totales?.total_pagado || 0)
+        const abonoRequerido = typeof c.totales?.abono_requerido === 'string'
+          ? parseFloat(c.totales.abono_requerido)
+          : (c.totales?.abono_requerido || 0)
         const saldoPendiente = valorTotal - totalPagado
-
-        const fecha = c.evento?.fecha ? new Date(c.evento.fecha + 'T00:00:00').toLocaleDateString('es-ES', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
-        }) : 'Fecha no especificada'
 
         return `
         <div class="day-card">
           <div class="day-card__header">
-            <div>
-              <div class="day-card__date">${fecha}</div>
-              <div class="day-card__name">${c.cliente?.nombre || 'Sin nombre'}</div>
-            </div>
-            <span class="chip state-${stateClass(c.estado)}">${c.estado || 'Sin estado'}</span>
+            <div class="day-card__title">${c.cliente.nombre}</div>
+            <div class="tag">${c.evento?.salon ?? 'Salón'}</div>
           </div>
           <div class="day-card__body">
-            <div class="meta"><strong>Email:</strong> ${c.cliente?.email || 'N/A'}</div>
-            ${c.cliente?.telefono ? `<div class="meta"><strong>Teléfono:</strong> ${c.cliente.telefono}</div>` : ''}
-          </div>
-          <div class="meta-row">
-            <div class="meta"><strong>Hora:</strong> ${c.evento?.hora ?? ''}</div>
-            <div class="meta"><strong>Duración:</strong> ${c.evento?.duracion || 0}h</div>
-            <div class="meta"><strong>Asistentes:</strong> ${c.evento?.asistentes ?? 0} personas</div>
-          </div>
-          <div class="meta"><strong>Cotización #:</strong> ${c.id}</div>
-          ${c.evento?.tipo ? `<div class="meta"><strong>Tipo de evento:</strong> ${c.evento.tipo}</div>` : ''}
-          <div class="divider"></div>
-          <div class="meta-row">
-            <div class="meta"><strong>Valor total:</strong> ${formatCurrency(valorTotal)}</div>
-            <div class="meta"><strong>Abono requerido (50%):</strong> ${formatCurrency(abonoRequerido)}</div>
-          </div>
-          ${totalPagado > 0 ? `
-          <div class="meta-row">
-            <div class="meta meta--highlight"><strong>Total pagado:</strong> ${formatCurrency(totalPagado)}</div>
-            ${saldoPendiente > 0 ? `<div class="meta meta--warning"><strong>Saldo pendiente:</strong> ${formatCurrency(saldoPendiente)}</div>` : ''}
-          </div>
-          ` : ''}
-          <div class="divider"></div>
-          <div class="meta-row">
-            <span class="tag state ${c.estado ? c.estado.toLowerCase() : ''}">${c.estado || 'Sin estado'}</span>
-            <span class="tag pay">${c.estado_pago || 'Sin información de pago'}</span>
+            <div class="meta-row">
+              <div class="meta"><strong>Email:</strong> ${c.cliente.email}</div>
+              ${c.cliente.telefono ? `<div class="meta"><strong>Teléfono:</strong> ${c.cliente.telefono}</div>` : ''}
+            </div>
+            <div class="meta-row">
+              <div class="meta"><strong>Hora:</strong> ${c.evento?.hora ?? ''}</div>
+              <div class="meta"><strong>Duración:</strong> ${c.evento?.duracion || 0}h</div>
+              <div class="meta"><strong>Asistentes:</strong> ${c.evento?.asistentes ?? 0} personas</div>
+            </div>
+            <div class="meta"><strong>Cotización #:</strong> ${c.id}</div>
+            ${c.evento?.tipo ? `<div class="meta"><strong>Tipo de evento:</strong> ${c.evento.tipo}</div>` : ''}
+            <div class="divider"></div>
+            <div class="meta-row">
+              <div class="meta"><strong>Valor total:</strong> ${formatCurrency(valorTotal)}</div>
+              <div class="meta"><strong>Abono requerido (50%):</strong> ${formatCurrency(abonoRequerido)}</div>
+            </div>
+            ${totalPagado > 0 ? `
+            <div class="meta-row">
+              <div class="meta meta--highlight"><strong>Total pagado:</strong> ${formatCurrency(totalPagado)}</div>
+              ${saldoPendiente > 0 ? `<div class="meta meta--warning"><strong>Saldo pendiente:</strong> ${formatCurrency(saldoPendiente)}</div>` : ''}
+            </div>
+            ` : ''}
+            <div class="divider"></div>
+            <div class="meta-row">
+              <span class="tag state ${c.estado ? c.estado.toLowerCase() : ''}">${c.estado || 'Sin estado'}</span>
+              <span class="tag pay">${c.estado_pago || 'Sin información de pago'}</span>
+            </div>
           </div>
           <div class="day-card__footer">
             <div class="day-card__actions day-card__actions--left">
@@ -381,8 +384,17 @@ async function main() {
           </div>
         </div>
         `
-      })
-      .join('')
+      }).join('')
+
+      return `
+        <div class="lista-day-section">
+          <h3 class="lista-day-title">${fechaFormateada}</h3>
+          <div class="day-list">
+            ${cotizacionesHTML}
+          </div>
+        </div>
+      `
+    }).join('')
 
     listaContainer.innerHTML = html
   }
@@ -689,6 +701,7 @@ async function main() {
     vistaCalendario?.classList.add('active')
     vistaLista?.classList.remove('active')
     if (detalleDelDia) detalleDelDia.style.display = 'block'
+    if (eyebrowVista) eyebrowVista.textContent = 'Calendario'
   })
 
   btnVistaLista?.addEventListener('click', () => {
@@ -698,6 +711,7 @@ async function main() {
     vistaLista?.classList.add('active')
     vistaCalendario?.classList.remove('active')
     if (detalleDelDia) detalleDelDia.style.display = 'none'
+    if (eyebrowVista) eyebrowVista.textContent = 'Lista'
     renderListaView()
   })
 
