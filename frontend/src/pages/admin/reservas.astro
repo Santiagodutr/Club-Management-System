@@ -12,10 +12,6 @@ export const prerender = false
         <h1>Reservas</h1>
         <p class="muted">Gestiona cotizaciones, confirma reservas (bloqueo automático del calendario) y controla pagos.</p>
       </div>
-      <div class="actions">
-        <button id="btnRefrescar" class="btn secondary">Refrescar datos</button>
-        <a class="btn ghost" href="/admin/login">Cerrar sesión</a>
-      </div>
     </header>
 
     <section class="card card--stretch">
@@ -29,22 +25,20 @@ export const prerender = false
             Estado
             <select id="fEstado">
               <option value="">Todos</option>
-              <option value="pendiente">Pendiente</option>
-              <option value="aceptada">Aceptada</option>
-              <option value="rechazada">Rechazada</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Aceptada">Aceptada</option>
+              <option value="Rechazada">Rechazada</option>
             </select>
           </label>
           <label>
             Pago
             <select id="fPago">
               <option value="">Todos</option>
-              <option value="sin_pagar">Sin pagar</option>
-              <option value="abono_pendiente">Abono pendiente</option>
-              <option value="abonado">Abonado</option>
-              <option value="pagado">Pagado</option>
+              <option value="Sin pagar">Sin pagar</option>
+              <option value="Abonado">Abonado</option>
+              <option value="Pagado completamente">Pagado completamente</option>
             </select>
           </label>
-          <button id="btnFiltrar" class="btn primary">Aplicar</button>
         </div>
       </div>
 
@@ -85,22 +79,22 @@ export const prerender = false
 <script type="module" src="/src/pages/admin/reservas.client.ts"></script>
 
 <style>
-  .panel { padding: 2rem; max-width: 1200px; margin: 0 auto 4rem; }
-  .panel__header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
-  .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.8rem; color: #0a4ba5; margin: 0 0 0.3rem; }
+  .panel { padding: 2rem; margin: 0 auto 4rem; }
+  .panel__header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 1.5rem; }
+  .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.8rem; color: #0a4ba5; margin: 0 0 0.35rem; }
   h1 { margin: 0; color: #0f172a; }
   h2 { margin: 0; color: #111827; }
-  .muted { color: #4b5563; margin: 0.4rem 0 0; max-width: 640px; }
+  .muted { color: #4b5563; margin: 0.5rem 0 0; max-width: 640px; line-height: 1.5; }
   .actions { display: flex; gap: 0.5rem; align-items: center; }
   .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin-top: 1.5rem; align-items: start; }
-  .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 1.25rem; box-shadow: 0 10px 30px rgba(15,23,42,0.06); }
+  .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(15,23,42,0.06); }
   .card--stretch { height: 100%; }
-  .card__header { display: flex; justify-content: space-between; gap: 1rem; align-items: center; flex-wrap: wrap; }
+  .card__header { display: flex; justify-content: space-between; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.25rem; }
   .filters { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
   label { font-size: 0.9rem; color: #4b5563; display: flex; flex-direction: column; gap: 0.25rem; }
   select, input, textarea { border: 1px solid #d1d5db; border-radius: 8px; padding: 0.55rem 0.75rem; font: inherit; background: #ffffff; color: #111827; }
-  .placeholder { padding: 1rem; color: #6b7280; text-align: center; }
-  .error { padding: 1rem; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; text-align: center; }
+  .placeholder { padding: 1.5rem; color: #6b7280; text-align: center; }
+  .error { padding: 1.5rem; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; text-align: center; }
   .btn { border: none; border-radius: 10px; padding: 0.65rem 1rem; font-weight: 600; cursor: pointer; font: inherit; transition: transform 0.1s ease, box-shadow 0.2s ease; }
   .btn.primary { background: linear-gradient(135deg, #0a4ba5, #2563eb); color: #fff; box-shadow: 0 10px 20px rgba(37,99,235,0.2); }
   .btn.secondary { background: #eef2ff; color: #1d4ed8; border: 1px solid #dbeafe; }
@@ -169,10 +163,10 @@ export const prerender = false
   :global(.day.empty) { background: #f9fafb; border-style: dashed; cursor: default; }
   .details { min-height: 100%; }
   .day-list { display: grid; gap: 1rem; }
-  :global(.day-card) { border: 1px solid #e5e7eb; border-radius: 16px; padding: 1rem; background: #ffffff; box-shadow: 0 6px 18px rgba(15,23,42,0.06); display: grid; gap: 0.6rem; }
+  :global(.day-card) { border: 1px solid #e5e7eb; border-radius: 16px; padding: 1.25rem; background: #ffffff; box-shadow: 0 6px 18px rgba(15,23,42,0.06); display: grid; gap: 0.75rem; }
   :global(.day-card__header) { display: flex; justify-content: space-between; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
   :global(.day-card__title) { font-weight: 700; color: #0f172a; font-size: 1.05rem; }
-  :global(.meta) { color: #4b5563; font-size: 0.95rem; }
+  :global(.meta) { color: #4b5563; font-size: 0.95rem; line-height: 1.6; }
   :global(.meta strong) { color: #0f172a; }
   :global(.meta-row) { display: flex; flex-wrap: wrap; gap: 1rem; }
   :global(.tag) { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.65rem; border-radius: 999px; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f8fafc; color: #0f172a; }
@@ -180,8 +174,257 @@ export const prerender = false
   :global(.tag.state.pendiente) { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
   :global(.tag.state.rechazada) { background: #fef2f2; color: #b91c1c; border-color: #fecdd3; }
   :global(.tag.pay) { background: #eef2ff; color: #1d4ed8; border-color: #dbeafe; }
-  :global(.day-card__body) { display: grid; gap: 0.35rem; }
-  :global(.day-card__actions) { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.4rem 0.6rem; }
+  :global(.day-card__body) { display: grid; gap: 0.5rem; }
+  :global(.day-card__footer) { margin-top: 0.75rem; display: grid; gap: 0.75rem; }
+  :global(.day-card__actions) { display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; }
+  :global(.day-card__actions--left) { justify-content: flex-start; }
+  :global(.day-card__actions--right) { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 0.5rem;
+  }
+  :global(.day-card__actions--right .link) {
+    justify-content: center;
+  }
+  :global(.day-card__actions--right .danger) { 
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+  
+  .divider { height: 1px; background: #e5e7eb; margin: 0.75rem 0; }
+  :global(.meta--highlight) { color: #059669; font-weight: 600; }
+  :global(.meta--warning) { color: #ea580c; font-weight: 600; }
+
+  /* Modales elegantes */
+  :global(.modal-overlay) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 1rem;
+  }
+  
+  :global(.modal-overlay.show) {
+    opacity: 1;
+  }
+  
+  :global(.modal) {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px rgba(15, 23, 42, 0.25);
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+  }
+  
+  :global(.modal-overlay.show .modal) {
+    transform: scale(1);
+  }
+  
+  :global(.modal__content) {
+    margin-bottom: 1.5rem;
+    color: #0f172a;
+    line-height: 1.6;
+  }
+  
+  :global(.modal__content h2) {
+    margin: 0 0 1rem;
+    color: #0a4ba5;
+    font-size: 1.5rem;
+  }
+  
+  :global(.modal__content h3) {
+    margin: 1rem 0 0.5rem;
+    color: #1e293b;
+    font-size: 1.1rem;
+  }
+  
+  :global(.modal__content p) {
+    margin: 0.35rem 0;
+    color: #475569;
+  }
+  
+  :global(.modal__content strong) {
+    color: #0f172a;
+    font-weight: 600;
+  }
+  
+  :global(.modal__icon) {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 1rem;
+    font-weight: bold;
+  }
+  
+  :global(.modal__content--success .modal__icon) {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  
+  :global(.modal__content--error .modal__icon) {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  
+  :global(.modal__content--info .modal__icon) {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  
+  :global(.modal__input) {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font: inherit;
+    margin-top: 0.5rem;
+    transition: border-color 0.2s ease;
+  }
+  
+  :global(.modal__input:focus) {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  
+  :global(.modal__actions) {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  
+  :global(.modal__actions .btn) {
+    border: none;
+    border-radius: 10px;
+    padding: 0.65rem 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+    font: inherit;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+    font-size: 0.95rem;
+  }
+  
+  :global(.modal__actions .btn.primary) {
+    background: linear-gradient(135deg, #0a4ba5, #2563eb);
+    color: #fff;
+    box-shadow: 0 10px 20px rgba(37,99,235,0.2);
+  }
+  
+  :global(.modal__actions .btn.primary:hover) {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(37,99,235,0.3);
+  }
+  
+  :global(.modal__actions .btn.secondary) {
+    background: #eef2ff;
+    color: #1d4ed8;
+    border: 1px solid #dbeafe;
+  }
+  
+  :global(.modal__actions .btn.secondary:hover) {
+    transform: translateY(-1px);
+    background: #e0e7ff;
+  }
+  
+  :global(.modal__actions .btn.danger) {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: #fff;
+    box-shadow: 0 10px 20px rgba(220,38,38,0.2);
+  }
+  
+  :global(.modal__actions .btn.danger:hover) {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(220,38,38,0.3);
+  }
+  
+  :global(.modal-detail) {
+    text-align: left;
+  }
+  
+  :global(.detail-section) {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+  
+  :global(.detail-section--highlight) {
+    background: #ecfdf5;
+    border: 2px solid #a7f3d0;
+  }
+  
+  :global(.detail-section h3) {
+    margin: 0 0 0.75rem !important;
+    color: #0a4ba5 !important;
+    font-size: 1rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  :global(.badge) {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: capitalize;
+  }
+  
+  :global(.badge--pendiente) {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+  }
+  
+  :global(.badge--aceptada) {
+    background: #ecfdf3;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+  
+  :global(.badge--rechazada) {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecdd3;
+  }
+  
+  :global(.badge--sin_pagar), :global(.badge--abono_pendiente) {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+  
+  :global(.badge--abonado) {
+    background: #e0e7ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
+  }
+  
+  :global(.badge--pagado) {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+  
   @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
   @media (max-width: 900px) {
     .panel__header { flex-direction: column; }
