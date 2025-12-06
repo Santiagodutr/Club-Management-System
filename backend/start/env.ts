@@ -51,4 +51,13 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   FRONTEND_URL: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for WhatsApp Business API
+  |----------------------------------------------------------
+  */
+  WHATSAPP_PHONE_NUMBER_ID: Env.schema.string(),
+  WHATSAPP_ACCESS_TOKEN: Env.schema.string(),
+  WHATSAPP_API_VERSION: Env.schema.string.optional(),
 })

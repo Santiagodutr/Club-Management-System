@@ -1,8 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Cotizacion from '#models/cotizacion'
+import DatosEmpresa from '#models/datos_empresa'
 import { PDFService } from '#services/pdf_service'
 import { CotizacionService, type SolicitudCotizacion } from '#services/cotizacion_service'
 import { EmailService, type DatosCotizacionEmail } from '#services/email_service'
+import WhatsAppService from '#services/whatsapp_service'
 import vine from '@vinejs/vine'
 import { DateTime } from 'luxon'
 import { cotizacionConfig } from '#config/app'
@@ -117,6 +119,85 @@ export default class CotizacionController {
         .catch((err) => {
           console.error('📧 Error enviando emails:', err)
         })
+
+      // Generar PDF y enviar por WhatsApp si hay teléfono del cliente
+      if (resultado.cotizacion.telefono) {
+        const whatsappService = new WhatsAppService()
+
+        // Generar PDF en background
+        PDFService
+          .generarPDF(resultado.cotizacion)
+          .then(async (pdfBuffer) => {
+            // Subir PDF a Supabase para obtener URL pública
+            const { supabase } = await import('#services/supabase_service')
+            const filename = `cotizacion_${resultado.cotizacion.id}_${Date.now()}.pdf`
+            
+            const { error: uploadError } = await supabase.storage
+              .from('cotizaciones_pdf')
+              .upload(filename, pdfBuffer, {
+                contentType: 'application/pdf',
+                cacheControl: '3600',
+              })
+
+            if (uploadError) {
+              console.error('❌ Error subiendo PDF a Supabase:', uploadError)
+              return
+            }
+
+            // Obtener URL pública
+            const { data: { publicUrl } } = supabase.storage
+              .from('cotizaciones_pdf')
+              .getPublicUrl(filename)
+
+            // Obtener teléfono del gerente desde la base de datos
+            const datosEmpresa = await DatosEmpresa.findBy('key', 'empresa')
+            if (!datosEmpresa?.whatsappGerente) {
+              console.warn('⚠️ No hay teléfono de gerente configurado en datos_empresa')
+              return
+            }
+
+            // Enviar por WhatsApp: puedes elegir entre botón o documento directo
+            const telefonoCliente = whatsappService.formatPhoneNumber(resultado.cotizacion.telefono!)
+            const telefonoGerente = whatsappService.formatPhoneNumber(datosEmpresa.whatsappGerente)
+
+            // Calcular hora de fin
+            const [horaInicio, minutosInicio] = resultado.cotizacion.hora.split(':').map(Number)
+            const horaFin = `${String((horaInicio + resultado.cotizacion.duracion) % 24).padStart(2, '0')}:${String(minutosInicio).padStart(2, '0')}`
+
+            // Formatear fecha
+            const fechaFormateada = DateTime.fromISO(resultado.cotizacion.fecha).setLocale('es').toFormat('dd/MM/yyyy')
+
+            // Opción 1: Enviar documento directamente (aparece como archivo adjunto)
+            const resultadoWhatsApp = await whatsappService.enviarCotizacionConDocumento(
+              telefonoCliente,
+              telefonoGerente,
+              publicUrl,
+              resultado.cotizacion.id.toString(),
+              {
+                salon: salonNombre || 'No especificado',
+                fecha: fechaFormateada,
+                horaInicio: resultado.cotizacion.hora,
+                horaFin: horaFin,
+                valorTotal: Number(resultado.cotizacion.valorTotal),
+                nombreCliente: resultado.cotizacion.nombre,
+                emailCliente: resultado.cotizacion.email,
+              }
+            )
+
+            // Opción 2: Enviar con botón interactivo (descomenta para usar)
+            // const resultadoWhatsApp = await whatsappService.enviarCotizacionConLink(
+            //   telefonoCliente,
+            //   telefonoGerente,
+            //   publicUrl,
+            //   resultado.cotizacion.id.toString()
+            // )
+
+            console.log('📱 Resultado envío WhatsApp:', resultadoWhatsApp)
+          })
+          .catch((err) => {
+            console.error('📱 Error enviando WhatsApp:', err)
+          })
+      }
 
       return response.status(201).json({
         success: true,
