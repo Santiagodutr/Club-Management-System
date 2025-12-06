@@ -96,6 +96,12 @@ export const prerender = false
             <p class="eyebrow">Participación por salón</p>
             <h3>Distribución</h3>
           </div>
+          <select id="estadoDonutSelect" class="filter-estado">
+            <option value="todas">Todas</option>
+            <option value="aceptada">Aceptadas</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="rechazada">Rechazadas</option>
+          </select>
         </header>
         <div class="donut-wrap">
           <div id="donutChart" class="donut">
@@ -122,6 +128,7 @@ export const prerender = false
   .filters { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
   label { font-size: 0.9rem; color: #4b5563; display: flex; flex-direction: column; gap: 0.25rem; }
   select { border: 1px solid #d1d5db; border-radius: 10px; padding: 0.55rem 0.75rem; font: inherit; background: #ffffff; color: #111827; min-width: 140px; }
+  .filter-estado { min-width: 120px; font-size: 0.85rem; padding: 0.45rem 0.6rem; border-radius: 8px; }
   .btn { border: none; border-radius: 10px; padding: 0.65rem 1rem; font-weight: 700; cursor: pointer; font: inherit; transition: transform 0.1s ease, box-shadow 0.2s ease; }
   .btn.secondary { background: #eef2ff; color: #1d4ed8; border: 1px solid #dbeafe; box-shadow: 0 8px 18px rgba(59,130,246,0.12); }
   .btn:hover { transform: translateY(-1px); }

@@ -149,12 +149,14 @@ async function main() {
   const donutChart = qs<HTMLDivElement>('#donutChart')
   const donutLegend = qs<HTMLDivElement>('#donutLegend')
   const btnRefrescar = qs<HTMLButtonElement>('#btnRefrescar')
+  const estadoDonutSelect = qs<HTMLSelectElement>('#estadoDonutSelect')
 
   let cotizaciones: Cot[] = []
   let vista: Vista = 'dia'
   let year = new Date().getFullYear()
   let month = new Date().getMonth() + 1
   let yearsDisponibles: number[] = []
+  let estadoDonutFiltro: 'todas' | 'aceptada' | 'pendiente' | 'rechazada' = 'todas'
 
   function updateSelectors() {
     if (!yearSelect || !monthSelect || !monthWrap || !yearWrap) return
@@ -251,7 +253,14 @@ async function main() {
 
   function buildSalonShare(): Record<string, number> {
     const acc: Record<string, number> = {}
-    filteredData().forEach((c) => {
+    let dataToProcess = filteredData()
+    
+    // Aplicar filtro de estado si no es "todas"
+    if (estadoDonutFiltro !== 'todas') {
+      dataToProcess = dataToProcess.filter((c) => statusKey(c.estado) === estadoDonutFiltro)
+    }
+    
+    dataToProcess.forEach((c) => {
       const name = c.evento?.salon || 'Sin salón'
       acc[name] = (acc[name] || 0) + 1
     })
@@ -323,6 +332,11 @@ async function main() {
 
   btnRefrescar?.addEventListener('click', () => {
     loadData()
+  })
+
+  estadoDonutSelect?.addEventListener('change', (e) => {
+    estadoDonutFiltro = ((e.target as HTMLSelectElement).value as typeof estadoDonutFiltro) || 'todas'
+    render()
   })
 
   await ensureSession()
