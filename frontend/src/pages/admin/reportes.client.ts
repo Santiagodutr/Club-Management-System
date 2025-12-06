@@ -148,7 +148,6 @@ async function main() {
   const calendarGrid = qs<HTMLDivElement>('#calendarGrid')
   const donutChart = qs<HTMLDivElement>('#donutChart')
   const donutLegend = qs<HTMLDivElement>('#donutLegend')
-  const btnRefrescar = qs<HTMLButtonElement>('#btnRefrescar')
   const estadoDonutSelect = qs<HTMLSelectElement>('#estadoDonutSelect')
 
   let cotizaciones: Cot[] = []
@@ -317,20 +316,16 @@ async function main() {
   vistaSelect?.addEventListener('change', (e) => {
     vista = ((e.target as HTMLSelectElement).value as Vista) || 'dia'
     updateSelectors()
-    render()
+    loadData()
   })
 
   monthSelect?.addEventListener('change', (e) => {
     month = Number((e.target as HTMLSelectElement).value) || month
-    render()
+    loadData()
   })
 
   yearSelect?.addEventListener('change', (e) => {
     year = Number((e.target as HTMLSelectElement).value) || year
-    render()
-  })
-
-  btnRefrescar?.addEventListener('click', () => {
     loadData()
   })
 
