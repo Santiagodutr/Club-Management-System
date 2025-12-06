@@ -33,14 +33,17 @@ interface Evento {
 document.addEventListener('DOMContentLoaded', () => {
 
 let eventos: Evento[] = []
+let eventosFiltrados: Evento[] = []
 let espacios: any[] = []
-let editingEventoId: number | null = null
-let imagenesTemp: Imagen[] = []
+let currentPage = 1
+const itemsPerPage = 10
 
 // Elementos del DOM
 const eventosList = document.getElementById('eventosList')
 const btnNuevoEvento = document.getElementById('btnNuevoEvento')
-const btnRefrescar = document.getElementById('btnRefrescar')
+const filtroEspacio = document.getElementById('filtroEspacio') as HTMLSelectElement
+const paginationContainer = document.getElementById('paginationContainer')
+const totalEventosSpan = document.getElementById('totalEventos')
 
 
 
@@ -98,11 +101,22 @@ async function cargarEspacios() {
     const result = await response.json()
     if (result.success) {
       espacios = result.data
-      renderEspaciosSelect()
+      renderFiltroEspacios()
     }
   } catch (error) {
     console.error('Error cargando espacios:', error)
   }
+}
+
+function renderFiltroEspacios() {
+  if (!filtroEspacio) return
+  filtroEspacio.innerHTML = '<option value="">Todos los salones</option>'
+  espacios.forEach(espacio => {
+    const option = document.createElement('option')
+    option.value = espacio.id.toString()
+    option.textContent = espacio.nombre
+    filtroEspacio.appendChild(option)
+  })
 }
 
 
@@ -124,7 +138,7 @@ async function cargarEventos() {
     
     if (result.success) {
       eventos = result.data
-      renderEventos()
+      aplicarFiltros()
     } else {
       eventosList.innerHTML = '<div class="placeholder">Error al cargar eventos</div>'
     }
@@ -134,18 +148,44 @@ async function cargarEventos() {
   }
 }
 
+function aplicarFiltros() {
+  const espacioSeleccionado = filtroEspacio?.value
+  
+  eventosFiltrados = eventos.filter(evento => {
+    if (espacioSeleccionado && evento.espacioId?.toString() !== espacioSeleccionado) {
+      return false
+    }
+    return true
+  })
+  
+  currentPage = 1
+  renderEventos()
+  renderPaginacion()
+  actualizarContador()
+}
+
+function actualizarContador() {
+  if (totalEventosSpan) {
+    totalEventosSpan.textContent = `${eventosFiltrados.length} evento${eventosFiltrados.length !== 1 ? 's' : ''}`
+  }
+}
+
 function renderEventos() {
   if (!eventosList) return
   
-  if (eventos.length === 0) {
-    eventosList.innerHTML = '<div class="placeholder">No hay eventos. Crea tu primer evento para comenzar.</div>'
+  if (eventosFiltrados.length === 0) {
+    eventosList.innerHTML = '<div class="placeholder">No hay eventos que coincidan con los filtros.</div>'
     return
   }
   
-  eventosList.innerHTML = eventos.map(evento => {
+  const start = (currentPage - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  const eventosPagina = eventosFiltrados.slice(start, end)
+  
+  eventosList.innerHTML = eventosPagina.map(evento => {
     const primeraImagen = evento.imagenes && evento.imagenes.length > 0 
       ? evento.imagenes[0].url 
-      : 'https://via.placeholder.com/100x75?text=Sin+imagen'
+      : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="75" viewBox="0 0 100 75"%3E%3Crect fill="%23f3f4f6" width="100" height="75"/%3E%3Ctext x="50" y="40" font-family="Arial" font-size="12" fill="%239ca3af" text-anchor="middle"%3ESin imagen%3C/text%3E%3C/svg%3E'
     
     const fecha = evento.publishedAt 
       ? new Date(evento.publishedAt).toLocaleDateString('es-CO', { 
@@ -155,24 +195,18 @@ function renderEventos() {
         })
       : 'Sin fecha'
     
-    const numImagenes = evento.imagenes?.length || 0
-    const excerpt = evento.excerpt || 'Sin descripción'
+    const salonTag = evento.espacio?.nombre 
+      ? `<span class="evento-tag salon-tag">${evento.espacio.nombre}</span>` 
+      : ''
     
     return `
       <div class="post-card" data-evento-id="${evento.id}">
-        <img src="${primeraImagen}" alt="${evento.titulo}" onerror="this.src='https://via.placeholder.com/100x75?text=Error'" />
+        <img src="${primeraImagen}" alt="${evento.titulo}" />
         <div class="post-info">
+          ${salonTag}
           <h3 class="post-title">${evento.titulo}</h3>
-          <p class="post-excerpt">${excerpt}</p>
           <div class="post-meta">
-            <span>${evento.espacio?.nombre || 'Sin salón'}</span>
-            <span>•</span>
             <span>${fecha}</span>
-            <span>•</span>
-            <span>${numImagenes} ${numImagenes === 1 ? 'img' : 'imgs'}</span>
-            <span class="post-status ${evento.publicado ? 'published' : 'draft'}">
-              ${evento.publicado ? 'Publicado' : 'Borrador'}
-            </span>
           </div>
         </div>
         <div class="post-actions">
@@ -184,6 +218,53 @@ function renderEventos() {
   }).join('')
 }
 
+function renderPaginacion() {
+  if (!paginationContainer) return
+  
+  const totalPages = Math.ceil(eventosFiltrados.length / itemsPerPage)
+  
+  if (totalPages <= 1) {
+    paginationContainer.innerHTML = ''
+    return
+  }
+  
+  let paginationHTML = '<div class="pagination">'
+  
+  // Botón anterior
+  if (currentPage > 1) {
+    paginationHTML += `<button class="pagination-btn" data-page="${currentPage - 1}">← Anterior</button>`
+  }
+  
+  // Números de página
+  const startPage = Math.max(1, currentPage - 2)
+  const endPage = Math.min(totalPages, currentPage + 2)
+  
+  if (startPage > 1) {
+    paginationHTML += `<button class="pagination-btn" data-page="1">1</button>`
+    if (startPage > 2) {
+      paginationHTML += `<span class="pagination-ellipsis">...</span>`
+    }
+  }
+  
+  for (let i = startPage; i <= endPage; i++) {
+    paginationHTML += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`
+  }
+  
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      paginationHTML += `<span class="pagination-ellipsis">...</span>`
+    }
+    paginationHTML += `<button class="pagination-btn" data-page="${totalPages}">${totalPages}</button>`
+  }
+  
+  // Botón siguiente
+  if (currentPage < totalPages) {
+    paginationHTML += `<button class="pagination-btn" data-page="${currentPage + 1}">Siguiente →</button>`
+  }
+  
+  paginationHTML += '</div>'
+  paginationContainer.innerHTML = paginationHTML
+}
 
 
 
@@ -193,14 +274,36 @@ function renderEventos() {
 
 
 
+
+
+// Modal de confirmación
+let eventoIdToDelete: number | null = null
+
+function mostrarModalEliminar(id: number) {
+  eventoIdToDelete = id
+  const modal = document.getElementById('confirmModal')
+  if (modal) {
+    modal.classList.remove('hidden')
+  }
+}
+
+function ocultarModalEliminar() {
+  eventoIdToDelete = null
+  const modal = document.getElementById('confirmModal')
+  if (modal) {
+    modal.classList.add('hidden')
+  }
+}
 
 // Eliminar evento
-async function eliminarEvento(id: number) {
-  if (!confirm('¿Estás seguro de eliminar este evento? Esta acción no se puede deshacer.')) return
+async function eliminarEvento() {
+  if (!eventoIdToDelete) return
+  
+  ocultarModalEliminar()
   
   try {
     const token = getAuthToken()
-    const response = await fetch(`${API_URL}/admin/salon-posts/${id}`, {
+    const response = await fetch(`${API_URL}/admin/salon-posts/${eventoIdToDelete}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -218,6 +321,8 @@ async function eliminarEvento(id: number) {
   } catch (error) {
     console.error('Error eliminando evento:', error)
     showNotification('Error de conexión', 'error')
+  } finally {
+    eventoIdToDelete = null
   }
 }
 
@@ -227,9 +332,18 @@ btnNuevoEvento?.addEventListener('click', (e) => {
   window.location.href = '/admin/eventos/nuevo'
 })
 
-btnRefrescar?.addEventListener('click', (e) => {
-  e.preventDefault()
-  cargarEventos()
+filtroEspacio?.addEventListener('change', aplicarFiltros)
+
+// Paginación
+paginationContainer?.addEventListener('click', (e) => {
+  const target = e.target as HTMLElement
+  if (target.classList.contains('pagination-btn')) {
+    const page = parseInt(target.getAttribute('data-page') || '1')
+    currentPage = page
+    renderEventos()
+    renderPaginacion()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 })
 
 // Delegación de eventos para la lista
@@ -251,17 +365,38 @@ if (eventosList) {
     const id = button.getAttribute('data-id')
     
     if (action === 'editar' && id) {
-      showNotification('Función de editar no disponible', 'warning')
+      window.location.href = `/admin/eventos/${id}/editar`
     } else if (action === 'eliminar' && id) {
-      eliminarEvento(parseInt(id))
+      mostrarModalEliminar(parseInt(id))
     }
   }, false)
 }
 
+// Event listeners del modal
+const btnConfirmarEliminar = document.getElementById('btnConfirmarEliminar')
+const btnCancelarEliminar = document.getElementById('btnCancelarEliminar')
+const confirmModal = document.getElementById('confirmModal')
 
+btnConfirmarEliminar?.addEventListener('click', eliminarEvento)
+btnCancelarEliminar?.addEventListener('click', ocultarModalEliminar)
+
+// Cerrar modal al hacer clic fuera
+confirmModal?.addEventListener('click', (e) => {
+  if (e.target === confirmModal) {
+    ocultarModalEliminar()
+  }
+})
+
+// Cerrar modal con ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && eventoIdToDelete !== null) {
+    ocultarModalEliminar()
+  }
+})
 
 // Inicializar
 async function init() {
+  await cargarEspacios()
   await cargarEventos()
 }
 

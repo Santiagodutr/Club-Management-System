@@ -1,24 +1,28 @@
 ---
-import AdminLayout from '../../../layouts/AdminLayout.astro'
+import AdminLayout from '../../../../layouts/AdminLayout.astro'
 
 export const prerender = false
 ---
 
-<AdminLayout title="Nuevo Evento - Club del Meta" active="eventos">
+<AdminLayout title="Editar Evento - Club del Meta" active="eventos">
   <section class="panel">
     <header class="panel__header">
       <div>
-        <p class="eyebrow">Crear Evento</p>
-        <h1>Nuevo Evento</h1>
-        <p class="muted">Completa el formulario para crear un nuevo evento.</p>
+        <p class="eyebrow">Editar Evento</p>
+        <h1 id="pageTitle">Editar Evento</h1>
+        <p class="muted">Modifica los datos del evento.</p>
       </div>
       <div class="actions">
         <a href="/admin/eventos" class="btn ghost">← Volver</a>
       </div>
     </header>
 
-    <section class="card">
-      <form id="eventoForm" class="form-grid">
+    <div id="loadingState" class="card">
+      <div class="placeholder">Cargando evento...</div>
+    </div>
+
+    <section id="eventoForm" class="card" style="display: none;">
+      <form class="form-grid">
         <label class="wide">
           Título *
           <input id="eventoTitulo" type="text" placeholder="Título del evento" required />
@@ -66,7 +70,7 @@ export const prerender = false
 
         <div class="wide form-actions">
           <a href="/admin/eventos" class="btn ghost">Cancelar</a>
-          <button type="submit" class="btn primary">Crear Evento</button>
+          <button type="submit" class="btn primary">Guardar Cambios</button>
         </div>
       </form>
     </section>
@@ -95,8 +99,8 @@ export const prerender = false
 </AdminLayout>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
-<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
-<script is:inline type="module" src="/src/pages/admin/eventos/nuevo.client.ts"></script>
+<script async src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script type="module" src="/src/pages/admin/eventos/[id]/editar.client.ts"></script>
 
 <style>
   .panel { padding: 2rem; max-width: 1200px; margin: 0 auto 4rem; }

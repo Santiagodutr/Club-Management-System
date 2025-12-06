@@ -75,10 +75,16 @@ async function main() {
               <td>${badge(c.estado_pago)}</td>
               <td class="actions-cell">
                 <button class="link" data-action="ver" data-id="${c.id}">Ver</button>
-                <button class="link" data-action="abonado" data-id="${c.id}">Cerrar abonado</button>
-                <button class="link" data-action="pagado" data-id="${c.id}">Cerrar pagado</button>
-                <button class="link" data-action="pago" data-id="${c.id}">Registrar pago</button>
-                <button class="link danger" data-action="rechazar" data-id="${c.id}">Rechazar</button>
+                ${c.estado && c.estado.toLowerCase() === 'pendiente' ? `
+                  <button class="link" data-action="abonado" data-id="${c.id}">Cerrar abonado</button>
+                  <button class="link" data-action="pagado" data-id="${c.id}">Cerrar pagado</button>
+                ` : ''}
+                ${c.estado && c.estado.toLowerCase() === 'aceptada' ? `
+                  <button class="link" data-action="pago" data-id="${c.id}">Registrar pago</button>
+                ` : ''}
+                ${c.estado && c.estado.toLowerCase() === 'pendiente' ? `
+                  <button class="link danger" data-action="rechazar" data-id="${c.id}">Rechazar</button>
+                ` : ''}
                 <button class="link" data-action="pdf" data-id="${c.id}">PDF</button>
                 <button class="link" data-action="correo" data-id="${c.id}">Reenviar correo</button>
               </td>

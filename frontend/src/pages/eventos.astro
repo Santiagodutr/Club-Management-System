@@ -711,6 +711,9 @@ try {
     const indicators = carousel.querySelectorAll('.indicator')
     let currentSlide = 0
 
+    // No hacer nada si solo hay una imagen
+    if (slides.length <= 1) return
+
     function showSlide(index) {
       slides.forEach((slide, i) => {
         slide.classList.toggle('active', i === index)
@@ -777,6 +780,12 @@ try {
       modal.classList.add('active')
       modal.setAttribute('aria-hidden', 'false')
       document.body.style.overflow = 'hidden'
+      
+      // Ocultar navegación si solo hay una imagen
+      const modalNav = modal.querySelector('.modal-nav')
+      if (modalNav) {
+        modalNav.style.display = images.length > 1 ? 'flex' : 'none'
+      }
     }
   }
 
@@ -819,7 +828,10 @@ try {
   document.addEventListener('keydown', (e) => {
     if (!modal?.classList.contains('active')) return
     if (e.key === 'Escape') closeModal()
-    if (e.key === 'ArrowLeft') navigate(-1)
-    if (e.key === 'ArrowRight') navigate(1)
+    // Solo permitir navegación con teclado si hay más de una imagen
+    if (currentPostImages.length > 1) {
+      if (e.key === 'ArrowLeft') navigate(-1)
+      if (e.key === 'ArrowRight') navigate(1)
+    }
   })
 </script>

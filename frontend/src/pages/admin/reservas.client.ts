@@ -375,10 +375,12 @@ async function main() {
               <button class="link" data-action="correo" data-id="${c.id}">Reenviar correo</button>
             </div>
             <div class="day-card__actions day-card__actions--right">
-              <button class="link" data-action="abonado" data-id="${c.id}">Registrar abonado</button>
-              <button class="link" data-action="pago" data-id="${c.id}">Registrar pago</button>
-              ${c.estado && c.estado.toLowerCase() !== 'aceptada' ? `
+              ${c.estado && c.estado.toLowerCase() === 'pendiente' ? `
+                <button class="link" data-action="abonado" data-id="${c.id}">Registrar abonado</button>
                 <button class="link danger" data-action="rechazar" data-id="${c.id}">Rechazar</button>
+              ` : ''}
+              ${c.estado && c.estado.toLowerCase() === 'aceptada' ? `
+                <button class="link" data-action="pago" data-id="${c.id}">Registrar pago</button>
               ` : ''}
             </div>
           </div>
@@ -470,10 +472,12 @@ async function main() {
               <button class="link" data-action="correo" data-id="${c.id}">Reenviar correo</button>
             </div>
             <div class="day-card__actions day-card__actions--right">
-              <button class="link" data-action="abonado" data-id="${c.id}">Registrar abonado</button>
-              <button class="link" data-action="pago" data-id="${c.id}">Registrar pago</button>
-              ${c.estado && c.estado.toLowerCase() !== 'aceptada' ? `
+              ${c.estado && c.estado.toLowerCase() === 'pendiente' ? `
+                <button class="link" data-action="abonado" data-id="${c.id}">Registrar abonado</button>
                 <button class="link danger" data-action="rechazar" data-id="${c.id}">Rechazar</button>
+              ` : ''}
+              ${c.estado && c.estado.toLowerCase() === 'aceptada' ? `
+                <button class="link" data-action="pago" data-id="${c.id}">Registrar pago</button>
               ` : ''}
             </div>
           </div>
