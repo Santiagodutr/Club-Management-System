@@ -656,11 +656,17 @@ async function main() {
 
   async function reenviarCorreo(id: number) {
     const modal = new Modal()
+    modal.show('<div style="text-align: center;"><div class="loader"></div><p style="margin-top: 1rem;">Enviando correo...</p></div>', [])
+    
     try {
       await cotizacionesAPI.reenviarCorreo(id)
-      modal.alert('Correo reenviado correctamente al cliente.', 'success')
+      modal.close()
+      const successModal = new Modal()
+      successModal.alert('Correo reenviado correctamente al cliente.', 'success')
     } catch (err: any) {
-      modal.alert(err?.message || 'Error al reenviar el correo', 'error')
+      modal.close()
+      const errorModal = new Modal()
+      errorModal.alert(err?.message || 'Error al reenviar el correo', 'error')
     }
   }
 
