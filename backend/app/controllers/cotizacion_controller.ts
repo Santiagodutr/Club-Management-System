@@ -554,10 +554,18 @@ export default class CotizacionController {
           observaciones: data.observaciones || cotizacion.observaciones,
         }
 
-        const resultado = await CotizacionService.crearCotizacion(solicitud)
+        // Usar recalcularCotizacion en lugar de crearCotizacion (que duplicaba)
+        const resultado = await CotizacionService.recalcularCotizacion(solicitud)
+        
+        if (!resultado.disponible) {
+          return response.status(400).json({
+            success: false,
+            message: resultado.mensajeDisponibilidad,
+          })
+        }
         
         console.log('[Actualizar] Resultado recalculo:', {
-          valorTotal: resultado.cotizacion.valorTotal,
+          valorTotal: resultado.valorTotal,
           detallesCount: resultado.detalles.length,
           detalles: resultado.detalles,
         })
@@ -566,17 +574,17 @@ export default class CotizacionController {
         cotizacion.merge({
           espacioId: solicitud.espacioId,
           configuracionEspacioId: solicitud.configuracionEspacioId,
-          disposicionId: resultado.cotizacion.disposicionId,
+          disposicionId: resultado.disposicionId,
           fecha: solicitud.fecha,
           hora: solicitud.horaInicio,
           duracion: solicitud.duracion,
           asistentes: solicitud.asistentes,
           tipoEvento: solicitud.tipoEvento,
           prestaciones: solicitud.servicios,
-          valorTotal: resultado.cotizacion.valorTotal,
+          valorTotal: resultado.valorTotal,
           detalles: resultado.detalles,
-          horasAdicionalesAplicadas: resultado.cotizacion.horasAdicionalesAplicadas,
-          recargoNocturnoAplicado: resultado.cotizacion.recargoNocturnoAplicado,
+          horasAdicionalesAplicadas: resultado.horasAdicionalesAplicadas,
+          recargoNocturnoAplicado: resultado.recargoNocturnoAplicado,
         })
         
         console.log('[Actualizar] Cotización después de merge:', {

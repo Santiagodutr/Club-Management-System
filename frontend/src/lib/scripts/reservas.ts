@@ -1,4 +1,4 @@
-import { cotizacionesAPI } from '../../services/api'
+import { cotizacionesAPI, espaciosPublicosAPI } from '../../services/api'
 import { supabase } from '../../lib/supabase'
 
 type Maybe<T> = T | null
@@ -208,6 +208,7 @@ async function main() {
 
   const estadoSelect = qs<HTMLSelectElement>('#fEstado')
   const pagoSelect = qs<HTMLSelectElement>('#fPago')
+  const salonSelect = qs<HTMLSelectElement>('#fSalon')
   const buscarIdInput = qs<HTMLInputElement>('#fBuscarId')
   const ordenSelect = qs<HTMLSelectElement>('#fOrden')
   const monthLabel = qs<HTMLHeadingElement>('#monthLabel')
@@ -265,6 +266,13 @@ async function main() {
         const pagoFiltro = pagoSelect.value.toLowerCase()
         const pagoCotizacion = (c.estado_pago || '').toLowerCase()
         if (pagoCotizacion !== pagoFiltro) return false
+      }
+      
+      // Filtro por salón
+      if (salonSelect?.value) {
+        const salonFiltro = parseInt(salonSelect.value)
+        const salonCotizacion = c.evento?.espacio_id
+        if (salonCotizacion !== salonFiltro) return false
       }
       
       return true
@@ -562,6 +570,7 @@ async function main() {
                   </svg>
                   Ver PDF
                 </button>
+                ${c.estado !== 'aceptada' ? `
                 <button class="btn-action secondary" data-action="editar" data-id="${c.id}">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -576,6 +585,7 @@ async function main() {
                   </svg>
                   Reenviar
                 </button>
+                ` : ''}
               </div>
             </div>
           </div>
@@ -803,6 +813,7 @@ async function main() {
                   </svg>
                   Ver PDF
                 </button>
+                ${c.estado !== 'aceptada' ? `
                 <button class="btn-action secondary" data-action="editar" data-id="${c.id}">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -817,6 +828,7 @@ async function main() {
                   </svg>
                   Reenviar
                 </button>
+                ` : ''}
               </div>
             </div>
           </div>
@@ -825,6 +837,28 @@ async function main() {
         }
       )
       .join('')
+  }
+
+  async function loadEspacios() {
+    if (!salonSelect) return
+    try {
+      const data = await espaciosPublicosAPI.listarSimplificado()
+      
+      if (data.success && Array.isArray(data.data)) {
+        // Limpiar opciones existentes excepto "Todos"
+        salonSelect.innerHTML = '<option value="">Todos</option>'
+        
+        // Añadir opciones de espacios
+        data.data.forEach((espacio: any) => {
+          const option = document.createElement('option')
+          option.value = espacio.id.toString()
+          option.textContent = espacio.nombre
+          salonSelect.appendChild(option)
+        })
+      }
+    } catch (err) {
+      console.error('Error cargando espacios:', err)
+    }
   }
 
   async function loadCotizaciones() {
@@ -2036,6 +2070,19 @@ async function main() {
     }
   })
 
+  salonSelect?.addEventListener('change', () => {
+    rebuildEventos()
+    // Si la fecha seleccionada quedó sin eventos tras filtrar, tomamos la primera disponible
+    if (!selectedDate || !eventosPorFecha[selectedDate]?.length) {
+      selectedDate = firstAvailableDate(Object.keys(eventosPorFecha))
+    }
+    renderCalendar()
+    renderDayList()
+    if (vistaActual === 'lista') {
+      renderListaView()
+    }
+  })
+
   // Búsqueda por ID en tiempo real
   buscarIdInput?.addEventListener('input', () => {
     rebuildEventos()
@@ -2076,6 +2123,7 @@ async function main() {
   })
 
   await ensureSession()
+  await loadEspacios()
   await loadCotizaciones()
   
   // Ocultar el selector de ordenamiento al inicio (vista calendario por defecto)

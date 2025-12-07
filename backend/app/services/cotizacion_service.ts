@@ -110,23 +110,11 @@ export class CotizacionService {
         minutosFin = minutosFin - 1440
       }
 
-      // Calcular tiempos con montaje/desmontaje
-      const minutosInicioConMontaje = minutosInicio - (tiempoMontaje * 60)
-      const minutosFinConDesmontaje = minutosFin + (tiempoDesmontaje * 60)
-
-      console.log('Horarios calculados:', {
-        horaEventoInicio: horaInicio,
-        horaEventoFin: this.minutosAHora(minutosFin),
-        horaBloqueadoDesde: this.minutosAHora(minutosInicioConMontaje),
-        horaBloqueadoHasta: this.minutosAHora(minutosFinConDesmontaje),
-      })
-
-      // 3. Validar que haya tiempo suficiente para montaje
-      if (minutosInicioConMontaje < minutosOpInicio) {
-        const horaMinima = this.minutosAHora(minutosOpInicio + (tiempoMontaje * 60)).split(':').slice(0, 2).join(':')
+      // 3. Validar horario de inicio del evento (sin considerar montaje aún)
+      if (minutosInicio < minutosOpInicio) {
         return {
           disponible: false,
-          mensaje: `El evento requiere ${tiempoMontaje}h de montaje. El club abre a las ${horario.horaInicio}, puedes empezar desde las ${horaMinima}`,
+          mensaje: `El evento no puede empezar antes de las ${horario.horaInicio} (apertura del club)`,
         }
       }
 
@@ -146,14 +134,15 @@ export class CotizacionService {
         }
       }
 
-      // 4. Validar que haya tiempo suficiente para desmontaje
-      const minutosFinConDesmontajeAjustado = minutosFinConDesmontaje >= 1440 ? minutosFinConDesmontaje - 1440 : minutosFinConDesmontaje
-      if (!horarioPasaMedianoche && !eventoFinalPasaMedianoche && minutosFinConDesmontajeAjustado > minutosOpFin) {
+      // 4. Validar hora de fin del evento (sin considerar desmontaje aún)
+      if (!horarioPasaMedianoche && !eventoFinalPasaMedianoche && minutosFin > minutosOpFin) {
+
+      // 4. Validar hora de fin del evento (sin considerar desmontaje aún)
+      if (!horarioPasaMedianoche && !eventoFinalPasaMedianoche && minutosFin > minutosOpFin) {
         const horaFinFormato = this.minutosAHora(minutosFin).split(':').slice(0, 2).join(':')
-        const horaFinDesmontaje = this.minutosAHora(minutosFinConDesmontajeAjustado).split(':').slice(0, 2).join(':')
         return {
           disponible: false,
-          mensaje: `El evento termina a las ${horaFinFormato} + ${tiempoDesmontaje}h desmontaje (${horaFinDesmontaje}), pero el club cierra a las ${horario.horaFin}`,
+          mensaje: `El evento terminaría a las ${horaFinFormato}, pero el club cierra a las ${horario.horaFin}`,
         }
       }
 
@@ -168,21 +157,16 @@ export class CotizacionService {
       }
 
       if (!horarioPasaMedianoche && eventoFinalPasaMedianoche) {
-        if (diaSemana !== 5 && diaSemana !== 6) {
-          const horaFinFormato = this.minutosAHora(minutosFin).split(':').slice(0, 2).join(':')
-          return {
-            disponible: false,
-            mensaje: `Solo se permiten eventos que pasen medianoche viernes y sábados. Tu evento terminaría a las ${horaFinFormato} del día siguiente`,
-          }
-        }
-      }
-
-      // 5. Validar bloqueos existentes considerando montaje/desmontaje
+      // 5. Validar bloqueos existentes (AQUÍ SÍ se considera montaje/desmontaje)
       const bloqueos = await BloqueoCalendario.query()
         .where('espacio_id', espacioId)
         .where('fecha', fecha)
 
       if (bloqueos.length > 0) {
+        // Calcular tiempos con montaje/desmontaje solo para validar cruces
+        const minutosInicioConMontaje = minutosInicio - (tiempoMontaje * 60)
+        const minutosFinConDesmontaje = minutosFin + (tiempoDesmontaje * 60)
+
         for (const bloqueo of bloqueos) {
           const minBloqueoInicio = this.horaAMinutos(bloqueo.horaInicio)
           const minBloqueoFin = this.horaAMinutos(bloqueo.horaFin)
@@ -190,6 +174,15 @@ export class CotizacionService {
           // Validar superposición incluyendo tiempos de montaje/desmontaje
           const seSuperpone = !(minutosFinConDesmontaje <= minBloqueoInicio || minutosInicioConMontaje >= minBloqueoFin)
           if (seSuperpone) {
+            const horaBloqueadoDesde = this.minutosAHora(minBloqueoInicio).split(':').slice(0, 2).join(':')
+            const horaBloqueadoHasta = this.minutosAHora(minBloqueoFin).split(':').slice(0, 2).join(':')
+            return {
+              disponible: false,
+              mensaje: `Ese horario se cruza con otro evento (${horaBloqueadoDesde}-${horaBloqueadoHasta}). Se requieren ${tiempoMontaje}h montaje y ${tiempoDesmontaje}h desmontaje`,
+            }
+          }
+        }
+      }   if (seSuperpone) {
             const horaBloqueadoDesde = this.minutosAHora(minBloqueoInicio).split(':').slice(0, 2).join(':')
             const horaBloqueadoHasta = this.minutosAHora(minBloqueoFin).split(':').slice(0, 2).join(':')
             return {
@@ -207,13 +200,11 @@ export class CotizacionService {
         disponible: true,
         horaInicio,
         horaFin: horaFinFormato,
-        tiempoMontaje,
-        tiempoDesmontaje,
       })
       
       return {
         disponible: true,
-        mensaje: `Disponible de ${horaInicio} a ${horaFinFormato}${eventoFinalPasaMedianoche ? ' (día siguiente)' : ''} (incluye ${tiempoMontaje}h montaje + ${tiempoDesmontaje}h desmontaje)`,
+        mensaje: `Disponible de ${horaInicio} a ${horaFinFormato}${eventoFinalPasaMedianoche ? ' (día siguiente)' : ''}`,
         horaFin: horaFinFormato,
       }
     } catch (error) {
@@ -339,6 +330,71 @@ export class CotizacionService {
     }
 
     return detalles
+  }
+
+  /**
+   * Recalcular cotización sin crear nueva (para actualizaciones)
+   */
+  static async recalcularCotizacion(solicitud: SolicitudCotizacion): Promise<{
+    detalles: DetalleCotizacion[]
+    valorTotal: number
+    disposicionId: number | null
+    horasAdicionalesAplicadas: number
+    recargoNocturnoAplicado: boolean
+    disponible: boolean
+    mensajeDisponibilidad: string
+  }> {
+    // Validar disponibilidad
+    const validacion = await this.validarDisponibilidad(
+      solicitud.espacioId,
+      solicitud.fecha,
+      solicitud.horaInicio,
+      solicitud.duracion,
+      solicitud.tipoEvento
+    )
+
+    if (!validacion.disponible) {
+      return {
+        detalles: [],
+        valorTotal: 0,
+        disposicionId: null,
+        horasAdicionalesAplicadas: 0,
+        recargoNocturnoAplicado: false,
+        disponible: false,
+        mensajeDisponibilidad: validacion.mensaje,
+      }
+    }
+
+    // Calcular detalles
+    const detalles = await this.calcularCotizacion(solicitud)
+    const valorTotal = detalles.reduce((sum, d) => sum + d.total, 0)
+
+    // Determinar si aplica recargo nocturno
+    const minutosInicio = this.horaAMinutos(solicitud.horaInicio)
+    const minutosFin = minutosInicio + solicitud.duracion * 60
+    const minutosHora22 = 22 * 60
+    const recargoNocturnoAplicado = minutosFin > minutosHora22 || minutosFin >= 1440
+
+    // Obtener disposicionId
+    let disposicionId: number | null = null
+    try {
+      const config = await ConfiguracionEspacio.find(solicitud.configuracionEspacioId)
+      if (config) {
+        disposicionId = config.disposicionId
+      }
+    } catch (error) {
+      console.warn('No se pudo obtener ConfiguracionEspacio:', error)
+    }
+
+    return {
+      detalles,
+      valorTotal,
+      disposicionId,
+      horasAdicionalesAplicadas: 0,
+      recargoNocturnoAplicado,
+      disponible: true,
+      mensajeDisponibilidad: validacion.mensaje,
+    }
   }
 
   /**
