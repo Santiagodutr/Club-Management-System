@@ -1,5 +1,9 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro'
+import iconAll from '../../assets/all.png'
+import iconChecked from '../../assets/checked.png'
+import iconPending from '../../assets/pending.png'
+import iconCancel from '../../assets/cancel.png'
 
 export const prerender = false
 ---
@@ -49,28 +53,36 @@ export const prerender = false
 
     <div class="kpi-grid">
       <article class="kpi-card">
-        <div class="kpi-icon primary">📈</div>
+        <div class="kpi-icon primary">
+          <img src={iconAll.src} alt="Total" />
+        </div>
         <div>
           <p class="kpi-label">Total</p>
           <p class="kpi-value" id="kpiTotal">—</p>
         </div>
       </article>
       <article class="kpi-card">
-        <div class="kpi-icon success">✅</div>
+        <div class="kpi-icon success">
+          <img src={iconChecked.src} alt="Aprobadas" />
+        </div>
         <div>
           <p class="kpi-label">Aprobadas</p>
           <p class="kpi-value" id="kpiAprobadas">—</p>
         </div>
       </article>
       <article class="kpi-card">
-        <div class="kpi-icon warning">⏳</div>
+        <div class="kpi-icon warning">
+          <img src={iconPending.src} alt="Pendientes" />
+        </div>
         <div>
           <p class="kpi-label">Pendientes</p>
           <p class="kpi-value" id="kpiPendientes">—</p>
         </div>
       </article>
       <article class="kpi-card">
-        <div class="kpi-icon danger">✖️</div>
+        <div class="kpi-icon danger">
+          <img src={iconCancel.src} alt="Rechazadas" />
+        </div>
         <div>
           <p class="kpi-label">Rechazadas</p>
           <p class="kpi-value" id="kpiRechazadas">—</p>
@@ -160,6 +172,12 @@ import '@scripts/reportes.ts'
     display: grid;
     place-items: center;
     font-size: 1.4rem;
+  }
+  
+  .kpi-icon img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
   }
   
   .kpi-icon.primary { 
