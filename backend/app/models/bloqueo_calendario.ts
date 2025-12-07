@@ -12,6 +12,9 @@ export default class BloqueoCalendario extends BaseModel {
   @column({ columnName: 'espacio_id' })
   declare espacioId: number
 
+  @column({ columnName: 'cotizacion_id' })
+  declare cotizacionId: number | null
+
   @column()
   declare fecha: string // YYYY-MM-DD
 

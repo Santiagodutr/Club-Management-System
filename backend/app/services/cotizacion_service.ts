@@ -220,12 +220,30 @@ export class CotizacionService {
 
     // Determinar precio base según duración
     let precioBase = 0
+    let descripcionTarifa = ''
+    
     if (solicitud.duracion <= 4 && tarifa.precio4Horas) {
       precioBase = parseFloat(tarifa.precio4Horas.toString())
+      descripcionTarifa = '4h'
     } else if (solicitud.duracion <= 8 && tarifa.precio8Horas) {
       precioBase = parseFloat(tarifa.precio8Horas.toString())
+      descripcionTarifa = '8h'
     } else if (tarifa.precio8Horas) {
+      // Si es más de 8h, usa precio base de 8h
       precioBase = parseFloat(tarifa.precio8Horas.toString())
+      descripcionTarifa = '8h base'
+    }
+
+    console.log('[CotizacionService] Cálculo precio base:', {
+      duracion: solicitud.duracion,
+      tarifa4h: tarifa.precio4Horas,
+      tarifa8h: tarifa.precio8Horas,
+      precioBaseSeleccionado: precioBase,
+      descripcion: descripcionTarifa,
+    })
+
+    if (precioBase === 0) {
+      throw new Error(`No se encontró tarifa válida para duración ${solicitud.duracion}h`)
     }
 
     detalles.push({
@@ -442,9 +460,10 @@ export class CotizacionService {
     cotizacion.estadoPago = 'abono_pendiente'
     await cotizacion.save()
 
-    // Bloquear fecha en calendario
+    // Bloquear fecha en calendario con referencia a cotización (CASCADE DELETE)
     await BloqueoCalendario.create({
       espacioId: cotizacion.espacioId!,
+      cotizacionId: cotizacion.id,
       fecha: cotizacion.fecha,
       horaInicio: cotizacion.hora,
       horaFin: this.calcularHoraFin(cotizacion.hora, cotizacion.duracion),

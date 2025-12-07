@@ -46,7 +46,20 @@ function formatearFechaLegible(fechaStr: string | Date | null | undefined): stri
     return 'Fecha por confirmar'
   }
 
-  const fecha = typeof fechaStr === 'string' ? new Date(fechaStr) : fechaStr
+  let fecha: Date
+  if (typeof fechaStr === 'string') {
+    // Si es formato YYYY-MM-DD, parsearlo en zona horaria local para evitar problemas de UTC
+    const partes = fechaStr.split('-')
+    if (partes.length === 3) {
+      const [year, month, day] = partes.map(Number)
+      fecha = new Date(year, month - 1, day) // month - 1 porque los meses van de 0-11
+    } else {
+      fecha = new Date(fechaStr)
+    }
+  } else {
+    fecha = fechaStr
+  }
+
   if (Number.isNaN(fecha?.getTime())) {
     return 'Fecha por confirmar'
   }

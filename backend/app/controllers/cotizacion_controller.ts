@@ -556,6 +556,12 @@ export default class CotizacionController {
 
         const resultado = await CotizacionService.crearCotizacion(solicitud)
         
+        console.log('[Actualizar] Resultado recalculo:', {
+          valorTotal: resultado.cotizacion.valorTotal,
+          detallesCount: resultado.detalles.length,
+          detalles: resultado.detalles,
+        })
+        
         // Actualizar cotización existente con nuevos valores
         cotizacion.merge({
           espacioId: solicitud.espacioId,
@@ -571,6 +577,11 @@ export default class CotizacionController {
           detalles: resultado.detalles,
           horasAdicionalesAplicadas: resultado.cotizacion.horasAdicionalesAplicadas,
           recargoNocturnoAplicado: resultado.cotizacion.recargoNocturnoAplicado,
+        })
+        
+        console.log('[Actualizar] Cotización después de merge:', {
+          valorTotal: cotizacion.valorTotal,
+          detalles: cotizacion.detalles,
         })
       }
 
