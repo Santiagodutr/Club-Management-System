@@ -14,20 +14,31 @@ try {
   
   if (result.success && result.data) {
     // Mapear a estructura compatible
-    salonesData = result.data.map((espacio: any) => ({
-      id: espacio.id,
-      nombre: espacio.nombre,
-      slug: espacio.slug,
-      subtitulo: espacio.subtitulo || '',
-      descripcionCorta: espacio.descripcion || '',
-      capacidad: {
-        minima: espacio.capacidad_minima || 0,
-        maxima: espacio.capacidad_maxima || 0
-      },
-      imagenes: espacio.imagenes || [],
-      precioDesde: espacio.precio_desde || 'Consultar',
-      destacado: espacio.destacado || false
-    }))
+    salonesData = result.data.map((espacio: any) => {
+      // Formatear precio con comas y COP
+      let precioFormateado = 'Consultar'
+      if (espacio.precio_desde) {
+        const precio = parseFloat(espacio.precio_desde)
+        if (!isNaN(precio)) {
+          precioFormateado = new Intl.NumberFormat('es-CO').format(precio) + ' COP'
+        }
+      }
+      
+      return {
+        id: espacio.id,
+        nombre: espacio.nombre,
+        slug: espacio.slug,
+        subtitulo: espacio.subtitulo || '',
+        descripcionCorta: espacio.descripcion || '',
+        capacidad: {
+          minima: espacio.capacidad_minima || 0,
+          maxima: espacio.capacidad_maxima || 0
+        },
+        imagenes: espacio.imagenes || [],
+        precioDesde: precioFormateado,
+        destacado: espacio.destacado || false
+      }
+    })
   }
 } catch (error) {
   console.error('Error cargando espacios:', error)
@@ -62,7 +73,7 @@ try {
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                   <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
-                {salon.capacidad.minima} - {salon.capacidad.maxima} personas
+                Hasta {salon.capacidad.maxima} personas
               </span>
               <h2>{salon.nombre}</h2>
             </div>
