@@ -166,8 +166,12 @@ function setupEventListeners() {
   const imagenesContainer = document.getElementById('imagenesContainer')
   imagenesContainer?.addEventListener('click', (e) => {
     const target = e.target as HTMLElement
-    const action = target.dataset.action
-    const index = target.dataset.index
+    // Buscar el botón más cercano si el click fue en un hijo (como SVG o path)
+    const button = target.closest('[data-action]') as HTMLElement
+    if (!button) return
+    
+    const action = button.dataset.action
+    const index = button.dataset.index
 
     if (action === 'eliminar-imagen' && index !== undefined) {
       if (confirm('¿Eliminar esta imagen?')) {
@@ -461,19 +465,27 @@ function renderImagenes() {
       (img, index) => `
     <div class="imagen-item ${img.es_portada ? 'is-portada' : ''}">
       <img src="${img.url}" alt="${img.alt || 'Imagen'}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"140\" height=\"105\" viewBox=\"0 0 140 105\"%3E%3Crect fill=\"%23fee2e2\" width=\"140\" height=\"105\"/%3E%3Ctext x=\"70\" y=\"55\" font-family=\"Arial\" font-size=\"14\" fill=\"%23ef4444\" text-anchor=\"middle\"%3EError%3C/text%3E%3C/svg%3E'" />
+      <div class="imagen-actions">
+        ${!img.es_portada ? `<button type="button" class="btn-icon primary" data-action="marcar-portada" data-index="${index}" title="Marcar como portada">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </button>` : ''}
+        <button type="button" class="btn-icon danger" data-action="eliminar-imagen" data-index="${index}" title="Eliminar imagen">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+        </button>
+      </div>
       <input 
         type="text" 
         value="${img.alt || ''}" 
-        placeholder="Descripción..."
+        placeholder="Descripción de la imagen..."
         data-index="${index}"
         class="imagen-alt-input"
       />
-      <div class="imagen-overlay">
-        <div class="imagen-actions">
-          ${!img.es_portada ? `<button type="button" class="btn-icon" data-action="marcar-portada" data-index="${index}" style="background: #0a4ba5;">Portada</button>` : '<span style="color: white; font-weight: bold;">📌 PORTADA</span>'}
-          <button type="button" class="btn-icon danger" data-action="eliminar-imagen" data-index="${index}">Eliminar</button>
-        </div>
-      </div>
     </div>
   `
     )
@@ -543,8 +555,15 @@ async function handleFileUpload(event: Event) {
 }
 
 async function actualizarDisposiciones() {
-  const authData = localStorage.getItem('adminAuth')
-  const token = authData ? JSON.parse(authData).token : null
+  const { data: sessionData } = await supabase.auth.getSession()
+  const token = sessionData.session?.access_token
+  
+  if (!token) {
+    alert('Sesión expirada. Por favor, inicia sesión nuevamente.')
+    window.location.href = '/admin/login'
+    return
+  }
+  
   const headers = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`
@@ -638,8 +657,15 @@ async function guardarEspacio() {
 
   try {
     // Actualizar espacio
-    const authData = localStorage.getItem('adminAuth')
-    const token = authData ? JSON.parse(authData).token : null
+    const { data: sessionData } = await supabase.auth.getSession()
+    const token = sessionData.session?.access_token
+    
+    if (!token) {
+      alert('Sesión expirada. Por favor, inicia sesión nuevamente.')
+      window.location.href = '/admin/login'
+      return
+    }
+    
     const response = await fetch(`http://localhost:3333/api/espacios/${espacioId}`, {
       method: 'PUT',
       headers: {
