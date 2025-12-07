@@ -69,5 +69,36 @@ export function setupGlobalAuthInterceptor() {
   }
 }
 
+// Setup auto-refresh del token cada 4 minutos
+export async function setupAutoTokenRefresh() {
+  try {
+    // Importar dinámicamente para evitar problemas circulares
+    const { getFreshToken } = await import('./auth')
+    
+    // Verificar y refrescar token inmediatamente
+    const initialToken = await getFreshToken()
+    if (!initialToken) {
+      console.warn('[Auto Refresh] No se pudo obtener token inicial')
+      return
+    }
+    
+    console.log('[Auto Refresh] Token refresh configurado (cada 4 minutos)')
+    
+    // Configurar intervalo de refresco cada 4 minutos
+    setInterval(async () => {
+      console.log('[Auto Refresh] Verificando token...')
+      const token = await getFreshToken()
+      if (!token) {
+        console.warn('[Auto Refresh] Token expiró y no se pudo refrescar')
+        // No redirigir aquí, dejar que el interceptor lo maneje
+      } else {
+        console.log('[Auto Refresh] Token válido')
+      }
+    }, 240000) // 4 minutos = 240000 ms
+  } catch (error) {
+    console.error('[Auto Refresh] Error configurando auto-refresh:', error)
+  }
+}
+
 // NO inicializar automáticamente - dejar que AdminLayout lo haga explícitamente
 // Esto evita problemas de timing con el almacenamiento del token después del login

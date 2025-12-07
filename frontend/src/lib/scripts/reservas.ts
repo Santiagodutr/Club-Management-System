@@ -159,8 +159,10 @@ function formatFullDate(key: string): string {
 }
 
 async function ensureSession() {
-  const { data } = await supabase.auth.getSession()
-  if (!data.session) {
+  // Usar getFreshToken para auto-refresh
+  const { getFreshToken } = await import('../auth')
+  const token = await getFreshToken()
+  if (!token) {
     window.location.href = '/admin/login'
   }
 }

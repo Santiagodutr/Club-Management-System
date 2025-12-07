@@ -19,10 +19,34 @@ export const prerender = false
 
     <section class="card">
       <form id="espacioForm" class="form-grid">
+        <!-- Galería -->
+        <div class="wide images-section">
+          <div class="images-header">
+            <div>
+              <p class="eyebrow">Galería</p>
+              <h3>Imágenes del salón</h3>
+            </div>
+            <div class="upload-actions">
+              <input type="file" id="fileInput" accept="image/*" multiple hidden />
+              <button type="button" id="btnSubirArchivo" class="btn secondary">Subir Imágenes</button>
+            </div>
+          </div>
+          
+          <div id="imagenesContainer" class="imagenes-grid">
+            <div class="placeholder">No hay imágenes. Sube archivos para comenzar.</div>
+          </div>
+
+          <div id="uploadProgress" class="upload-progress" style="display: none;">
+            <div class="progress-bar">
+              <div id="progressBar" class="progress-fill"></div>
+            </div>
+            <p id="progressText">Subiendo...</p>
+          </div>
+        </div>
+
         <!-- Información básica -->
         <div class="wide section-header">
           <p class="eyebrow">Información Básica</p>
-          <h3>Datos del salón</h3>
         </div>
         <label class="wide">
           Nombre del salón *
@@ -38,6 +62,11 @@ export const prerender = false
         <label class="wide">
           Subtítulo
           <input id="subtitulo" type="text" placeholder="Texto corto descriptivo" />
+        </label>
+
+        <label>
+          Capacidad máxima
+          <input id="capacidadMaxima" type="number" min="1" placeholder="100" />
         </label>
 
         <label>
@@ -59,9 +88,7 @@ export const prerender = false
 
         <!-- Descripción -->
         <div class="wide section-header">
-          <p class="eyebrow">Contenido</p>
-          <h3>Descripción completa</h3>
-          <small class="hint">Usa Markdown para formato</small>
+          <p class="eyebrow">Descripción Completa</p>
         </div>
 
         <div class="wide">
@@ -73,8 +100,7 @@ export const prerender = false
 
         <!-- Características y Servicios -->
         <div class="wide section-header">
-          <p class="eyebrow">Detalles</p>
-          <h3>Características y Servicios</h3>
+          <p class="eyebrow">Características y Servicios</p>
         </div>
 
         <div class="tags-section">
@@ -100,8 +126,7 @@ export const prerender = false
         <!-- Disposiciones -->
         <div class="wide section-header">
           <div style="flex: 1;">
-            <p class="eyebrow">Configuración</p>
-            <h3>Disposiciones del salón</h3>
+            <p class="eyebrow">Configuración de Disposiciones</p>
           </div>
           <button id="btnAgregarDisposicion" type="button" class="btn secondary">+ Agregar Disposición</button>
         </div>
@@ -115,7 +140,7 @@ export const prerender = false
         <!-- Popup de disposición (inline) -->
         <div id="popupDisposicion" class="popup-disposicion" style="display: none;">
           <div class="popup-content">
-            <h4>Agregar Disposición</h4>
+            <h4>Nueva Disposición</h4>
             <label>
               Tipo de disposición
               <select id="selectDisposicion">
@@ -126,35 +151,11 @@ export const prerender = false
               Capacidad
               <input id="inputCapacidad" type="number" min="1" placeholder="Ej: 50" />
             </label>
+
             <div class="popup-actions">
               <button id="btnCancelarDisposicion" type="button" class="btn ghost">Cancelar</button>
               <button id="btnConfirmarDisposicion" type="button" class="btn primary">Agregar</button>
             </div>
-          </div>
-        </div>
-
-        <!-- Imágenes -->
-        <div class="wide images-section">
-          <div class="images-header">
-            <div>
-              <p class="eyebrow">Galería</p>
-              <h3>Imágenes del salón</h3>
-            </div>
-            <div class="upload-actions">
-              <input type="file" id="fileInput" accept="image/*" multiple hidden />
-              <button type="button" id="btnSubirArchivo" class="btn secondary">📤 Subir Imágenes</button>
-            </div>
-          </div>
-          
-          <div id="imagenesContainer" class="imagenes-grid">
-            <div class="placeholder">No hay imágenes. Sube archivos para comenzar.</div>
-          </div>
-
-          <div id="uploadProgress" class="upload-progress" style="display: none;">
-            <div class="progress-bar">
-              <div id="progressBar" class="progress-fill"></div>
-            </div>
-            <p id="progressText">Subiendo...</p>
           </div>
         </div>
 
@@ -169,6 +170,111 @@ export const prerender = false
 
 
 
+  <!-- Modal de Tarifas -->
+  <div id="modalTarifas" class="modal-overlay" style="display: none;">
+    <div class="modal-tarifas">
+      <div class="modal-header">
+        <h3>Configurar Tarifas</h3>
+        <button id="btnCerrarModalTarifas" class="btn-close" type="button">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="tariff-card">
+          <div class="tariff-card-header">
+            <h4>Socio</h4>
+            <span class="badge-socio">Miembro</span>
+          </div>
+          
+          <div class="tariff-grid">
+            <label>
+              <span class="label-text">4 horas</span>
+              <div class="input-with-icon">
+                <span class="input-icon">$</span>
+                <input id="modalTarifaSocio4h" type="text" class="currency-input" placeholder="0" />
+              </div>
+            </label>
+            <label>
+              <span class="label-text">8 horas</span>
+              <div class="input-with-icon">
+                <span class="input-icon">$</span>
+                <input id="modalTarifaSocio8h" type="text" class="currency-input" placeholder="0" />
+              </div>
+            </label>
+          </div>
+
+          <div class="tariff-additional">
+            <h5>Horas Adicionales</h5>
+            <div class="tariff-grid">
+              <label>
+                <span class="label-text">Adicional 4h</span>
+                <div class="input-with-icon">
+                  <span class="input-icon">$</span>
+                  <input id="modalAdicionalSocio4h" type="text" class="currency-input" placeholder="0" />
+                </div>
+              </label>
+              <label>
+                <span class="label-text">Adicional 8h</span>
+                <div class="input-with-icon">
+                  <span class="input-icon">$</span>
+                  <input id="modalAdicionalSocio8h" type="text" class="currency-input" placeholder="0" />
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="tariff-card">
+          <div class="tariff-card-header">
+            <h4>Particular</h4>
+            <span class="badge-particular">Externo</span>
+          </div>
+          
+          <div class="tariff-grid">
+            <label>
+              <span class="label-text">4 horas</span>
+              <div class="input-with-icon">
+                <span class="input-icon">$</span>
+                <input id="modalTarifaParticular4h" type="text" class="currency-input" placeholder="0" />
+              </div>
+            </label>
+            <label>
+              <span class="label-text">8 horas</span>
+              <div class="input-with-icon">
+                <span class="input-icon">$</span>
+                <input id="modalTarifaParticular8h" type="text" class="currency-input" placeholder="0" />
+              </div>
+            </label>
+          </div>
+
+          <div class="tariff-additional">
+            <h5>Horas Adicionales</h5>
+            <div class="tariff-grid">
+              <label>
+                <span class="label-text">Adicional 4h</span>
+                <div class="input-with-icon">
+                  <span class="input-icon">$</span>
+                  <input id="modalAdicionalParticular4h" type="text" class="currency-input" placeholder="0" />
+                </div>
+              </label>
+              <label>
+                <span class="label-text">Adicional 8h</span>
+                <div class="input-with-icon">
+                  <span class="input-icon">$</span>
+                  <input id="modalAdicionalParticular8h" type="text" class="currency-input" placeholder="0" />
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btnCancelarModalTarifas" type="button" class="btn ghost">Cancelar</button>
+        <button id="btnGuardarTarifas" type="button" class="btn primary">Guardar Tarifas</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast notifications -->
   <div id="toastContainer" class="toast-container"></div>
 </AdminLayout>
@@ -182,6 +288,184 @@ import '@scripts/espacios/nuevo.ts'
 
 <style>
   .panel { padding: 2rem; max-width: 1200px; margin: 0 auto 4rem; }
+  .panel__header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 2rem; }
+  .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.8rem; color: #0a4ba5; margin: 0 0 0.3rem; font-weight: 600; }
+  h1, h2, h3, h4 { margin: 0; color: #0f172a; }
+  h3 { font-size: 1.05rem; }
+  h4 { font-size: 0.95rem; }
+  .muted { color: #4b5563; margin: 0.4rem 0 0; max-width: 640px; font-size: 0.9rem; }
+  .actions { display: flex; gap: 0.5rem; align-items: center; }
+  .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 2rem; box-shadow: 0 10px 30px rgba(15,23,42,0.06); }
+  
+  label { font-size: 0.9rem; color: #4b5563; display: flex; flex-direction: column; gap: 0.3rem; font-weight: 600; }
+  label .hint { font-size: 0.85rem; color: #9ca3af; font-weight: 400; margin-top: 0.2rem; }
+  select, input, textarea { border: 1px solid #d1d5db; border-radius: 10px; padding: 0.65rem 0.85rem; font: inherit; background: #ffffff; color: #111827; transition: border-color 0.2s; }
+  select:focus, input:focus, textarea:focus { outline: none; border-color: #0a4ba5; box-shadow: 0 0 0 3px rgba(10, 75, 165, 0.1); }
+  textarea { display: none; }
+  
+  /* Editor EasyMDE - estilos comunes en /src/styles/easymde-custom.css */
+  #editorContainer { margin-top: 0.25rem; }
+  
+  .btn { border: none; border-radius: 10px; padding: 0.65rem 1rem; font-weight: 600; cursor: pointer; font: inherit; transition: all 0.2s ease; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; }
+  .btn.primary { background: linear-gradient(135deg, #0a4ba5, #2563eb); color: #fff; box-shadow: 0 10px 20px rgba(37,99,235,0.2); }
+  .btn.primary:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(37,99,235,0.3); }
+  .btn.secondary { background: #eef2ff; color: #1d4ed8; border: 1px solid #dbeafe; }
+  .btn.secondary:hover { background: #dbeafe; transform: translateY(-1px); }
+  .btn.ghost { background: #ffffff; color: #0f172a; border: 1px solid #e5e7eb; }
+  .btn.ghost:hover { background: #f9fafb; transform: translateY(-1px); }
+  .btn.small { padding: 0.45rem 0.75rem; font-size: 0.85rem; }
+  
+  .placeholder { padding: 1.5rem; color: #6b7280; text-align: center; border: 1px dashed #e5e7eb; border-radius: 12px; background: #f8fafc; }
+  .placeholder-text { padding: 0.75rem; color: #9ca3af; text-align: center; font-size: 0.85rem; }
+  
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+  .wide { grid-column: 1 / -1; }
+  
+  .section-header { display: flex; align-items: center; gap: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid #e5e7eb; margin-bottom: 0.5rem; }
+  .section-header .eyebrow { margin: 0; }
+  .section-header h3 { margin: 0.25rem 0 0; }
+  .section-header .hint { display: block; margin: 0.25rem 0 0; }
+  
+  .switch-group { display: flex; gap: 2rem; align-items: center; }
+  .switch { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: #4b5563; cursor: pointer; flex-direction: row; font-weight: 500; }
+  .switch input { width: 18px; height: 18px; cursor: pointer; margin: 0; }
+  
+  .form-actions { display: flex; gap: 1rem; justify-content: flex-end; padding-top: 1rem; border-top: 1px solid #e5e7eb; margin-top: 0.5rem; }
+  
+  /* Tags section */
+  .tags-section { display: flex; flex-direction: column; gap: 0.5rem; }
+  .tags-section label { flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+  .tags-list { display: flex; flex-wrap: wrap; gap: 0.5rem; min-height: 40px; }
+  :global(.tag-item) { background: #eef2ff; color: #1d4ed8; padding: 0.4rem 0.75rem; border-radius: 6px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; border: 1px solid #dbeafe; }
+  :global(.tag-item button) { background: none; border: none; color: #1d4ed8; cursor: pointer; padding: 0; font-size: 1rem; line-height: 1; }
+  
+  /* Disposiciones */
+  .disposiciones-list { display: grid; gap: 0.75rem; min-height: 60px; }
+  :global(.config-card) { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center; padding: 1rem 1.25rem; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; transition: all 0.2s; }
+  :global(.config-card:hover) { background: #ffffff; border-color: #0a4ba5; box-shadow: 0 4px 12px rgba(10, 75, 165, 0.1); }
+  :global(.config-info) { display: flex; flex-direction: column; gap: 0.5rem; }
+  :global(.config-title) { font-weight: 600; color: #0f172a; font-size: 0.95rem; }
+  :global(.config-capacity-input) { display: flex; align-items: center; gap: 0.5rem; }
+  :global(.config-capacity-input label) { color: #6b7280; font-size: 0.85rem; margin: 0; font-weight: 500; }
+  :global(.capacity-input) { width: 80px; padding: 0.35rem 0.5rem; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 0.85rem; background: white; }
+  :global(.capacity-input:focus) { outline: none; border-color: #0a4ba5; box-shadow: 0 0 0 3px rgba(10, 75, 165, 0.1); }
+  :global(.btn-icon) { background: none; border: none; cursor: pointer; font-size: 1.5rem; padding: 0.25rem 0.5rem; border-radius: 6px; transition: all 0.2s; color: #6b7280; line-height: 1; }
+  :global(.btn-icon:hover) { background: #fee2e2; color: #dc2626; transform: scale(1.1); }
+  :global(.btn-icon.danger:hover) { background: #fecaca; color: #b91c1c; }
+  :global(.disposicion-actions) { display: flex; gap: 0.5rem; }
+  :global(.btn-tarifa) { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 0.5rem 0.85rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+  :global(.btn-tarifa:hover) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3); background: linear-gradient(135deg, #059669, #047857); }
+  :global(.btn-tarifa.has-rates) { background: linear-gradient(135deg, #0891b2, #0e7490); box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3); }
+  :global(.btn-tarifa.has-rates:hover) { background: linear-gradient(135deg, #0e7490, #155e75); }
+  :global(.btn-tarifa svg) { width: 16px; height: 16px; }
+  
+  /* Popup disposición inline */
+  .popup-disposicion { grid-column: 1 / -1; background: #f0f9ff; border: 2px solid #0ea5e9; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15); animation: slideDown 0.3s ease; }
+  .popup-content { display: flex; flex-direction: column; gap: 1rem; }
+  .popup-content h4 { color: #0e7490; margin-bottom: 0.5rem; }
+  .popup-content h5 { color: #0f172a; margin: 0; font-size: 0.9rem; font-weight: 600; }
+  .popup-actions { display: flex; gap: 0.75rem; justify-content: flex-end; padding-top: 0.5rem; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  /* Modal Tarifas */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 10000; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  
+  .modal-tarifas { background: white; border-radius: 20px; max-width: 700px; width: 92%; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  
+  .modal-header { padding: 1.75rem 2rem; border-bottom: 2px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #f0f9ff, #ffffff); border-radius: 20px 20px 0 0; }
+  .modal-header h3 { margin: 0; color: #0a4ba5; font-size: 1.5rem; font-weight: 700; }
+  .btn-close { background: none; border: none; font-size: 2.5rem; line-height: 1; cursor: pointer; color: #9ca3af; padding: 0; transition: all 0.2s; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+  .btn-close:hover { color: #dc2626; background: #fee2e2; transform: scale(1.1); }
+  
+  .modal-body { padding: 2rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1.5rem; }
+  .modal-footer { padding: 1.5rem 2rem; border-top: 2px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 1rem; background: #f9fafb; border-radius: 0 0 20px 20px; }
+  
+  .tariff-card { background: linear-gradient(135deg, #f8fafc, #ffffff); border: 2px solid #e5e7eb; border-radius: 16px; padding: 1.75rem; transition: all 0.3s; }
+  .tariff-card:hover { border-color: #0a4ba5; box-shadow: 0 8px 24px rgba(10, 75, 165, 0.12); }
+  
+  .tariff-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e5e7eb; }
+  .tariff-card-header h4 { margin: 0; color: #0f172a; font-size: 1.25rem; font-weight: 700; }
+  
+  .badge-socio { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #166534; padding: 0.4rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(22, 101, 52, 0.15); }
+  .badge-particular { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; padding: 0.4rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(30, 64, 175, 0.15); }
+  
+  .tariff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .tariff-grid label { margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+  .label-text { font-size: 0.9rem; font-weight: 600; color: #4b5563; }
+  
+  .input-with-icon { position: relative; }
+  .input-icon { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-weight: 600; font-size: 1rem; pointer-events: none; }
+  .input-with-icon input { padding-left: 2.25rem; background: white; }
+  
+  .tariff-additional { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px dashed #e5e7eb; }
+  .tariff-additional h5 { margin: 0 0 1rem; color: #0f172a; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+  .tariff-additional h5::before { content: '+'; background: #eef2ff; color: #1d4ed8; width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; }
+  
+  /* Pricing cards */
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+  .pricing-card { background: #f8fafc; border: 2px solid #e5e7eb; border-radius: 12px; padding: 1.5rem; transition: all 0.2s; }
+  .pricing-card:hover { border-color: #0a4ba5; box-shadow: 0 4px 12px rgba(10, 75, 165, 0.1); }
+  .pricing-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 2px solid #e5e7eb; }
+  .pricing-header h4 { margin: 0; color: #0f172a; font-size: 1.1rem; }
+  .badge { padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; background: #dbeafe; color: #1d4ed8; }
+  .badge.socio { background: #dcfce7; color: #166534; }
+  .pricing-inputs { display: flex; flex-direction: column; gap: 1rem; }
+  .pricing-inputs label { margin: 0; }
+  .pricing-inputs input { background: white; }
+  
+  /* Images section */
+  .images-section { border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.5rem; background: #f8fafc; }
+  .images-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
+  .images-header h3 { margin: 0.25rem 0 0; font-size: 1rem; color: #0f172a; }
+  .upload-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .imagenes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; min-height: 100px; }
+  
+  :global(.imagen-item) { position: relative; aspect-ratio: 4/3; border-radius: 12px; overflow: hidden; border: 2px solid #e5e7eb; background: #f1f5f9; transition: all 0.25s ease; }
+  :global(.imagen-item:hover) { border-color: #0a4ba5; transform: translateY(-4px); box-shadow: 0 8px 24px rgba(10, 75, 165, 0.15); }
+  :global(.imagen-item.is-portada) { border-color: #10b981; border-width: 3px; }
+  :global(.imagen-item.is-portada::before) { content: 'PORTADA'; position: absolute; top: 0.5rem; left: 0.5rem; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px; z-index: 10; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
+  :global(.imagen-item img) { width: 100%; height: 100%; object-fit: cover; }
+  :global(.imagen-item .imagen-alt-input) { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); border: none; border-top: 1px solid #e5e7eb; padding: 0.5rem; font-size: 0.8rem; font-family: inherit; opacity: 0; transition: opacity 0.25s; }
+  :global(.imagen-item:hover .imagen-alt-input) { opacity: 1; }
+  :global(.imagen-actions) { position: absolute; top: 0.5rem; right: 0.5rem; display: flex; gap: 0.35rem; opacity: 0; transition: opacity 0.25s; z-index: 10; }
+  :global(.imagen-item:hover .imagen-actions) { opacity: 1; }
+  :global(.imagen-item .btn-icon) { width: 36px; height: 36px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 1.1rem; backdrop-filter: blur(8px); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); }
+  :global(.imagen-item .btn-icon.primary) { background: rgba(10, 75, 165, 0.95); color: white; }
+  :global(.imagen-item .btn-icon.primary:hover) { background: #0a4ba5; transform: scale(1.1); }
+  :global(.imagen-item .btn-icon.danger) { background: rgba(220, 38, 38, 0.95); color: white; }
+  :global(.imagen-item .btn-icon.danger:hover) { background: #dc2626; transform: scale(1.1); }
+  
+  .upload-progress { margin-top: 1rem; }
+  .progress-bar { width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; margin-bottom: 0.5rem; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #0a4ba5, #2563eb); transition: width 0.3s ease; }
+  #progressText { font-size: 0.85rem; color: #6b7280; text-align: center; margin: 0; }
+  
+  /* Modal Galería */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+  .modal-content { background: white; border-radius: 16px; max-width: 900px; width: 90%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3); }
+  .modal-header { padding: 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h3 { margin: 0; color: #0f172a; font-size: 1.25rem; }
+  .btn-close { background: none; border: none; font-size: 2rem; line-height: 1; cursor: pointer; color: #6b7280; padding: 0; transition: color 0.2s; }
+  .btn-close:hover { color: #dc2626; }
+  .modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 1.5rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 0.75rem; }
+  
+  .galeria-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
+  :global(.galeria-item) { aspect-ratio: 1; border-radius: 8px; overflow: hidden; cursor: pointer; border: 3px solid transparent; transition: all 0.2s; position: relative; background: #f1f5f9; }
+  :global(.galeria-item:hover) { border-color: #0a4ba5; transform: scale(1.02); }
+  :global(.galeria-item.selected) { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+  :global(.galeria-item.selected::after) { content: '✓'; position: absolute; top: 0.5rem; right: 0.5rem; background: #10b981; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4); }
+  :global(.galeria-item img) { width: 100%; height: 100%; object-fit: cover; }
+  
+  /* Toast notifications */
+  .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 10000; display: flex; flex-direction: column; gap: 0.75rem; }
+  :global(.toast) { background: white; border-radius: 10px; padding: 1rem 1.25rem; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); border-left: 4px solid; min-width: 280px; animation: slideIn 0.3s ease; }
+  :global(.toast.success) { border-left-color: #10b981; }
+  :global(.toast.error) { border-left-color: #dc2626; }
+  :global(.toast.info) { border-left-color: #0ea5e9; }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   .panel__header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 2rem; }
   .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.8rem; color: #0a4ba5; margin: 0 0 0.3rem; font-weight: 600; }
   h1, h2, h3, h4 { margin: 0; color: #0f172a; }
@@ -251,6 +535,12 @@ import '@scripts/espacios/nuevo.ts'
   :global(.disposicion-nombre) { font-weight: 600; color: #0f172a; font-size: 0.95rem; }
   :global(.disposicion-capacidad) { color: #6b7280; font-size: 0.85rem; }
   :global(.disposicion-item .btn) { padding: 0.4rem 0.75rem; font-size: 0.8rem; }
+  :global(.disposicion-actions) { display: flex; gap: 0.5rem; }
+  :global(.btn-tarifa) { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 0.5rem 0.85rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+  :global(.btn-tarifa:hover) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3); background: linear-gradient(135deg, #059669, #047857); }
+  :global(.btn-tarifa.has-rates) { background: linear-gradient(135deg, #0891b2, #0e7490); box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3); }
+  :global(.btn-tarifa.has-rates:hover) { background: linear-gradient(135deg, #0e7490, #155e75); }
+  :global(.btn-tarifa svg) { width: 16px; height: 16px; }
   
   /* Popup disposición inline */
   .popup-disposicion { 
@@ -265,8 +555,45 @@ import '@scripts/espacios/nuevo.ts'
   }
   .popup-content { display: flex; flex-direction: column; gap: 1rem; }
   .popup-content h4 { color: #0e7490; margin-bottom: 0.5rem; }
+  .popup-content h5 { color: #0f172a; margin: 0; font-size: 0.9rem; font-weight: 600; }
   .popup-actions { display: flex; gap: 0.75rem; justify-content: flex-end; padding-top: 0.5rem; }
   @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  /* Modal Tarifas */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 10000; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  
+  .modal-tarifas { background: white; border-radius: 20px; max-width: 700px; width: 92%; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  
+  .modal-header { padding: 1.75rem 2rem; border-bottom: 2px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #f0f9ff, #ffffff); border-radius: 20px 20px 0 0; }
+  .modal-header h3 { margin: 0; color: #0a4ba5; font-size: 1.5rem; font-weight: 700; }
+  .btn-close { background: none; border: none; font-size: 2.5rem; line-height: 1; cursor: pointer; color: #9ca3af; padding: 0; transition: all 0.2s; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+  .btn-close:hover { color: #dc2626; background: #fee2e2; transform: scale(1.1); }
+  
+  .modal-body { padding: 2rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1.5rem; }
+  .modal-footer { padding: 1.5rem 2rem; border-top: 2px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 1rem; background: #f9fafb; border-radius: 0 0 20px 20px; }
+  
+  .tariff-card { background: linear-gradient(135deg, #f8fafc, #ffffff); border: 2px solid #e5e7eb; border-radius: 16px; padding: 1.75rem; transition: all 0.3s; }
+  .tariff-card:hover { border-color: #0a4ba5; box-shadow: 0 8px 24px rgba(10, 75, 165, 0.12); }
+  
+  .tariff-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e5e7eb; }
+  .tariff-card-header h4 { margin: 0; color: #0f172a; font-size: 1.25rem; font-weight: 700; }
+  
+  .badge-socio { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #166534; padding: 0.4rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(22, 101, 52, 0.15); }
+  .badge-particular { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; padding: 0.4rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(30, 64, 175, 0.15); }
+  
+  .tariff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .tariff-grid label { margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+  .label-text { font-size: 0.9rem; font-weight: 600; color: #4b5563; }
+  
+  .input-with-icon { position: relative; }
+  .input-icon { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-weight: 600; font-size: 1rem; pointer-events: none; }
+  .input-with-icon input { padding-left: 2.25rem; background: white; }
+  
+  .tariff-additional { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px dashed #e5e7eb; }
+  .tariff-additional h5 { margin: 0 0 1rem; color: #0f172a; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+  .tariff-additional h5::before { content: '+'; background: #eef2ff; color: #1d4ed8; width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; }
   
   /* Pricing cards */
   .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }

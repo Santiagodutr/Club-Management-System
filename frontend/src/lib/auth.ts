@@ -104,3 +104,63 @@ export function onAuthStateChange(callback: (authState: AuthState) => void) {
     })
   })
 }
+
+/**
+ * Get fresh access token (refreshes automatically if needed)
+ */
+export async function getFreshToken(): Promise<string | null> {
+  try {
+    // Obtener sesión actual (Supabase automáticamente refresca si es necesario)
+    const { data: { session }, error } = await supabase.auth.getSession()
+    
+    if (error) {
+      console.error('[Auth] Error getting session:', error)
+      return null
+    }
+    
+    if (!session) {
+      console.warn('[Auth] No active session found')
+      return null
+    }
+    
+    // Verificar si el token está próximo a expirar (menos de 5 minutos)
+    const expiresAt = session.expires_at ? session.expires_at * 1000 : 0
+    const now = Date.now()
+    const timeUntilExpiry = expiresAt - now
+    const fiveMinutes = 5 * 60 * 1000
+    
+    if (timeUntilExpiry < fiveMinutes) {
+      console.log('[Auth] Token about to expire, refreshing...')
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+      
+      if (refreshError) {
+        console.error('[Auth] Error refreshing session:', refreshError)
+        return null
+      }
+      
+      if (refreshData.session) {
+        console.log('[Auth] Token refreshed successfully')
+        
+        // Actualizar token en localStorage para que lo use api.ts
+        const adminAuth = localStorage.getItem('adminAuth')
+        if (adminAuth) {
+          try {
+            const authData = JSON.parse(adminAuth)
+            authData.token = refreshData.session.access_token
+            localStorage.setItem('adminAuth', JSON.stringify(authData))
+            console.log('[Auth] Updated token in localStorage')
+          } catch (e) {
+            console.error('[Auth] Error updating localStorage:', e)
+          }
+        }
+        
+        return refreshData.session.access_token
+      }
+    }
+    
+    return session.access_token
+  } catch (error) {
+    console.error('[Auth] Unexpected error getting fresh token:', error)
+    return null
+  }
+}
