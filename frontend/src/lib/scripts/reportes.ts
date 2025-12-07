@@ -181,7 +181,7 @@ async function main() {
       yearWrap.style.display = 'flex'
     } else {
       monthWrap.style.display = 'none'
-      yearWrap.style.display = 'none'
+      yearWrap.style.display = 'flex'
     }
   }
 
