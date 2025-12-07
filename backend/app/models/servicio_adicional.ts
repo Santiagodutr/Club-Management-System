@@ -18,7 +18,7 @@ export default class ServicioAdicional extends BaseModel {
   @column({ columnName: 'configuracion_espacio_id' })
   declare configuracionEspacioId: number | null
 
-  @column({ columnName: 'tipo_cliente' })
+  @column({ columnName: 'tipo_cliente', serializeAs: 'tipo_cliente' })
   declare tipoCliente: string // 'socio' | 'particular'
 
   @column()
