@@ -59,6 +59,10 @@ const salon = {
   destacado: espacio.destacado || false,
   fechaActualizacion: espacio.contenido_actualizado_at || new Date().toISOString()
 }
+
+// Obtener imagen de portada
+const imagenPortada = salon.imagenes.find((img: any) => img.es_portada) || salon.imagenes[0]
+const urlPortada = imagenPortada?.url || '/src/assets/millanura.jpg'
 ---
 
 <BaseLayout title={`${salon.nombre} - Club del Meta`} hideNavbar fullWidth>
@@ -66,7 +70,7 @@ const salon = {
   <section class="salon-hero">
     <div 
       class="salon-hero__background" 
-      style={`background-image: linear-gradient(rgba(4, 14, 32, 0.6), rgba(4, 14, 32, 0.8)), url(${salon.imagenes[0]?.url || '/src/assets/millanura.jpg'})`}
+      style={`background-image: linear-gradient(rgba(4, 14, 32, 0.6), rgba(4, 14, 32, 0.8)), url(${urlPortada})`}
     ></div>
 
     <div class="navbar-wrapper">

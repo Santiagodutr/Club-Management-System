@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 
+// Mantener página estática para mejor rendimiento
+export const prerender = true
+
 const API_URL = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333'
 
 // Obtener espacios desde la API
@@ -42,8 +45,13 @@ try {
     </header>
 
     <div class="salones-grid">
-      {salonesData.map((salon) => (
-        <article class="salon-card" data-destacado={salon.destacado} style={`background-image: url(${salon.imagenes[0]?.url || '/src/assets/millanura.jpg'})`}>
+      {salonesData.map((salon) => {
+        // Buscar imagen de portada, o usar la primera si no hay portada definida
+        const imagenPortada = salon.imagenes.find((img: any) => img.es_portada) || salon.imagenes[0]
+        const urlPortada = imagenPortada?.url || '/src/assets/millanura.jpg'
+        
+        return (
+        <article class="salon-card" data-destacado={salon.destacado} style={`background-image: url(${urlPortada})`}>
           <div class="salon-card__overlay">
             <div class="salon-card__header">
               {salon.destacado && <span class="salon-card__destacado">Destacado</span>}
@@ -72,7 +80,8 @@ try {
             </div>
           </div>
         </article>
-      ))}
+        )
+      })}
     </div>
   </section>
 </BaseLayout>
