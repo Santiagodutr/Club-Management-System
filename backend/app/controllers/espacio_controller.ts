@@ -106,7 +106,7 @@ export default class EspacioController {
 
       // Insertar el espacio
       const [espacio] = await db
-        .from('espacios')
+        .table('espacios')
         .insert({
           ...datos,
           contenido_actualizado_at: new Date(),
@@ -307,20 +307,53 @@ export default class EspacioController {
         .where('configuraciones_espacio.espacio_id', espacioId)
         .orderBy('configuraciones_espacio.id', 'asc')
 
-      console.log('Configuraciones encontradas:', configuraciones)
+      // Cargar tarifas para cada configuración
+      const configuracionesConTarifas = await Promise.all(
+        configuraciones.map(async (config: any) => {
+          // Tarifas base (4h y 8h)
+          const tarifasBase = await db
+            .from('tarifas')
+            .select('tipo_cliente', 'precio_4_horas', 'precio_8_horas')
+            .where('configuracion_espacio_id', config.id)
+
+          // Tarifas adicionales
+          const tarifasAdicionales = await db
+            .from('tarifas_hora_adicional')
+            .select('tipo_cliente', 'base_horas', 'precio')
+            .where('configuracion_espacio_id', config.id)
+
+          // Organizar tarifas en un objeto
+          const tarifas: any = {}
+          
+          tarifasBase.forEach((tarifa: any) => {
+            const prefix = tarifa.tipo_cliente === 'socio' ? 'socio' : 'particular'
+            tarifas[`${prefix}_4h`] = tarifa.precio_4_horas ? parseFloat(tarifa.precio_4_horas) : null
+            tarifas[`${prefix}_8h`] = tarifa.precio_8_horas ? parseFloat(tarifa.precio_8_horas) : null
+          })
+
+          tarifasAdicionales.forEach((tarifa: any) => {
+            const prefix = tarifa.tipo_cliente === 'socio' ? 'socio' : 'particular'
+            const suffix = tarifa.base_horas === 4 ? '4h' : '8h'
+            tarifas[`${prefix}_adicional_${suffix}`] = tarifa.precio ? parseFloat(tarifa.precio) : null
+          })
+
+          return {
+            id: config.id,
+            capacidad: config.capacidad,
+            disposicion: {
+              id: config.disposicion_id,
+              nombre: config.disposicion_nombre,
+              descripcion: config.disposicion_descripcion,
+              imagen_url: config.disposicion_imagen_url,
+            },
+            tarifas: Object.keys(tarifas).length > 0 ? tarifas : null,
+          }
+        })
+      )
 
       return response.json({
         success: true,
-        data: configuraciones.map((config: any) => ({
-          id: config.id,
-          capacidad: config.capacidad,
-          disposicion: {
-            id: config.disposicion_id,
-            nombre: config.disposicion_nombre,
-            descripcion: config.disposicion_descripcion,
-            imagen_url: config.disposicion_imagen_url,
-          },
-        })),
+        data: configuracionesConTarifas,
       })
     } catch (error) {
       console.error('Error al obtener configuraciones:', error)

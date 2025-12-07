@@ -155,7 +155,7 @@ const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.pro
     </div>
 
     <script>
-      import { checkAuthOnLoad, setupGlobalAuthInterceptor } from '../lib/auth-guard'
+      import { checkAuthOnLoad, setupGlobalAuthInterceptor, setupAutoTokenRefresh } from '../lib/auth-guard'
 
       // Esperar a que el DOM esté listo antes de verificar auth
       document.addEventListener('DOMContentLoaded', () => {
@@ -163,6 +163,11 @@ const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.pro
         console.log('[AdminLayout] Inicializando auth guard...')
         checkAuthOnLoad()
         setupGlobalAuthInterceptor()
+        
+        // Configurar auto-refresh del token
+        setupAutoTokenRefresh()
+          .then(() => console.log('[AdminLayout] Auto-refresh configurado'))
+          .catch(err => console.error('[AdminLayout] Error configurando auto-refresh:', err))
 
         // Logout functionality
         const logoutBtn = document.getElementById('logoutBtn');

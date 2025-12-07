@@ -3,6 +3,7 @@ import Espacio from '#models/espacio'
 import Disposicion from '#models/disposicion'
 import ConfiguracionEspacio from '#models/configuracion_espacio'
 import vine from '@vinejs/vine'
+import db from '@adonisjs/lucid/services/db'
 
 export default class EspaciosAdminController {
   /**
@@ -215,6 +216,76 @@ export default class EspaciosAdminController {
         capacidad: data.capacidad,
       })
 
+      // Crear tarifas si se enviaron
+      const tarifas = request.input('tarifas')
+      if (tarifas) {
+        // Crear tarifas base para socio
+        if (tarifas.socio_4h !== null || tarifas.socio_8h !== null) {
+          await db.table('tarifas').insert({
+            configuracion_espacio_id: configuracion.id,
+            tipo_cliente: 'socio',
+            precio_4_horas: tarifas.socio_4h,
+            precio_8_horas: tarifas.socio_8h,
+            cortesia: false,
+          })
+        }
+
+        // Crear tarifas base para particular
+        if (tarifas.particular_4h !== null || tarifas.particular_8h !== null) {
+          await db.table('tarifas').insert({
+            configuracion_espacio_id: configuracion.id,
+            tipo_cliente: 'particular',
+            precio_4_horas: tarifas.particular_4h,
+            precio_8_horas: tarifas.particular_8h,
+            cortesia: false,
+          })
+        }
+
+        // Crear tarifas adicionales para socio
+        if (tarifas.socio_adicional_4h !== null) {
+          await db.table('tarifas_hora_adicional').insert({
+            configuracion_espacio_id: configuracion.id,
+            tipo_cliente: 'socio',
+            base_horas: 4,
+            min_personas: 1,
+            max_personas: null,
+            precio: tarifas.socio_adicional_4h,
+          })
+        }
+        if (tarifas.socio_adicional_8h !== null) {
+          await db.table('tarifas_hora_adicional').insert({
+            configuracion_espacio_id: configuracion.id,
+            tipo_cliente: 'socio',
+            base_horas: 8,
+            min_personas: 1,
+            max_personas: null,
+            precio: tarifas.socio_adicional_8h,
+          })
+        }
+
+        // Crear tarifas adicionales para particular
+        if (tarifas.particular_adicional_4h !== null) {
+          await db.table('tarifas_hora_adicional').insert({
+            configuracion_espacio_id: configuracion.id,
+            tipo_cliente: 'particular',
+            base_horas: 4,
+            min_personas: 1,
+            max_personas: null,
+            precio: tarifas.particular_adicional_4h,
+          })
+        }
+        if (tarifas.particular_adicional_8h !== null) {
+          await db.table('tarifas_hora_adicional').insert({
+            configuracion_espacio_id: configuracion.id,
+            tipo_cliente: 'particular',
+            base_horas: 8,
+            min_personas: 1,
+            max_personas: null,
+            precio: tarifas.particular_adicional_8h,
+          })
+        }
+      }
+
       await configuracion.load('disposicion')
 
       return response.status(201).json({
@@ -269,6 +340,81 @@ export default class EspaciosAdminController {
       configuracion.capacidad = data.capacidad
 
       await configuracion.save()
+
+      // Actualizar tarifas si se enviaron
+      const tarifas = request.input('tarifas')
+      if (tarifas) {
+        // Eliminar tarifas existentes
+        await db.from('tarifas').where('configuracion_espacio_id', configuracion.id).delete()
+        await db.from('tarifas_hora_adicional').where('configuracion_espacio_id', configuracion.id).delete()
+
+        // Crear tarifas base para socio
+        if (tarifas.socio_4h !== null || tarifas.socio_8h !== null) {
+          await db.table('tarifas').insert({
+            configuracion_espacio_id: configuracion.id,
+            tipo_cliente: 'socio',
+            precio_4_horas: tarifas.socio_4h,
+            precio_8_horas: tarifas.socio_8h,
+            cortesia: false,
+          })
+        }
+
+        // Crear tarifas base para particular
+        if (tarifas.particular_4h !== null || tarifas.particular_8h !== null) {
+          await db.table('tarifas').insert({
+            configuracion_espacio_id: configuracion.id,
+            tipo_cliente: 'particular',
+            precio_4_horas: tarifas.particular_4h,
+            precio_8_horas: tarifas.particular_8h,
+            cortesia: false,
+          })
+        }
+
+        // Crear tarifas adicionales para socio
+        if (tarifas.socio_adicional_4h !== null) {
+          await db.table('tarifas_hora_adicional').insert({
+            configuracion_espacio_id: configuracion.id,
+            tipo_cliente: 'socio',
+            base_horas: 4,
+            min_personas: 1,
+            max_personas: null,
+            precio: tarifas.socio_adicional_4h,
+          })
+        }
+        if (tarifas.socio_adicional_8h !== null) {
+          await db.table('tarifas_hora_adicional').insert({
+            configuracion_espacio_id: configuracion.id,
+            tipo_cliente: 'socio',
+            base_horas: 8,
+            min_personas: 1,
+            max_personas: null,
+            precio: tarifas.socio_adicional_8h,
+          })
+        }
+
+        // Crear tarifas adicionales para particular
+        if (tarifas.particular_adicional_4h !== null) {
+          await db.table('tarifas_hora_adicional').insert({
+            configuracion_espacio_id: configuracion.id,
+            tipo_cliente: 'particular',
+            base_horas: 4,
+            min_personas: 1,
+            max_personas: null,
+            precio: tarifas.particular_adicional_4h,
+          })
+        }
+        if (tarifas.particular_adicional_8h !== null) {
+          await db.table('tarifas_hora_adicional').insert({
+            configuracion_espacio_id: configuracion.id,
+            tipo_cliente: 'particular',
+            base_horas: 8,
+            min_personas: 1,
+            max_personas: null,
+            precio: tarifas.particular_adicional_8h,
+          })
+        }
+      }
+
       await configuracion.load('disposicion')
 
       return response.json({

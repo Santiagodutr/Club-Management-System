@@ -42,6 +42,16 @@ interface DisposicionEspacio {
   disposicion_id: number
   nombre: string
   capacidad: number
+  tarifas?: {
+    socio_4h: number | null
+    socio_8h: number | null
+    socio_adicional_4h: number | null
+    socio_adicional_8h: number | null
+    particular_4h: number | null
+    particular_8h: number | null
+    particular_adicional_4h: number | null
+    particular_adicional_8h: number | null
+  }
 }
 
 let espacioId: number
@@ -52,6 +62,7 @@ let imagenes: ImagenEspacio[] = []
 let disposiciones: Disposicion[] = []
 let disposicionesEspacio: DisposicionEspacio[] = []
 let disposicionesOriginales: DisposicionEspacio[] = []
+let disposicionEditandoIndex: number | null = null
 
 // Obtener el ID del espacio desde la URL
 const pathParts = window.location.pathname.split('/')
@@ -123,17 +134,41 @@ function setupEventListeners() {
     confirmarDisposicion()
   })
 
-  // Event delegation para eliminar disposiciones
+  // Modal de Tarifas
+  document.getElementById('btnCerrarModalTarifas')?.addEventListener('click', (e) => {
+    e.preventDefault()
+    cerrarModalTarifas()
+  })
+  document.getElementById('btnCancelarModalTarifas')?.addEventListener('click', (e) => {
+    e.preventDefault()
+    cerrarModalTarifas()
+  })
+  document.getElementById('btnGuardarTarifas')?.addEventListener('click', (e) => {
+    e.preventDefault()
+    guardarTarifas()
+  })
+
+  // Formateo de inputs de moneda
+  setupCurrencyInputs()
+
+  // Event delegation para eliminar disposiciones y abrir modal de tarifas
   const disposicionesList = document.getElementById('disposicionesList')
   disposicionesList?.addEventListener('click', (e) => {
     const target = e.target as HTMLElement
-    const action = target.dataset.action
-    const index = target.dataset.index
+    const button = target.closest('[data-action]') as HTMLElement
+    if (!button) return
+
+    const action = button.dataset.action
+    const index = button.dataset.index
 
     if (action === 'eliminar-disposicion' && index !== undefined) {
       if (confirm('¿Eliminar esta disposición?')) {
         eliminarDisposicion(parseInt(index))
       }
+    }
+
+    if (action === 'configurar-tarifas' && index !== undefined) {
+      abrirModalTarifas(parseInt(index))
     }
   })
 
@@ -254,6 +289,7 @@ async function cargarEspacio() {
     ;(document.getElementById('nombre') as HTMLInputElement).value = espacio.nombre
     ;(document.getElementById('slug') as HTMLInputElement).value = espacio.slug
     ;(document.getElementById('subtitulo') as HTMLInputElement).value = espacio.subtitulo || ''
+    ;(document.getElementById('capacidadMaxima') as HTMLInputElement).value = espacio.capacidad_maxima?.toString() || ''
     ;(document.getElementById('areaM2') as HTMLInputElement).value = espacio.area_m2?.toString() || ''
     ;(document.getElementById('destacado') as HTMLInputElement).checked = espacio.destacado
     ;(document.getElementById('activo') as HTMLInputElement).checked = espacio.activo
@@ -296,7 +332,8 @@ async function cargarDisposicionesEspacio() {
         id: config.id,
         disposicion_id: config.disposicion.id,
         nombre: config.disposicion.nombre || 'Desconocida',
-        capacidad: config.capacidad
+        capacidad: config.capacidad,
+        tarifas: config.tarifas || undefined
       }))
       // Guardar copia de las originales para comparar cambios
       disposicionesOriginales = JSON.parse(JSON.stringify(disposicionesEspacio))
@@ -354,6 +391,108 @@ function eliminarDisposicion(index: number) {
   renderDisposiciones()
 }
 
+function formatCurrency(value: string): string {
+  // Remover todo excepto dígitos
+  const numbers = value.replace(/\D/g, '')
+  if (!numbers) return ''
+  
+  // Formatear con separadores de miles
+  return parseInt(numbers).toLocaleString('es-CO')
+}
+
+function parseCurrency(value: string): number | null {
+  // Remover separadores y convertir a número
+  const numbers = value.replace(/\D/g, '')
+  return numbers ? parseInt(numbers) : null
+}
+
+function setupCurrencyInputs() {
+  const currencyInputs = document.querySelectorAll('.currency-input')
+  
+  currencyInputs.forEach(input => {
+    input.addEventListener('input', (e) => {
+      const target = e.target as HTMLInputElement
+      const cursorPosition = target.selectionStart || 0
+      const oldLength = target.value.length
+      
+      target.value = formatCurrency(target.value)
+      
+      // Ajustar posición del cursor después del formateo
+      const newLength = target.value.length
+      const diff = newLength - oldLength
+      target.setSelectionRange(cursorPosition + diff, cursorPosition + diff)
+    })
+    
+    // Formatear al perder foco
+    input.addEventListener('blur', (e) => {
+      const target = e.target as HTMLInputElement
+      target.value = formatCurrency(target.value)
+    })
+  })
+}
+
+function abrirModalTarifas(index: number) {
+  disposicionEditandoIndex = index
+  const disposicion = disposicionesEspacio[index]
+  
+  // Llenar valores del modal con las tarifas existentes o dejar vacío
+  const tarifas = disposicion.tarifas || {
+    socio_4h: null,
+    socio_8h: null,
+    socio_adicional_4h: null,
+    socio_adicional_8h: null,
+    particular_4h: null,
+    particular_8h: null,
+    particular_adicional_4h: null,
+    particular_adicional_8h: null
+  }
+  
+  ;(document.getElementById('modalTarifaSocio4h') as HTMLInputElement).value = tarifas.socio_4h ? formatCurrency(tarifas.socio_4h.toString()) : ''
+  ;(document.getElementById('modalTarifaSocio8h') as HTMLInputElement).value = tarifas.socio_8h ? formatCurrency(tarifas.socio_8h.toString()) : ''
+  ;(document.getElementById('modalAdicionalSocio4h') as HTMLInputElement).value = tarifas.socio_adicional_4h ? formatCurrency(tarifas.socio_adicional_4h.toString()) : ''
+  ;(document.getElementById('modalAdicionalSocio8h') as HTMLInputElement).value = tarifas.socio_adicional_8h ? formatCurrency(tarifas.socio_adicional_8h.toString()) : ''
+  ;(document.getElementById('modalTarifaParticular4h') as HTMLInputElement).value = tarifas.particular_4h ? formatCurrency(tarifas.particular_4h.toString()) : ''
+  ;(document.getElementById('modalTarifaParticular8h') as HTMLInputElement).value = tarifas.particular_8h ? formatCurrency(tarifas.particular_8h.toString()) : ''
+  ;(document.getElementById('modalAdicionalParticular4h') as HTMLInputElement).value = tarifas.particular_adicional_4h ? formatCurrency(tarifas.particular_adicional_4h.toString()) : ''
+  ;(document.getElementById('modalAdicionalParticular8h') as HTMLInputElement).value = tarifas.particular_adicional_8h ? formatCurrency(tarifas.particular_adicional_8h.toString()) : ''
+  
+  const modal = document.getElementById('modalTarifas')
+  if (modal) modal.style.display = 'flex'
+}
+
+function cerrarModalTarifas() {
+  disposicionEditandoIndex = null
+  const modal = document.getElementById('modalTarifas')
+  if (modal) modal.style.display = 'none'
+}
+
+function guardarTarifas() {
+  if (disposicionEditandoIndex === null) return
+  
+  const socio4h = parseCurrency((document.getElementById('modalTarifaSocio4h') as HTMLInputElement).value)
+  const socio8h = parseCurrency((document.getElementById('modalTarifaSocio8h') as HTMLInputElement).value)
+  const socioAdicional4h = parseCurrency((document.getElementById('modalAdicionalSocio4h') as HTMLInputElement).value)
+  const socioAdicional8h = parseCurrency((document.getElementById('modalAdicionalSocio8h') as HTMLInputElement).value)
+  const particular4h = parseCurrency((document.getElementById('modalTarifaParticular4h') as HTMLInputElement).value)
+  const particular8h = parseCurrency((document.getElementById('modalTarifaParticular8h') as HTMLInputElement).value)
+  const particularAdicional4h = parseCurrency((document.getElementById('modalAdicionalParticular4h') as HTMLInputElement).value)
+  const particularAdicional8h = parseCurrency((document.getElementById('modalAdicionalParticular8h') as HTMLInputElement).value)
+  
+  disposicionesEspacio[disposicionEditandoIndex].tarifas = {
+    socio_4h: socio4h,
+    socio_8h: socio8h,
+    socio_adicional_4h: socioAdicional4h,
+    socio_adicional_8h: socioAdicional8h,
+    particular_4h: particular4h,
+    particular_8h: particular8h,
+    particular_adicional_4h: particularAdicional4h,
+    particular_adicional_8h: particularAdicional8h
+  }
+  
+  renderDisposiciones()
+  cerrarModalTarifas()
+}
+
 function renderDisposiciones() {
   const container = document.getElementById('disposicionesList')
   if (!container) return
@@ -365,7 +504,9 @@ function renderDisposiciones() {
 
   container.innerHTML = disposicionesEspacio
     .map(
-      (d, i) => `
+      (d, i) => {
+        const tieneTarifas = d.tarifas && Object.values(d.tarifas).some(v => v !== null && v !== undefined)
+        return `
     <div class="config-card">
       <div class="config-info">
         <span class="config-title">${d.nombre}</span>
@@ -374,11 +515,20 @@ function renderDisposiciones() {
           <input type="number" class="capacity-input" value="${d.capacidad}" data-index="${i}" min="1" />
         </div>
       </div>
-      <button type="button" class="btn-icon danger" data-action="eliminar-disposicion" data-index="${i}" title="Eliminar">
-        ✕
-      </button>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <button type="button" class="btn-tarifa ${tieneTarifas ? 'has-rates' : ''}" data-action="configurar-tarifas" data-index="${i}" title="Configurar tarifas">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </button>
+        <button type="button" class="btn-icon danger" data-action="eliminar-disposicion" data-index="${i}" title="Eliminar">
+          ✕
+        </button>
+      </div>
     </div>
   `
+      }
     )
     .join('')
 }
@@ -555,8 +705,9 @@ async function handleFileUpload(event: Event) {
 }
 
 async function actualizarDisposiciones() {
-  const { data: sessionData } = await supabase.auth.getSession()
-  const token = sessionData.session?.access_token
+  // Obtener token fresco con auto-refresh
+  const { getFreshToken } = await import('../../auth')
+  const token = await getFreshToken()
   
   if (!token) {
     alert('Sesión expirada. Por favor, inicia sesión nuevamente.')
@@ -594,16 +745,25 @@ async function actualizarDisposiciones() {
   for (const disp of disposicionesEspacio) {
     try {
       if (disp.id) {
-        // Ya existe - verificar si cambió la capacidad
+        // Ya existe - verificar si cambió la capacidad o tarifas
         const original = disposicionesOriginales.find(d => d.id === disp.id)
-        if (original && original.capacidad !== disp.capacidad) {
-          // Actualizar solo capacidad
+        const capacidadCambio = original && original.capacidad !== disp.capacidad
+        const tarifasCambio = JSON.stringify(original?.tarifas) !== JSON.stringify(disp.tarifas)
+        
+        if (capacidadCambio || tarifasCambio) {
+          const payload: any = {
+            capacidad: disp.capacidad
+          }
+          
+          // Agregar tarifas si existen
+          if (disp.tarifas) {
+            payload.tarifas = disp.tarifas
+          }
+          
           const response = await fetch(`http://localhost:3333/admin/espacios/${espacioId}/configuraciones/${disp.id}`, {
             method: 'PUT',
             headers,
-            body: JSON.stringify({
-              capacidad: disp.capacidad
-            })
+            body: JSON.stringify(payload)
           })
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}))
@@ -614,13 +774,20 @@ async function actualizarDisposiciones() {
         }
       } else {
         // Nueva disposición - crear
+        const payload: any = {
+          disposicionId: disp.disposicion_id,
+          capacidad: disp.capacidad
+        }
+        
+        // Agregar tarifas si existen
+        if (disp.tarifas) {
+          payload.tarifas = disp.tarifas
+        }
+        
         const response = await fetch(`http://localhost:3333/admin/espacios/${espacioId}/configuraciones`, {
           method: 'POST',
           headers,
-          body: JSON.stringify({
-            disposicionId: disp.disposicion_id,
-            capacidad: disp.capacidad
-          })
+          body: JSON.stringify(payload)
         })
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
@@ -647,6 +814,12 @@ async function guardarEspacio() {
     slug: (document.getElementById('slug') as HTMLInputElement).value.trim(),
     subtitulo: (document.getElementById('subtitulo') as HTMLInputElement).value.trim() || null,
     descripcion_completa: markdownEditor.value() || null,
+    capacidad_minima: 0,
+    capacidad_maxima: (() => {
+      const input = document.getElementById('capacidadMaxima') as HTMLInputElement
+      const value = input?.value?.trim()
+      return value && value !== '' ? parseInt(value) : null
+    })(),
     area_m2: parseFloat((document.getElementById('areaM2') as HTMLInputElement).value) || null,
     caracteristicas: caracteristicas.length > 0 ? caracteristicas : null,
     servicios_incluidos: servicios.length > 0 ? servicios : null,
@@ -656,9 +829,9 @@ async function guardarEspacio() {
   }
 
   try {
-    // Actualizar espacio
-    const { data: sessionData } = await supabase.auth.getSession()
-    const token = sessionData.session?.access_token
+    // Actualizar espacio usando token fresco con auto-refresh
+    const { getFreshToken } = await import('../../auth')
+    const token = await getFreshToken()
     
     if (!token) {
       alert('Sesión expirada. Por favor, inicia sesión nuevamente.')
