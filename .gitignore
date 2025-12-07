@@ -1,1 +1,3 @@
 .vscode
+frontend/.astro/types.d.ts
+frontend/dist/*
