@@ -140,8 +140,15 @@ export const cotizacionesAPI = {
 
   // Listar cotizaciones con filtros
   async listar(filtros: CotizacionFiltros = {}) {
+    // Aplicar límite por defecto si no se especifica
+    const filtrosConDefaults = {
+      limit: 50,
+      page: 1,
+      ...filtros
+    }
+    
     const params = new URLSearchParams()
-    Object.entries(filtros).forEach(([key, value]) => {
+    Object.entries(filtrosConDefaults).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         params.append(key, String(value))
       }

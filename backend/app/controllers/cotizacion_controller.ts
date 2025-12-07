@@ -311,20 +311,37 @@ export default class CotizacionController {
       const total = await totalQuery.count('* as total')
       const totalRecords = Number(total[0]?.total || 0)
 
-      // Obtener cotizaciones con paginación
+      // Obtener cotizaciones con paginación y eager loading (optimizado)
+      // Solo seleccionar campos necesarios para la lista
       const cotizaciones = await query
+        .select([
+          'id',
+          'cotizacion_numero',
+          'nombre',
+          'email',
+          'telefono',
+          'fecha',
+          'hora',
+          'duracion',
+          'asistentes',
+          'tipo_evento',
+          'espacio_id',
+          'valor_total',
+          'monto_abono',
+          'monto_pagado',
+          'estado',
+          'estado_pago',
+          'created_at',
+          'updated_at'
+        ])
+        .preload('espacio', (espacioQuery) => {
+          espacioQuery.select('id', 'nombre')
+        })
         .orderBy('fecha', 'desc')
         .orderBy('hora', 'desc')
         .orderBy('created_at', 'desc')
         .limit(limitNum)
         .offset(offset)
-
-      // Manually load espacio for each cotizacion to avoid undefined foreign key errors
-      for (const cotizacion of cotizaciones) {
-        if (cotizacion.espacioId) {
-          await cotizacion.load('espacio')
-        }
-      }
 
       return response.json({
         success: true,

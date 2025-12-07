@@ -293,7 +293,8 @@ async function main() {
   async function loadData() {
     if (calendarGrid) calendarGrid.innerHTML = '<div class="placeholder">Cargando...</div>'
     try {
-      const resp = await cotizacionesAPI.listar({})
+      // Cargar últimas 200 cotizaciones para reportes (suficiente para análisis)
+      const resp = await cotizacionesAPI.listar({ limit: 200, page: 1 })
       cotizaciones = (resp as any)?.data || []
       yearsDisponibles = Array.from(
         new Set(

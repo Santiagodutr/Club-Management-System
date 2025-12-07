@@ -103,7 +103,10 @@ async function main() {
     if (!cotizacionesTabla) return
     cotizacionesTabla.innerHTML = '<div class="placeholder">Cargando...</div>'
     try {
-      const filtros: Record<string, string> = {}
+      const filtros: Record<string, any> = {
+        limit: 50, // Limitar a 50 para carga rápida
+        page: 1
+      }
       if (estadoSelect?.value) filtros.estado = estadoSelect.value
       if (pagoSelect?.value) filtros.estado_pago = pagoSelect.value
       const resp = await cotizacionesAPI.listar(filtros)
