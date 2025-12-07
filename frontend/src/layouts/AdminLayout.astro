@@ -1,5 +1,6 @@
 ---
 import logoCorpmeta from '../assets/logo_corpmeta.png'
+import faviconIco from '../assets/logo_corpmeta.ico'
 
 interface Props {
   title?: string
@@ -15,6 +16,7 @@ const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.pro
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+    <link rel="icon" type="image/x-icon" href={faviconIco} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
