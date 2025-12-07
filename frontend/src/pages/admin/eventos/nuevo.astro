@@ -97,7 +97,9 @@ export const prerender = false
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
 <link rel="stylesheet" href="/styles/easymde-custom.css">
 <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
-<script is:inline type="module" src="/src/pages/admin/eventos/nuevo.client.ts"></script>
+<script>
+import '@scripts/eventos/nuevo.ts'
+</script>
 
 <style>
   .panel { padding: 2rem; max-width: 1200px; margin: 0 auto 4rem; }

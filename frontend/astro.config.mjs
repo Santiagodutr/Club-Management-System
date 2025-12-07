@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config'
 import node from '@astrojs/node'
+import { fileURLToPath } from 'url'
 
 export default defineConfig({
   output: 'hybrid',
@@ -7,14 +8,10 @@ export default defineConfig({
     mode: 'standalone'
   }),
   vite: {
-    build: {
-      rollupOptions: {
-        external: []
+    resolve: {
+      alias: {
+        '@scripts': fileURLToPath(new URL('./src/lib/scripts', import.meta.url))
       }
     }
-  },
-  // Exclude .client.ts files from being treated as pages
-  experimental: {
-    
   }
 })
