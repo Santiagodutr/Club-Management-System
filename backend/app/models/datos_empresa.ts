@@ -10,13 +10,13 @@ export default class DatosEmpresa extends BaseModel {
   @column()
   declare nit: string
 
-  @column({ columnName: 'bancolombia_cc' })
+  @column({ columnName: 'bancolombia_cc', serializeAs: 'bancolombia_cc' })
   declare bancolombiaCc: string | null
 
-  @column({ columnName: 'davivienda_cc' })
+  @column({ columnName: 'davivienda_cc', serializeAs: 'davivienda_cc' })
   declare daviviendaCc: string | null
 
-  @column({ columnName: 'davivienda_ca' })
+  @column({ columnName: 'davivienda_ca', serializeAs: 'davivienda_ca' })
   declare daviviendaCa: string | null
 
   @column()
@@ -28,10 +28,10 @@ export default class DatosEmpresa extends BaseModel {
   @column()
   declare lng: string | null
 
-  @column({ columnName: 'email_gerente' })
+  @column({ columnName: 'email_gerente', serializeAs: 'email_gerente' })
   declare emailGerente: string | null
 
-  @column({ columnName: 'whatsapp_gerente' })
+  @column({ columnName: 'whatsapp_gerente', serializeAs: 'whatsapp_gerente' })
   declare whatsappGerente: string | null
 
   @column.dateTime({ autoCreate: true })
