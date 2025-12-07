@@ -425,6 +425,11 @@ export default class CotizacionController {
         data: {
           id: cotizacion.id,
           numero: cotizacion.cotizacionNumero,
+          // IDs necesarios para edición
+          espacioId: cotizacion.espacioId,
+          configuracionEspacioId: cotizacion.configuracionEspacioId,
+          disposicionId: cotizacion.disposicionId,
+          serviciosIds: cotizacion.prestaciones || [], // Array de IDs de servicios
           cliente: {
             nombre: cotizacion.nombre,
             email: cotizacion.email,
@@ -879,17 +884,40 @@ export default class CotizacionController {
         montoAbono: cotizacion.calcularMontoAbono(),
       }
 
-      const resultado = await EmailService.enviarCorreosCotizacion(datosEmail)
+      // Enviar correos
+      const resultadoEmail = await EmailService.enviarCorreosCotizacion(datosEmail)
+
+      // Enviar WhatsApp si hay teléfono
+      let resultadoWhatsApp = null
+      if (cotizacion.telefono) {
+        try {
+          const WhatsAppService = (await import('#services/whatsapp_service')).default
+          resultadoWhatsApp = await WhatsAppService.enviarMensajeCotizacion({
+            telefono: cotizacion.telefono,
+            nombreCliente: cotizacion.nombre,
+            salon: salonNombre || 'No especificado',
+            fecha: cotizacion.fecha,
+            hora: cotizacion.hora,
+            cotizacionId: cotizacion.id,
+          })
+        } catch (whatsappError) {
+          console.error('Error enviando WhatsApp:', whatsappError)
+          // No fallar si WhatsApp falla, continuar con respuesta exitosa
+        }
+      }
 
       return response.json({
         success: true,
-        message: 'Correos enviados',
-        data: resultado,
+        message: 'Notificaciones enviadas correctamente',
+        data: {
+          email: resultadoEmail,
+          whatsapp: resultadoWhatsApp,
+        },
       })
     } catch (error) {
       return response.status(500).json({
         success: false,
-        message: 'Error al enviar correos',
+        message: 'Error al enviar notificaciones',
         error: error instanceof Error ? error.message : 'desconocido',
       })
     }

@@ -1,0 +1,786 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro'
+
+export const prerender = false
+
+const { id } = Astro.params
+---
+
+<AdminLayout title="Editar Cotización">
+  <section class="editar-cotizacion">
+    <header class="page-header">
+      <a href="/admin/reservas" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Volver a Reservas
+      </a>
+      <h1>Editar Cotización <span id="cotizacion-numero"></span></h1>
+    </header>
+
+    <!-- Estado de carga -->
+    <div id="loading-state" class="loading-state">
+      <div class="loader"></div>
+      <p>Cargando datos de la cotización...</p>
+    </div>
+
+    <!-- Estado de error -->
+    <div id="error-state" class="error-state" style="display: none;">
+      <div class="error-icon">⚠️</div>
+      <h2>Error al cargar</h2>
+      <p id="error-message">No se pudo cargar la cotización</p>
+      <button class="btn-primary" onclick="window.location.href='/admin/reservas'">Volver a Reservas</button>
+    </div>
+
+    <!-- Formulario -->
+    <div id="form-wrapper" class="form-wrapper" style="display: none;">
+      <form id="cotizacion-form">
+        <!-- Paso 1: Salón y Configuración -->
+        <div class="form-section">
+          <h3>1. Salón y Configuración</h3>
+          
+          <div class="field">
+            <label for="salon">Salón *</label>
+            <select id="salon" name="salon" required>
+              <option value="">Cargando espacios...</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="disposicion">Disposición del Salón *</label>
+            <select id="disposicion" name="disposicion" required>
+              <option value="">Selecciona primero un salón</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Paso 2: Fecha, Hora y Duración -->
+        <div class="form-section">
+          <h3>2. Fecha y Hora</h3>
+          
+          <div class="field grid-2">
+            <div>
+              <label for="date">Fecha del Evento *</label>
+              <input id="date" name="date" type="date" required />
+            </div>
+            <div>
+              <label for="time">Hora de Inicio *</label>
+              <input id="time" name="time" type="time" required />
+            </div>
+          </div>
+
+          <div class="field grid-2">
+            <div>
+              <label for="duration">Duración (horas) *</label>
+              <input id="duration" name="duration" type="number" min="4" max="8" value="4" required />
+              <small>Mínimo 4h, Máximo 8h</small>
+            </div>
+            <div>
+              <label>Hora Final</label>
+              <input id="hora-final" type="text" readonly disabled value="Calculando..." />
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 3: Tipo de Evento y Asistentes -->
+        <div class="form-section">
+          <h3>3. Tipo de Evento</h3>
+          
+          <div class="field grid-2">
+            <div>
+              <label for="tipoEvento">Tipo de Evento *</label>
+              <select id="tipoEvento" name="tipoEvento" required>
+                <option value="">Selecciona un tipo</option>
+                <option value="social">Social (Matrimonio, Cumpleaños, Reunión)</option>
+                <option value="empresarial">Empresarial (Conferencia, Reunión)</option>
+                <option value="capacitacion">Capacitación / Workshop</option>
+              </select>
+            </div>
+            <div>
+              <label for="asistentes">Cantidad de Asistentes * <span id="capacidad-info-text"></span></label>
+              <input id="asistentes" name="asistentes" type="number" min="1" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 4: Servicios Adicionales -->
+        <div class="form-section">
+          <h3>4. Servicios Adicionales</h3>
+          
+          <div class="checkboxes" id="servicios-checkboxes">
+            <p style="color: #64748b;">Cargando servicios...</p>
+          </div>
+        </div>
+
+        <!-- Paso 5: Información de Contacto -->
+        <div class="form-section">
+          <h3>5. Información de Contacto</h3>
+          
+          <div class="field">
+            <label for="nombre">Nombre de Contacto *</label>
+            <input id="nombre" name="nombre" type="text" required />
+          </div>
+
+          <div class="field grid-2">
+            <div>
+              <label for="email">Email *</label>
+              <input id="email" name="email" type="email" required />
+            </div>
+            <div>
+              <label for="telefono">Teléfono</label>
+              <input id="telefono" name="telefono" type="tel" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="observaciones">Observaciones Adicionales</label>
+            <textarea id="observaciones" name="observaciones" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn-secondary" onclick="window.location.href='/admin/reservas'">Cancelar</button>
+          <button type="submit" class="btn-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <style>
+    .editar-cotizacion {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #2563eb;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s;
+      margin-bottom: 1rem;
+    }
+
+    .back-link:hover {
+      color: #1d4ed8;
+    }
+
+    .page-header h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+    }
+
+    .page-header h1 span {
+      color: #2563eb;
+    }
+
+    .loading-state,
+    .error-state {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .loader {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-state p {
+      color: #64748b;
+      font-size: 1rem;
+    }
+
+    .error-state {
+      background: #fee2e2;
+      border: 2px solid #fecaca;
+      border-radius: 12px;
+    }
+
+    .error-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .error-state h2 {
+      color: #991b1b;
+      margin: 0 0 0.5rem;
+    }
+
+    .error-state p {
+      color: #dc2626;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-wrapper {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    .form-section {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .form-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .form-section h3 {
+      margin: 0 0 1.25rem;
+      font-size: 1.1rem;
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    .field {
+      margin-bottom: 1.25rem;
+    }
+
+    .field label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #1e293b;
+      font-size: 0.95rem;
+    }
+
+    .field small {
+      display: block;
+      margin-top: 0.4rem;
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    input[type="time"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      background: #fff;
+      box-sizing: border-box;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #0a4ba5;
+      box-shadow: 0 0 0 3px rgba(10, 75, 165, 0.1);
+    }
+
+    input:disabled {
+      background: #f3f4f6;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .checkboxes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      padding: 0.5rem 0;
+    }
+
+    .checkboxes label {
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .checkboxes input[type="checkbox"] {
+      width: auto;
+      margin-right: 0.5rem;
+      cursor: pointer;
+      accent-color: #0a4ba5;
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #0a4ba5;
+      color: #fff;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .btn-primary:hover {
+      background: #083a82;
+      box-shadow: 0 4px 12px rgba(10, 75, 165, 0.3);
+    }
+
+    .btn-primary:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1.5px solid #cbd5e1;
+      color: #0f172a;
+    }
+
+    .btn-secondary:hover {
+      border-color: #0a4ba5;
+      color: #0a4ba5;
+      background: #f0f6ff;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .editar-cotizacion {
+        padding: 1rem;
+      }
+
+      .form-wrapper {
+        padding: 1.5rem;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <script>
+    import { getAuthToken } from '../../../../lib/utils/auth'
+    
+    const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3333'
+    const cotizacionId = window.location.pathname.split('/')[3]
+    
+    console.log('[Editar] Iniciando para cotización ID:', cotizacionId)
+
+    const loadingState = document.getElementById('loading-state')
+    const errorState = document.getElementById('error-state')
+    const formWrapper = document.getElementById('form-wrapper')
+    const form = document.getElementById('cotizacion-form')
+
+    const salonSelect = document.getElementById('salon')
+    const disposicionSelect = document.getElementById('disposicion')
+    const dateInput = document.getElementById('date')
+    const timeInput = document.getElementById('time')
+    const durationInput = document.getElementById('duration')
+    const horaFinalInput = document.getElementById('hora-final')
+    const asistentesInput = document.getElementById('asistentes')
+    const capacidadInfoText = document.getElementById('capacidad-info-text')
+
+    let cotizacionData = null
+    let espaciosData = []
+    let serviciosData = []
+
+    async function fetchWithAuth(url, options = {}) {
+      const token = getAuthToken()
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+    }
+
+    async function cargarDatos() {
+      try {
+        console.log('[Editar] Cargando datos para cotización:', cotizacionId)
+        
+        const [cotizacionResp, espaciosResp, serviciosResp] = await Promise.all([
+          fetchWithAuth(`${API_URL}/api/cotizaciones/${cotizacionId}`),
+          fetch(`${API_URL}/api/espacios-publicos`),
+          fetch(`${API_URL}/api/servicios-adicionales/publico?activo=true`),
+        ])
+
+        console.log('[Editar] Status responses:', cotizacionResp.status, espaciosResp.status, serviciosResp.status)
+
+        if (!cotizacionResp.ok) {
+          const error = await cotizacionResp.json()
+          throw new Error(error.message || 'No se pudo cargar la cotización')
+        }
+
+        const cotizacionResult = await cotizacionResp.json()
+        const espaciosResult = await espaciosResp.json()
+        const serviciosResult = await serviciosResp.json()
+
+        console.log('[Editar] Cotización result:', cotizacionResult)
+        console.log('[Editar] Espacios result:', espaciosResult)
+        console.log('[Editar] Servicios result:', serviciosResult)
+
+        if (!cotizacionResult.success) {
+          throw new Error(cotizacionResult.message || 'Error al cargar')
+        }
+
+        cotizacionData = cotizacionResult.data
+        espaciosData = espaciosResult.success ? espaciosResult.data : []
+        serviciosData = serviciosResult.success ? serviciosResult.data : []
+
+        console.log('[Editar] Estado cotización:', cotizacionData.estado)
+
+        if (cotizacionData.estado === 'Aceptada' || cotizacionData.estado === 'aceptada') {
+          throw new Error('No se puede editar una cotización ya aceptada')
+        }
+
+        poblarFormulario()
+        
+        loadingState.style.display = 'none'
+        formWrapper.style.display = 'block'
+
+      } catch (err) {
+        console.error('[Editar] Error:', err)
+        loadingState.style.display = 'none'
+        errorState.style.display = 'block'
+        document.getElementById('error-message').textContent = err.message || 'Error desconocido'
+      }
+    }
+
+    function poblarFormulario() {
+      console.log('[Editar] ========== POBLANDO FORMULARIO ==========')
+      console.log('[Editar] Cotización completa:', cotizacionData)
+      
+      // Número de cotización
+      document.getElementById('cotizacion-numero').textContent = `#${cotizacionData.numero || cotizacionData.id}`
+
+      // ESPACIOS - Ahora el backend devuelve espacioId directamente
+      const espacioIdActual = cotizacionData.espacioId
+      console.log('[Editar] Espacio ID:', espacioIdActual)
+      
+      salonSelect.innerHTML = '<option value="">Selecciona un salón</option>' +
+        espaciosData.map(e => {
+          const isSelected = e.id === espacioIdActual
+          if (isSelected) console.log(`[Editar] ✓ Salón seleccionado: ${e.nombre}`)
+          // Guardar solo el ID como value, el nombre en data-nombre
+          return `<option value="${e.id}" data-nombre="${e.nombre}" ${isSelected ? 'selected' : ''}>${e.nombre}</option>`
+        }).join('')
+
+      // SERVICIOS - Ahora el backend devuelve serviciosIds directamente
+      const serviciosActualesIds = cotizacionData.serviciosIds || []
+      console.log('[Editar] Servicios IDs:', serviciosActualesIds)
+
+      const serviciosContainer = document.getElementById('servicios-checkboxes')
+      serviciosContainer.innerHTML = serviciosData.length > 0
+        ? serviciosData.map(s => {
+            const isChecked = serviciosActualesIds.includes(s.id)
+            if (isChecked) console.log(`[Editar] ✓ Servicio marcado: ${s.nombre}`)
+            return `<label>
+              <input type="checkbox" name="servicios" value="${s.id}" ${isChecked ? 'checked' : ''}>
+              ${s.nombre}
+            </label>`
+          }).join('')
+        : '<p style="color: #64748b;">No hay servicios disponibles</p>'
+
+      // DATOS DEL EVENTO
+      const fecha = cotizacionData.evento?.fecha || ''
+      const hora = cotizacionData.evento?.hora || ''
+      const duracion = cotizacionData.evento?.duracion || '4'
+      const tipoEvento = cotizacionData.evento?.tipo || ''
+      const asistentes = cotizacionData.evento?.asistentes || '50'
+      
+      // DATOS DEL CLIENTE
+      const nombre = cotizacionData.cliente?.nombre || ''
+      const email = cotizacionData.cliente?.email || ''
+      const telefono = cotizacionData.cliente?.telefono || ''
+      const observaciones = cotizacionData.observaciones || ''
+      
+      console.log('[Editar] Fecha:', fecha, '| Hora:', hora, '| Duración:', duracion)
+      console.log('[Editar] Tipo:', tipoEvento, '| Asistentes:', asistentes)
+      console.log('[Editar] Cliente:', nombre, '|', email)
+      
+      // Poblar campos
+      dateInput.value = fecha.split('T')[0] // Extraer solo YYYY-MM-DD
+      timeInput.value = hora
+      durationInput.value = String(duracion)
+      
+      const tipoEventoEl = document.getElementById('tipoEvento')
+      tipoEventoEl.value = tipoEvento
+      
+      asistentesInput.value = String(asistentes)
+      
+      const nombreEl = document.getElementById('nombre')
+      nombreEl.value = nombre
+      
+      const emailEl = document.getElementById('email')
+      emailEl.value = email
+      
+      const telefonoEl = document.getElementById('telefono')
+      telefonoEl.value = telefono
+      
+      const observacionesEl = document.getElementById('observaciones')
+      observacionesEl.value = observaciones
+
+      // CARGAR DISPOSICIONES
+      const configuracionId = cotizacionData.configuracionEspacioId
+      console.log('[Editar] Configuración ID:', configuracionId)
+      
+      if (espacioIdActual) {
+        cargarDisposicionesDelEspacio(espacioIdActual, configuracionId)
+      } else {
+        console.error('[Editar] ❌ No hay espacioId')
+      }
+      
+      calcularHoraFinal()
+      console.log('[Editar] ========== ✓ FORMULARIO POBLADO ==========')
+    }
+
+    async function cargarDisposicionesDelEspacio(espacioId, configuracionActualId) {
+      try {
+        disposicionSelect.innerHTML = '<option value="">Cargando...</option>'
+        
+        const response = await fetch(`${API_URL}/api/espacios/${espacioId}/configuraciones`)
+        const result = await response.json()
+        
+        if (result.success && result.data && result.data.length > 0) {
+          let html = '<option value="">Selecciona una disposición</option>'
+          
+          result.data.forEach(config => {
+            const disposicionNombre = config.disposicion?.nombre || 'Sin nombre'
+            const capacidad = config.capacidad || 0
+            html += `<option value="${config.id}" data-capacidad="${capacidad}" ${config.id === configuracionActualId ? 'selected' : ''}>
+              ${disposicionNombre} (Capacidad: ${capacidad})
+            </option>`
+          })
+          
+          disposicionSelect.innerHTML = html
+          actualizarCapacidad()
+        } else {
+          disposicionSelect.innerHTML = '<option value="">No hay disposiciones</option>'
+        }
+      } catch (error) {
+        console.error('Error cargando disposiciones:', error)
+        disposicionSelect.innerHTML = '<option value="">Error</option>'
+      }
+    }
+
+    function calcularHoraFinal() {
+      if (!timeInput.value || !durationInput.value) {
+        horaFinalInput.value = 'Selecciona hora de inicio'
+        return
+      }
+      
+      const [horas, minutos] = timeInput.value.split(':').map(Number)
+      const duracion = parseInt(durationInput.value)
+      let horaFinal = horas + duracion
+      
+      if (horaFinal >= 24) horaFinal = horaFinal - 24
+      
+      horaFinalInput.value = `${String(horaFinal).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`
+    }
+
+    function actualizarCapacidad() {
+      const selected = disposicionSelect.selectedOptions[0]
+      if (!selected || !selected.value) {
+        capacidadInfoText.textContent = ''
+        return
+      }
+      
+      const capacidad = parseInt(selected.dataset.capacidad)
+      capacidadInfoText.textContent = `(Máx: ${capacidad})`
+      asistentesInput.max = capacidad
+      
+      if (parseInt(asistentesInput.value) > capacidad) {
+        asistentesInput.value = capacidad
+      }
+    }
+
+    // Event listeners
+    salonSelect.addEventListener('change', async (e) => {
+      const espacioId = parseInt(e.target.value)
+      if (espacioId) {
+        console.log('[Editar] Salón cambiado a ID:', espacioId)
+        cargarDisposicionesDelEspacio(espacioId)
+      }
+    })
+
+    disposicionSelect.addEventListener('change', actualizarCapacidad)
+    
+    timeInput.addEventListener('change', calcularHoraFinal)
+    
+    durationInput.addEventListener('change', () => {
+      const duracionValue = parseInt(durationInput.value)
+      if (duracionValue < 4) {
+        alert('La duración mínima es de 4 horas')
+        durationInput.value = 4
+      }
+      if (duracionValue > 8) {
+        alert('La duración máxima es de 8 horas')
+        durationInput.value = 8
+      }
+      calcularHoraFinal()
+    })
+
+    asistentesInput.addEventListener('change', () => {
+      const selected = disposicionSelect.selectedOptions[0]
+      if (!selected) return
+      
+      const capacidad = parseInt(selected.dataset.capacidad)
+      const asistentes = parseInt(asistentesInput.value)
+      
+      if (asistentes > capacidad) {
+        alert(`Máximo ${capacidad} personas para esta disposición`)
+        asistentesInput.value = capacidad
+      }
+    })
+
+    // Submit form
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      
+      console.log('[Editar] ========== SUBMIT INICIADO ==========')
+      console.log('[Editar] Salón value:', salonSelect.value)
+      console.log('[Editar] Disposición value:', disposicionSelect.value)
+
+      // Validar salón
+      if (!salonSelect.value) {
+        alert('Selecciona un salón')
+        return
+      }
+
+      // Validar disposición
+      if (!disposicionSelect.value) {
+        alert('Selecciona una disposición')
+        return
+      }
+
+      const selected = disposicionSelect.selectedOptions[0]
+      if (!selected) {
+        alert('Error: No se pudo obtener la disposición seleccionada')
+        return
+      }
+
+      const capacidad = parseInt(selected.dataset.capacidad || '0')
+      const asistentes = parseInt(asistentesInput.value || '0')
+      
+      console.log('[Editar] Validando capacidad:', asistentes, '<=', capacidad)
+      
+      if (asistentes > capacidad) {
+        alert(`Máximo ${capacidad} personas para esta disposición`)
+        return
+      }
+
+      // Obtener el ID del salón directamente (ya no necesitamos parsear JSON)
+      const espacioId = parseInt(salonSelect.value)
+      console.log('[Editar] Espacio ID:', espacioId)
+
+      const servicios = Array.from(form.querySelectorAll('input[name="servicios"]:checked')).map(i => parseInt(i.value))
+
+      const updateData = {
+        espacioId: espacioId,
+        configuracionEspacioId: parseInt(disposicionSelect.value),
+        fecha: dateInput.value,
+        horaInicio: timeInput.value,
+        duracion: parseInt(durationInput.value),
+        tipoEvento: document.getElementById('tipoEvento').value,
+        asistentes: asistentes,
+        servicios,
+        nombre: document.getElementById('nombre').value,
+        email: document.getElementById('email').value,
+        telefono: document.getElementById('telefono').value || undefined,
+        observaciones: document.getElementById('observaciones').value || undefined,
+      }
+
+      console.log('[Editar] Datos a enviar:', updateData)
+
+      const submitBtn = form.querySelector('button[type="submit"]')
+      const originalText = submitBtn.textContent
+      submitBtn.disabled = true
+      submitBtn.textContent = 'Guardando...'
+
+      try {
+        console.log('[Editar] Enviando PUT a:', `${API_URL}/api/cotizaciones/${cotizacionId}`)
+        
+        const response = await fetchWithAuth(`${API_URL}/api/cotizaciones/${cotizacionId}`, {
+          method: 'PUT',
+          body: JSON.stringify(updateData),
+        })
+
+        console.log('[Editar] Response status:', response.status)
+        const result = await response.json()
+        console.log('[Editar] Response data:', result)
+
+        if (result.success) {
+          alert('✓ Cotización actualizada correctamente')
+          window.location.href = '/admin/reservas'
+        } else {
+          alert('Error: ' + (result.message || 'No se pudo actualizar'))
+        }
+      } catch (error) {
+        console.error('[Editar] Error:', error)
+        alert('Error de conexión al actualizar: ' + error.message)
+      } finally {
+        submitBtn.disabled = false
+        submitBtn.textContent = originalText
+      }
+      
+      console.log('[Editar] ========== SUBMIT FINALIZADO ==========')
+    })
+
+    // Inicializar
+    cargarDatos()
+  </script>
+</AdminLayout>

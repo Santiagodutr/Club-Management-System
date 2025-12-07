@@ -562,12 +562,19 @@ async function main() {
                   </svg>
                   Ver PDF
                 </button>
-                <button class="btn-action secondary" data-action="correo" data-id="${c.id}">
+                <button class="btn-action secondary" data-action="editar" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                  Editar
+                </button>
+                <button class="btn-action secondary" data-action="reenviar" data-id="${c.id}">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                     <polyline points="22,6 12,13 2,6"></polyline>
                   </svg>
-                  Reenviar Correo
+                  Reenviar
                 </button>
               </div>
             </div>
@@ -796,12 +803,19 @@ async function main() {
                   </svg>
                   Ver PDF
                 </button>
-                <button class="btn-action secondary" data-action="correo" data-id="${c.id}">
+                <button class="btn-action secondary" data-action="editar" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                  Editar
+                </button>
+                <button class="btn-action secondary" data-action="reenviar" data-id="${c.id}">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                     <polyline points="22,6 12,13 2,6"></polyline>
                   </svg>
-                  Reenviar Correo
+                  Reenviar
                 </button>
               </div>
             </div>
@@ -1538,19 +1552,312 @@ async function main() {
     window.open(url, '_blank')
   }
 
-  async function reenviarCorreo(id: number) {
+  // Removed abrirModalEditar - now using separate edit page
+  // See /admin/reservas/[id]/editar.astro
+  
+  async function abrirModalEditar_DEPRECATED(id: number) {
     const modal = new Modal()
-    modal.show('<div style="text-align: center;"><div class="loader"></div><p style="margin-top: 1rem;">Enviando correo...</p></div>', [])
+    const loading = new LoadingOverlay()
+    loading.show('Cargando datos...')
+    
+    try {
+      // Cargar cotización, espacios, disposiciones y servicios en paralelo
+      const [respCotizacion, respEspacios, respServicios] = await Promise.all([
+        cotizacionesAPI.obtener(id),
+        fetch(`${API_URL}/api/espacios/publicos`).then(r => r.json()),
+        fetch(`${API_URL}/api/servicios-adicionales`).then(r => r.json())
+      ])
+
+      const c = respCotizacion.data
+      const espacios = respServicios.success ? respEspacios.data : []
+      const servicios = respServicios.success ? respServicios.data : []
+
+      loading.hide()
+
+      // No permitir editar cotizaciones aceptadas
+      if (c.estado === 'aceptada') {
+        modal.alert('No se puede editar una cotización ya aceptada.', 'error')
+        return
+      }
+
+      // Obtener servicios seleccionados de la cotización actual
+      const serviciosActuales = (c as any).detalles
+        ?.filter((d: any) => d.tipo === 'servicio_adicional')
+        .map((d: any) => d.servicioAdicionalId) || []
+
+      const content = `
+        <div class="modal-edit-cotizacion">
+          <h2 style="margin: 0 0 1.5rem; font-size: 1.4rem; font-weight: 700; color: #0f172a;">Editar Cotización #${c.id}</h2>
+          
+          <form id="editForm" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Paso 1: Salón y Configuración -->
+            <div class="form-section-edit">
+              <h3 style="margin: 0 0 0.75rem; font-size: 1rem; font-weight: 600; color: #334155;">1. Salón y Configuración</h3>
+              
+              <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.875rem; color: #475569;">Salón *</label>
+                <select id="editEspacio" required style="width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.875rem; background: white;">
+                  <option value="">Selecciona un salón</option>
+                  ${espacios.map((e: any) => `<option value="${e.id}" data-capacidad="${e.capacidadMaxima}" ${c.espacio.id === e.id ? 'selected' : ''}>${e.nombre}</option>`).join('')}
+                </select>
+              </div>
+
+              <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.875rem; color: #475569;">Disposición del Salón *</label>
+                <select id="editDisposicion" required style="width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.875rem; background: white;">
+                  <option value="">Cargando disposiciones...</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Paso 2: Fecha, Hora y Duración -->
+            <div class="form-section-edit">
+              <h3 style="margin: 0 0 0.75rem; font-size: 1rem; font-weight: 600; color: #334155;">2. Fecha y Hora</h3>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                  <label style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.875rem; color: #475569;">Fecha del Evento *</label>
+                  <input type="date" id="editFecha" value="${c.evento.fecha}" required style="width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.875rem;">
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.875rem; color: #475569;">Hora de Inicio *</label>
+                  <input type="time" id="editHora" value="${c.evento.hora}" required style="width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.875rem;">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                  <label style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.875rem; color: #475569;">Duración (horas) *</label>
+                  <input type="number" id="editDuracion" value="${c.evento.duracion}" min="1" required style="width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.875rem;">
+                  <small style="display: block; margin-top: 0.25rem; font-size: 0.75rem; color: #64748b;">Mínimo 4h para clientes</small>
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.875rem; color: #475569;">Hora Final</label>
+                  <input type="text" id="editHoraFinal" readonly style="width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.875rem; background: #f1f5f9; color: #64748b; cursor: not-allowed;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Paso 3: Tipo de Evento y Asistentes -->
+            <div class="form-section-edit">
+              <h3 style="margin: 0 0 0.75rem; font-size: 1rem; font-weight: 600; color: #334155;">3. Tipo de Evento</h3>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                  <label style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.875rem; color: #475569;">Tipo de Evento *</label>
+                  <select id="editTipoEvento" required style="width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.875rem; background: white;">
+                    <option value="">Selecciona un tipo</option>
+                    <option value="social" ${c.evento.tipo === 'social' ? 'selected' : ''}>Social (Matrimonio, Cumpleaños)</option>
+                    <option value="empresarial" ${c.evento.tipo === 'empresarial' ? 'selected' : ''}>Empresarial (Conferencia)</option>
+                    <option value="capacitacion" ${c.evento.tipo === 'capacitacion' ? 'selected' : ''}>Capacitación / Workshop</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.875rem; color: #475569;">Cantidad de Asistentes *</label>
+                  <input type="number" id="editAsistentes" value="${c.evento.asistentes}" min="1" required style="width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.875rem;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Paso 4: Servicios Adicionales -->
+            <div class="form-section-edit">
+              <h3 style="margin: 0 0 0.75rem; font-size: 1rem; font-weight: 600; color: #334155;">4. Servicios Adicionales</h3>
+              
+              <div id="editServiciosContainer" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                ${servicios.map((s: any) => `
+                  <label style="display: flex; align-items: center; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; cursor: pointer; transition: background 0.2s;">
+                    <input type="checkbox" name="editServicios" value="${s.id}" ${serviciosActuales.includes(s.id) ? 'checked' : ''} style="margin-right: 0.5rem; width: 16px; height: 16px; cursor: pointer;">
+                    <span style="font-size: 0.875rem; color: #334155;">${s.nombre}</span>
+                  </label>
+                `).join('')}
+                ${servicios.length === 0 ? '<p style="color: #94a3b8; font-size: 0.875rem;">No hay servicios disponibles</p>' : ''}
+              </div>
+            </div>
+
+            <!-- Paso 5: Información de Contacto -->
+            <div class="form-section-edit">
+              <h3 style="margin: 0 0 0.75rem; font-size: 1rem; font-weight: 600; color: #334155;">5. Información de Contacto</h3>
+              
+              <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.875rem; color: #475569;">Nombre de Contacto *</label>
+                <input type="text" id="editNombre" value="${c.cliente.nombre}" required style="width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.875rem;">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                  <label style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.875rem; color: #475569;">Email *</label>
+                  <input type="email" id="editEmail" value="${c.cliente.email}" required style="width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.875rem;">
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.875rem; color: #475569;">Teléfono</label>
+                  <input type="tel" id="editTelefono" value="${c.cliente.telefono || ''}" style="width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.875rem;">
+                </div>
+              </div>
+
+              <div>
+                <label style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.875rem; color: #475569;">Observaciones Adicionales</label>
+                <textarea id="editObservaciones" rows="3" style="width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.875rem; resize: vertical;">${c.observaciones || ''}</textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+      `
+
+      modal.show(content, [
+        {
+          label: 'Cancelar',
+          handler: () => {},
+          variant: 'secondary'
+        },
+        {
+          label: 'Guardar Cambios',
+          handler: async () => {
+            await guardarEdicionCotizacion(id)
+          },
+          variant: 'primary'
+        }
+      ])
+
+      // Configurar comportamiento del formulario después de mostrarlo
+      setTimeout(() => {
+        configurarFormularioEdicion(c)
+      }, 100)
+
+    } catch (err: any) {
+      loading.hide()
+      modal.alert('No se pudo cargar los datos para editar la cotización.', 'error')
+    }
+  }
+
+  function configurarFormularioEdicion(cotizacion: any) {
+    const espacioSelect = document.getElementById('editEspacio') as HTMLSelectElement
+    const disposicionSelect = document.getElementById('editDisposicion') as HTMLSelectElement
+    const fechaInput = document.getElementById('editFecha') as HTMLInputElement
+    const horaInput = document.getElementById('editHora') as HTMLInputElement
+    const duracionInput = document.getElementById('editDuracion') as HTMLInputElement
+    const horaFinalInput = document.getElementById('editHoraFinal') as HTMLInputElement
+
+    // Función para calcular hora final
+    const calcularHoraFinal = () => {
+      if (!horaInput.value || !duracionInput.value) {
+        horaFinalInput.value = 'Selecciona hora de inicio'
+        return
+      }
+      
+      const [horas, minutos] = horaInput.value.split(':').map(Number)
+      const duracion = parseInt(duracionInput.value)
+      let horaFinal = horas + duracion
+      
+      if (horaFinal >= 24) horaFinal = horaFinal - 24
+      
+      horaFinalInput.value = `${String(horaFinal).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`
+    }
+
+    // Cargar disposiciones cuando cambia el espacio
+    const cargarDisposiciones = async (espacioId: number, disposicionActualId?: number) => {
+      try {
+        const resp = await fetch(`${API_URL}/api/espacios/${espacioId}`)
+        const data = await resp.json()
+        
+        if (data.success && data.data.configuraciones) {
+          disposicionSelect.innerHTML = data.data.configuraciones
+            .map((config: any) => `
+              <option value="${config.id}" data-capacidad="${config.capacidadMaxima}">
+                ${config.disposicion.nombre} (Max: ${config.capacidadMaxima} personas)
+              </option>
+            `).join('')
+          
+          // Seleccionar la disposición actual si existe
+          if (disposicionActualId) {
+            disposicionSelect.value = String(disposicionActualId)
+          }
+        }
+      } catch (err) {
+        console.error('Error cargando disposiciones:', err)
+      }
+    }
+
+    // Event listeners
+    espacioSelect.addEventListener('change', () => {
+      const espacioId = parseInt(espacioSelect.value)
+      if (espacioId) {
+        cargarDisposiciones(espacioId)
+      }
+    })
+
+    horaInput.addEventListener('change', calcularHoraFinal)
+    duracionInput.addEventListener('change', calcularHoraFinal)
+
+    // Inicializar
+    cargarDisposiciones(cotizacion.espacio.id, cotizacion.configuracionEspacio?.id)
+    calcularHoraFinal()
+  }
+
+  async function guardarEdicionCotizacion(id: number) {
+    const espacioId = parseInt((document.getElementById('editEspacio') as HTMLSelectElement).value)
+    const configuracionEspacioId = parseInt((document.getElementById('editDisposicion') as HTMLSelectElement).value)
+    const fecha = (document.getElementById('editFecha') as HTMLInputElement).value
+    const horaInicio = (document.getElementById('editHora') as HTMLInputElement).value
+    const duracion = parseInt((document.getElementById('editDuracion') as HTMLInputElement).value)
+    const tipoEvento = (document.getElementById('editTipoEvento') as HTMLSelectElement).value
+    const asistentes = parseInt((document.getElementById('editAsistentes') as HTMLInputElement).value)
+    const nombre = (document.getElementById('editNombre') as HTMLInputElement).value
+    const email = (document.getElementById('editEmail') as HTMLInputElement).value
+    const telefono = (document.getElementById('editTelefono') as HTMLInputElement).value
+    const observaciones = (document.getElementById('editObservaciones') as HTMLTextAreaElement).value
+    const servicios = Array.from(document.querySelectorAll('input[name="editServicios"]:checked'))
+      .map((cb: any) => parseInt(cb.value))
+
+    if (!espacioId || !configuracionEspacioId || !fecha || !horaInicio || !duracion || !tipoEvento || !asistentes || !nombre || !email) {
+      const errorModal = new Modal()
+      errorModal.alert('Por favor completa todos los campos requeridos.', 'error')
+      return
+    }
+
+    const loading = new LoadingOverlay()
+    loading.show('Actualizando cotización...')
+
+    try {
+      await cotizacionesAPI.actualizar(id, {
+        espacioId,
+        configuracionEspacioId,
+        fecha,
+        horaInicio,
+        duracion,
+        tipoEvento,
+        asistentes,
+        nombre,
+        email,
+        telefono: telefono.trim() || undefined,
+        observaciones: observaciones.trim() || undefined,
+        servicios,
+      })
+
+      loading.hide()
+      await loadCotizaciones()
+      
+      const successModal = new Modal()
+      successModal.alert('Cotización actualizada exitosamente.', 'success')
+    } catch (err: any) {
+      loading.hide()
+      const errorModal = new Modal()
+      errorModal.alert(err?.message || 'Error al actualizar la cotización', 'error')
+    }
+  }
+
+  async function reenviarNotificaciones(id: number) {
+    const modal = new Modal()
+    modal.show('<div style="text-align: center;"><div class="loader"></div><p style="margin-top: 1rem;">Enviando notificaciones...</p></div>', [])
     
     try {
       await cotizacionesAPI.reenviarCorreo(id)
       modal.close()
       const successModal = new Modal()
-      successModal.alert('Correo reenviado correctamente al cliente.', 'success')
+      successModal.alert('Notificaciones enviadas correctamente (Email y WhatsApp).', 'success')
     } catch (err: any) {
       modal.close()
       const errorModal = new Modal()
-      errorModal.alert(err?.message || 'Error al reenviar el correo', 'error')
+      errorModal.alert(err?.message || 'Error al enviar las notificaciones', 'error')
     }
   }
 
@@ -1628,7 +1935,8 @@ async function main() {
     if (action === 'pago') registrarPago(id)
     if (action === 'rechazar') rechazarCotizacion(id)
     if (action === 'pdf') abrirPdf(id)
-    if (action === 'correo') reenviarCorreo(id)
+    if (action === 'reenviar') reenviarNotificaciones(id)
+    if (action === 'editar') window.location.href = `/admin/reservas/${id}/editar`
     if (action === 'eliminar') eliminarCotizacion(id)
   })
 
@@ -1666,7 +1974,8 @@ async function main() {
     if (action === 'pago') registrarPago(id)
     if (action === 'rechazar') rechazarCotizacion(id)
     if (action === 'pdf') abrirPdf(id)
-    if (action === 'correo') reenviarCorreo(id)
+    if (action === 'reenviar') reenviarNotificaciones(id)
+    if (action === 'editar') abrirModalEditar(id)
     if (action === 'eliminar') eliminarCotizacion(id)
   })
 
