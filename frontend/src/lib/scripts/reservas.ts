@@ -208,6 +208,8 @@ async function main() {
 
   const estadoSelect = qs<HTMLSelectElement>('#fEstado')
   const pagoSelect = qs<HTMLSelectElement>('#fPago')
+  const buscarIdInput = qs<HTMLInputElement>('#fBuscarId')
+  const ordenSelect = qs<HTMLSelectElement>('#fOrden')
   const monthLabel = qs<HTMLHeadingElement>('#monthLabel')
   const calendarDays = qs<HTMLDivElement>('#calendarDays')
   const prevMonthBtn = qs<HTMLButtonElement>('#prevMonth')
@@ -240,6 +242,13 @@ async function main() {
     eventosPorFecha = {}
     // Usar allCotizaciones para reconstruir los eventos
     cotizaciones = allCotizaciones.filter((c) => {
+      // Filtro por búsqueda de ID
+      if (buscarIdInput?.value.trim()) {
+        const busqueda = buscarIdInput.value.trim().toLowerCase()
+        const idStr = c.id?.toString().toLowerCase() || ''
+        if (!idStr.includes(busqueda)) return false
+      }
+      
       // Filtro por estado
       if (estadoSelect?.value) {
         const estadoFiltro = estadoSelect.value.toLowerCase()
@@ -343,8 +352,15 @@ async function main() {
       return
     }
 
-    // Agrupar por fecha
-    const fechasOrdenadas = Object.keys(eventosPorFecha).sort().reverse()
+    // Agrupar por fecha y ordenar según el criterio seleccionado
+    const orden = ordenSelect?.value || 'reciente'
+    const fechasOrdenadas = Object.keys(eventosPorFecha).sort((a, b) => {
+      if (orden === 'reciente') {
+        return b.localeCompare(a) // Más reciente primero (descendente)
+      } else {
+        return a.localeCompare(b) // Más antigua primero (ascendente)
+      }
+    })
     
     if (fechasOrdenadas.length === 0) {
       listaContainer.innerHTML = '<div class="placeholder">No hay cotizaciones para mostrar con los filtros aplicados.</div>'
@@ -838,7 +854,7 @@ async function main() {
 
       const content = `
         <div class="modal-detail">
-          <h2>Aceptar cotización #${c.numero}</h2>
+          <h2>Aceptar cotización #${c.id}</h2>
           <div class="detail-section">
             <p><strong>Valor total:</strong> ${formatCurrency(valorTotal)}</p>
             <p><strong>Abono requerido (50%):</strong> ${formatCurrency(abonoRequerido)}</p>
@@ -974,7 +990,7 @@ async function main() {
 
       const content = `
         <div class="modal-detail">
-          <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 600;">Registrar pago - Cotización #${c.numero}</h2>
+          <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 600;">Registrar pago - Cotización #${c.id}</h2>
           <div class="detail-section">
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem;">
               <div>
@@ -1196,7 +1212,7 @@ async function main() {
 
       const content = `
         <div class="modal-detail">
-          <h2>Cotización #${c.numero}</h2>
+          <h2>Cotización #${c.id}</h2>
           <div class="detail-section">
             <h3>Cliente</h3>
             <p><strong>Nombre:</strong> ${c.cliente.nombre}</p>
@@ -1282,7 +1298,7 @@ async function main() {
 
       const content = `
         <div class="modal-detail">
-          <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 600;">Registrar pago - Cotización #${c.numero}</h2>
+          <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 600;">Registrar pago - Cotización #${c.id}</h2>
           <div class="detail-section">
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem;">
               <div>
@@ -1663,6 +1679,10 @@ async function main() {
     vistaLista?.classList.remove('active')
     if (detalleDelDia) detalleDelDia.style.display = 'block'
     if (eyebrowVista) eyebrowVista.textContent = 'Calendario'
+    // Ocultar selector de ordenamiento en vista calendario
+    if (ordenSelect?.parentElement) {
+      ordenSelect.parentElement.style.display = 'none'
+    }
   })
 
   btnVistaLista?.addEventListener('click', () => {
@@ -1673,6 +1693,10 @@ async function main() {
     vistaCalendario?.classList.remove('active')
     if (detalleDelDia) detalleDelDia.style.display = 'none'
     if (eyebrowVista) eyebrowVista.textContent = 'Lista'
+    // Mostrar selector de ordenamiento en vista lista
+    if (ordenSelect?.parentElement) {
+      ordenSelect.parentElement.style.display = 'flex'
+    }
     renderListaView()
   })
 
@@ -1703,6 +1727,27 @@ async function main() {
     }
   })
 
+  // Búsqueda por ID en tiempo real
+  buscarIdInput?.addEventListener('input', () => {
+    rebuildEventos()
+    // Si la fecha seleccionada quedó sin eventos tras filtrar, tomamos la primera disponible
+    if (!selectedDate || !eventosPorFecha[selectedDate]?.length) {
+      selectedDate = firstAvailableDate(Object.keys(eventosPorFecha))
+    }
+    renderCalendar()
+    renderDayList()
+    if (vistaActual === 'lista') {
+      renderListaView()
+    }
+  })
+
+  // Cambio de ordenamiento
+  ordenSelect?.addEventListener('change', () => {
+    if (vistaActual === 'lista') {
+      renderListaView()
+    }
+  })
+
   // Close dropdowns when clicking outside
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement
@@ -1723,6 +1768,11 @@ async function main() {
 
   await ensureSession()
   await loadCotizaciones()
+  
+  // Ocultar el selector de ordenamiento al inicio (vista calendario por defecto)
+  if (ordenSelect?.parentElement) {
+    ordenSelect.parentElement.style.display = 'none'
+  }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
