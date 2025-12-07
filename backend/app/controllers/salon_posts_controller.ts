@@ -10,11 +10,16 @@ export default class SalonPostsController {
   async index({ request, response }: HttpContext) {
     try {
       const espacioId = request.input('espacio_id')
+      const limit = Math.min(parseInt(request.input('limit', '50')), 100)
       
       const query = SalonPost.query()
+        .select('id', 'titulo', 'slug', 'content', 'imagenes', 'espacio_id', 'published_at')
         .where('publicado', true)
-        .preload('espacio')
+        .preload('espacio', (espacioQuery) => {
+          espacioQuery.select('id', 'nombre', 'slug')
+        })
         .orderBy('published_at', 'desc')
+        .limit(limit)
 
       if (espacioId) {
         query.where('espacioId', espacioId)
@@ -23,7 +28,7 @@ export default class SalonPostsController {
       const posts = await query
 
       // Cache para contenido público que no cambia frecuentemente
-      response.header('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=59')
+      response.header('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=120')
 
       return response.json({
         success: true,
@@ -47,7 +52,9 @@ export default class SalonPostsController {
       const post = await SalonPost.query()
         .where('slug', params.slug)
         .where('publicado', true)
-        .preload('espacio')
+        .preload('espacio', (espacioQuery) => {
+          espacioQuery.select('id', 'nombre', 'slug', 'imagenes')
+        })
         .first()
 
       if (!post) {
@@ -58,7 +65,7 @@ export default class SalonPostsController {
       }
 
       // Cache para contenido público
-      response.header('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=59')
+      response.header('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=120')
 
       return response.json({
         success: true,
@@ -77,11 +84,17 @@ export default class SalonPostsController {
    * Listar todos los posts (admin)
    * GET /admin/salon-posts
    */
-  async indexAdmin({ response }: HttpContext) {
+  async indexAdmin({ request, response }: HttpContext) {
     try {
+      const limit = Math.min(parseInt(request.input('limit', '50')), 200)
+      
       const posts = await SalonPost.query()
-        .preload('espacio')
+        .select('id', 'titulo', 'slug', 'espacio_id', 'imagenes', 'publicado', 'published_at', 'created_at', 'updated_at')
+        .preload('espacio', (espacioQuery) => {
+          espacioQuery.select('id', 'nombre')
+        })
         .orderBy('created_at', 'desc')
+        .limit(limit)
 
       return response.json({
         success: true,
@@ -152,8 +165,17 @@ export default class SalonPostsController {
    */
   async showAdmin({ params, response }: HttpContext) {
     try {
+      // Validar que el ID sea un número válido
+      const id = parseInt(params.id)
+      if (isNaN(id) || id <= 0) {
+        return response.status(400).json({
+          success: false,
+          message: 'ID de post inválido',
+        })
+      }
+
       const post = await SalonPost.query()
-        .where('id', params.id)
+        .where('id', id)
         .preload('espacio')
         .first()
 
@@ -183,7 +205,16 @@ export default class SalonPostsController {
    */
   async update({ params, request, response }: HttpContext) {
     try {
-      const post = await SalonPost.find(params.id)
+      // Validar que el ID sea un número válido
+      const id = parseInt(params.id)
+      if (isNaN(id) || id <= 0) {
+        return response.status(400).json({
+          success: false,
+          message: 'ID de post inválido',
+        })
+      }
+
+      const post = await SalonPost.find(id)
 
       if (!post) {
         return response.status(404).json({
@@ -242,7 +273,16 @@ export default class SalonPostsController {
    */
   async destroy({ params, response }: HttpContext) {
     try {
-      const post = await SalonPost.find(params.id)
+      // Validar que el ID sea un número válido
+      const id = parseInt(params.id)
+      if (isNaN(id) || id <= 0) {
+        return response.status(400).json({
+          success: false,
+          message: 'ID de post inválido',
+        })
+      }
+
+      const post = await SalonPost.find(id)
 
       if (!post) {
         return response.status(404).json({
@@ -272,7 +312,16 @@ export default class SalonPostsController {
    */
   async publish({ params, request, response }: HttpContext) {
     try {
-      const post = await SalonPost.find(params.id)
+      // Validar que el ID sea un número válido
+      const id = parseInt(params.id)
+      if (isNaN(id) || id <= 0) {
+        return response.status(400).json({
+          success: false,
+          message: 'ID de post inválido',
+        })
+      }
+
+      const post = await SalonPost.find(id)
 
       if (!post) {
         return response.status(404).json({

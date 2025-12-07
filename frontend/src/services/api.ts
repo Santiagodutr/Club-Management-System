@@ -218,6 +218,13 @@ export const cotizacionesAPI = {
       method: 'POST',
     })
   },
+
+  // Eliminar cotización
+  async eliminar(id: number) {
+    return fetchAPI(`/api/cotizaciones/${id}`, {
+      method: 'DELETE',
+    })
+  },
 }
 
 // ============================================

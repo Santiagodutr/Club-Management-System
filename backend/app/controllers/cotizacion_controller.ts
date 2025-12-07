@@ -199,6 +199,9 @@ export default class CotizacionController {
           })
       }
 
+      // Refrescar vista materializada en background (no bloquear respuesta)
+      this.refreshStatsAsync()
+
       return response.status(201).json({
         success: true,
         message: 'Cotización creada exitosamente',
@@ -217,6 +220,19 @@ export default class CotizacionController {
         message: 'Error al crear la cotización',
         error: error.message,
       })
+    }
+  }
+
+  /**
+   * Refrescar vista materializada de forma asíncrona
+   */
+  private async refreshStatsAsync() {
+    try {
+      const db = (await import('@adonisjs/lucid/services/db')).default
+      await db.rawQuery('SELECT refresh_cotizaciones_summary()')
+    } catch (error) {
+      console.error('Error refrescando stats:', error)
+      // No lanzar error, es background task
     }
   }
 
@@ -370,8 +386,11 @@ export default class CotizacionController {
               ? parseFloat(c.valorTotal) - (typeof c.montoPagado === 'string' ? parseFloat(c.montoPagado) : c.montoPagado)
               : c.valorTotal - (typeof c.montoPagado === 'string' ? parseFloat(c.montoPagado) : c.montoPagado),
           },
-          estado: c.estadoLegible,
-          estado_pago: c.estadoPagoLegible,
+          estado: c.estado,
+          estado_legible: c.estadoLegible,
+          estado_pago: c.estadoPago,
+          estado_pago_legible: c.estadoPagoLegible,
+          monto_pagado: c.montoPagado,
           fecha_creacion: c.createdAt,
           fecha_actualizacion: c.updatedAt,
         })),
@@ -421,7 +440,13 @@ export default class CotizacionController {
           detalles: cotizacion.getDetalles(),
           totales: {
             subtotal: cotizacion.valorTotal,
+            valor_total: cotizacion.valorTotal,
             abono_50_porciento: cotizacion.calcularMontoAbono(),
+            abono_requerido: cotizacion.calcularMontoAbono(),
+            total_pagado: cotizacion.montoPagado,
+            saldo_pendiente: typeof cotizacion.valorTotal === 'string' 
+              ? parseFloat(cotizacion.valorTotal) - (typeof cotizacion.montoPagado === 'string' ? parseFloat(cotizacion.montoPagado) : cotizacion.montoPagado)
+              : cotizacion.valorTotal - (typeof cotizacion.montoPagado === 'string' ? parseFloat(cotizacion.montoPagado) : cotizacion.montoPagado),
           },
           estado: cotizacion.estadoLegible,
           estado_pago: cotizacion.estadoPagoLegible,
@@ -865,6 +890,39 @@ export default class CotizacionController {
       return response.status(500).json({
         success: false,
         message: 'Error al enviar correos',
+        error: error instanceof Error ? error.message : 'desconocido',
+      })
+    }
+  }
+
+  /**
+   * Eliminar cotización
+   * DELETE /api/cotizaciones/:id
+   */
+  async eliminarCotizacion({ params, response }: HttpContext) {
+    try {
+      const cotizacion = await Cotizacion.findOrFail(params.id)
+
+      // Si la cotización está aceptada, también eliminar el bloqueo del calendario
+      if (cotizacion.estado === 'aceptada') {
+        const { supabase } = await import('#services/supabase_service')
+        await supabase
+          .from('bloqueos_calendario')
+          .delete()
+          .eq('cotizacion_id', cotizacion.id)
+      }
+
+      await cotizacion.delete()
+
+      return response.json({
+        success: true,
+        message: 'Cotización eliminada correctamente',
+      })
+    } catch (error) {
+      console.error('Error eliminando cotización:', error)
+      return response.status(500).json({
+        success: false,
+        message: 'Error al eliminar la cotización',
         error: error instanceof Error ? error.message : 'desconocido',
       })
     }

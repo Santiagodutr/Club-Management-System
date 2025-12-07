@@ -114,6 +114,38 @@ class Modal {
   }
 }
 
+// Loading overlay global
+class LoadingOverlay {
+  private overlay: HTMLDivElement
+
+  constructor() {
+    this.overlay = document.createElement('div')
+    this.overlay.className = 'loading-overlay'
+    this.overlay.innerHTML = `
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p class="loading-text">Procesando...</p>
+      </div>
+    `
+  }
+
+  show(message: string = 'Procesando...') {
+    const text = this.overlay.querySelector('.loading-text')
+    if (text) text.textContent = message
+    document.body.appendChild(this.overlay)
+    setTimeout(() => this.overlay.classList.add('show'), 10)
+  }
+
+  hide() {
+    this.overlay.classList.remove('show')
+    setTimeout(() => {
+      if (this.overlay.parentNode) {
+        document.body.removeChild(this.overlay)
+      }
+    }, 300)
+  }
+}
+
 function formatCurrency(value: number | string): string {
   const num = typeof value === 'string' ? parseFloat(value) : value
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(num)
@@ -335,55 +367,193 @@ async function main() {
           : (c.totales?.abono_requerido || 0)
         const saldoPendiente = valorTotal - totalPagado
 
+        const estadoClase = c.estado ? `estado-${c.estado.toLowerCase()}` : ''
+        
+        // Calculate end time
+        const horaInicio = c.evento?.hora ?? '00:00'
+        const duracion = c.evento?.duracion || 0
+        const calcularHoraFin = (inicio: string, horas: number): string => {
+          const [h, m] = inicio.split(':').map(Number)
+          const totalMinutos = h * 60 + m + (horas * 60)
+          const horaFin = Math.floor(totalMinutos / 60) % 24
+          const minutosFin = totalMinutos % 60
+          return `${String(horaFin).padStart(2, '0')}:${String(minutosFin).padStart(2, '0')}`
+        }
+        const horaFin = calcularHoraFin(horaInicio, duracion)
+        
         return `
         <div class="day-card">
-          <div class="day-card__header">
-            <div class="day-card__title">${c.cliente.nombre}</div>
-            <div class="tag">${c.evento?.salon ?? 'Salón'}</div>
+          <div class="card-menu">
+            <button class="card-menu__btn" data-id="${c.id}" title="Más opciones">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+            <div class="card-menu__dropdown" data-menu="${c.id}">
+              <button class="card-menu__item" data-action="eliminar" data-id="${c.id}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Eliminar
+              </button>
+            </div>
           </div>
+          <div class="day-card__header ${estadoClase}">
+            <div class="day-card__title-section">
+              <h3 class="day-card__title">
+                ${c.cliente.nombre}
+                <span style="font-weight: 400; font-size: 0.85rem; color: #64748b;">#${c.id}</span>
+              </h3>
+              <p class="day-card__subtitle">${c.cliente.email}</p>
+            </div>
+            <div class="day-card__salon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              ${c.evento?.salon ?? 'Salón'}
+            </div>
+          </div>
+          
           <div class="day-card__body">
-            <div class="meta-row">
-              <div class="meta"><strong>Email:</strong> ${c.cliente.email}</div>
-              ${c.cliente.telefono ? `<div class="meta"><strong>Teléfono:</strong> ${c.cliente.telefono}</div>` : ''}
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Hora de Inicio</span>
+                <span class="info-value">${horaInicio}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Hora de Fin</span>
+                <span class="info-value">${horaFin}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Duración</span>
+                <span class="info-value">${duracion} horas</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Asistentes</span>
+                <span class="info-value">${c.evento?.asistentes ?? 0} personas</span>
+              </div>
+              ${c.evento?.tipo ? `
+              <div class="info-item">
+                <span class="info-label">Tipo de Evento</span>
+                <span class="info-value">${c.evento.tipo}</span>
+              </div>
+              ` : ''}
+              ${c.cliente.telefono ? `
+              <div class="info-item">
+                <span class="info-label">Teléfono</span>
+                <span class="info-value">${c.cliente.telefono}</span>
+              </div>
+              ` : ''}
             </div>
-            <div class="meta-row">
-              <div class="meta"><strong>Hora:</strong> ${c.evento?.hora ?? ''}</div>
-              <div class="meta"><strong>Duración:</strong> ${c.evento?.duracion || 0}h</div>
-              <div class="meta"><strong>Asistentes:</strong> ${c.evento?.asistentes ?? 0} personas</div>
+            
+            ${c.estado && c.estado.toLowerCase() !== 'rechazada' ? `
+            <div class="info-grid info-grid--financial">
+              <div class="info-item">
+                <span class="info-label">Valor Total</span>
+                <span class="info-value highlight">${formatCurrency(valorTotal)}</span>
+              </div>
+              ${totalPagado > 0 ? `
+              <div class="info-item">
+                <span class="info-label">Total Pagado</span>
+                <span class="info-value success">${formatCurrency(totalPagado)}</span>
+              </div>
+              ` : `
+              <div class="info-item">
+                <span class="info-label">Abono Requerido (50%)</span>
+                <span class="info-value">${formatCurrency(abonoRequerido)}</span>
+              </div>
+              `}
+              ${saldoPendiente > 0 ? `
+              <div class="info-item">
+                <span class="info-label">Saldo Pendiente</span>
+                <span class="info-value warning">${formatCurrency(saldoPendiente)}</span>
+              </div>
+              ` : ''}
             </div>
-            <div class="meta"><strong>Cotización #:</strong> ${c.id}</div>
-            ${c.evento?.tipo ? `<div class="meta"><strong>Tipo de evento:</strong> ${c.evento.tipo}</div>` : ''}
-            <div class="divider"></div>
-            <div class="meta-row">
-              <div class="meta"><strong>Valor total:</strong> ${formatCurrency(valorTotal)}</div>
-              <div class="meta"><strong>Abono requerido (50%):</strong> ${formatCurrency(abonoRequerido)}</div>
+            ` : `
+            <div class="info-grid info-grid--financial">
+              <div class="info-item">
+                <span class="info-label">Valor Total</span>
+                <span class="info-value highlight">${formatCurrency(valorTotal)}</span>
+              </div>
             </div>
-            ${totalPagado > 0 ? `
-            <div class="meta-row">
-              <div class="meta meta--highlight"><strong>Total pagado:</strong> ${formatCurrency(totalPagado)}</div>
-              ${saldoPendiente > 0 ? `<div class="meta meta--warning"><strong>Saldo pendiente:</strong> ${formatCurrency(saldoPendiente)}</div>` : ''}
+            `}
+            
+            <div class="status-row">
+              <span class="badge badge-estado ${c.estado ? c.estado.toLowerCase() : ''}">${(c as any).estado_legible || c.estado || 'Sin estado'}</span>
+              <span class="badge badge-pago ${(c as any).estado_pago === 'pagado' ? 'pagado' : ''}">${(c as any).estado_pago_legible || c.estado_pago || 'Sin información de pago'}</span>
+            </div>
+          </div>
+          
+          <div class="day-card__footer">
+            ${c.estado && c.estado.toLowerCase() === 'pendiente' ? `
+            <div class="actions-section">
+              <p class="actions-label">Acciones Principales</p>
+              <div class="actions-row">
+                <button class="btn-action success" data-action="aceptar" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  Aceptar Reserva
+                </button>
+                <button class="btn-action danger" data-action="rechazar" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                  Rechazar
+                </button>
+              </div>
             </div>
             ` : ''}
-            <div class="divider"></div>
-            <div class="meta-row">
-              <span class="tag state ${c.estado ? c.estado.toLowerCase() : ''}">${c.estado || 'Sin estado'}</span>
-              <span class="tag pay">${c.estado_pago || 'Sin información de pago'}</span>
+            
+            ${c.estado && c.estado.toLowerCase() === 'aceptada' && saldoPendiente > 0 ? `
+            <div class="actions-section">
+              <p class="actions-label">Gestión de Pagos</p>
+              <div class="actions-row">
+                <button class="btn-action primary" data-action="pago" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                  </svg>
+                  Registrar Pago
+                </button>
+              </div>
             </div>
-          </div>
-          <div class="day-card__footer">
-            <div class="day-card__actions day-card__actions--left">
-              <button class="link" data-action="ver" data-id="${c.id}">Ver detalle</button>
-              <button class="link" data-action="pdf" data-id="${c.id}">Ver PDF</button>
-              <button class="link" data-action="correo" data-id="${c.id}">Reenviar correo</button>
-            </div>
-            <div class="day-card__actions day-card__actions--right">
-              ${c.estado && c.estado.toLowerCase() === 'pendiente' ? `
-                <button class="link" data-action="abonado" data-id="${c.id}">Registrar abonado</button>
-                <button class="link danger" data-action="rechazar" data-id="${c.id}">Rechazar</button>
-              ` : ''}
-              ${c.estado && c.estado.toLowerCase() === 'aceptada' ? `
-                <button class="link" data-action="pago" data-id="${c.id}">Registrar pago</button>
-              ` : ''}
+            ` : ''}
+            
+            <div class="actions-section">
+              <p class="actions-label">Información</p>
+              <div class="actions-row">
+                <button class="btn-action secondary" data-action="ver" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  Ver Detalle
+                </button>
+                <button class="btn-action secondary" data-action="pdf" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                  Ver PDF
+                </button>
+                <button class="btn-action secondary" data-action="correo" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                  Reenviar Correo
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -431,56 +601,193 @@ async function main() {
             ? parseFloat(c.totales.abono_requerido)
             : (c.totales?.abono_requerido || 0)
           const saldoPendiente = valorTotal - totalPagado
+          const estadoClase = c.estado ? `estado-${c.estado.toLowerCase()}` : ''
+
+          // Calculate end time
+          const horaInicio = c.evento?.hora ?? '00:00'
+          const duracion = c.evento?.duracion || 0
+          const calcularHoraFin = (inicio: string, horas: number): string => {
+            const [h, m] = inicio.split(':').map(Number)
+            const totalMinutos = h * 60 + m + (horas * 60)
+            const horaFin = Math.floor(totalMinutos / 60) % 24
+            const minutosFin = totalMinutos % 60
+            return `${String(horaFin).padStart(2, '0')}:${String(minutosFin).padStart(2, '0')}`
+          }
+          const horaFin = calcularHoraFin(horaInicio, duracion)
 
           return `
         <div class="day-card">
-          <div class="day-card__header">
-            <div class="day-card__title">${c.cliente.nombre}</div>
-            <div class="tag">${c.evento?.salon ?? 'Salón'}</div>
+          <div class="card-menu">
+            <button class="card-menu__btn" data-id="${c.id}" title="Más opciones">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+            <div class="card-menu__dropdown" data-menu="${c.id}">
+              <button class="card-menu__item" data-action="eliminar" data-id="${c.id}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Eliminar
+              </button>
+            </div>
           </div>
+          <div class="day-card__header ${estadoClase}">
+            <div class="day-card__title-section">
+              <h3 class="day-card__title">
+                ${c.cliente.nombre}
+                <span style="font-weight: 400; font-size: 0.85rem; color: #64748b;">#${c.id}</span>
+              </h3>
+              <p class="day-card__subtitle">${c.cliente.email}</p>
+            </div>
+            <div class="day-card__salon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              ${c.evento?.salon ?? 'Salón'}
+            </div>
+          </div>
+          
           <div class="day-card__body">
-            <div class="meta-row">
-              <div class="meta"><strong>Email:</strong> ${c.cliente.email}</div>
-              ${c.cliente.telefono ? `<div class="meta"><strong>Teléfono:</strong> ${c.cliente.telefono}</div>` : ''}
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Hora de Inicio</span>
+                <span class="info-value">${horaInicio}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Hora de Fin</span>
+                <span class="info-value">${horaFin}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Duración</span>
+                <span class="info-value">${duracion} horas</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Asistentes</span>
+                <span class="info-value">${c.evento?.asistentes ?? 0} personas</span>
+              </div>
+              ${c.evento?.tipo ? `
+              <div class="info-item">
+                <span class="info-label">Tipo de Evento</span>
+                <span class="info-value">${c.evento.tipo}</span>
+              </div>
+              ` : ''}
+              ${c.cliente.telefono ? `
+              <div class="info-item">
+                <span class="info-label">Teléfono</span>
+                <span class="info-value">${c.cliente.telefono}</span>
+              </div>
+              ` : ''}
             </div>
-            <div class="meta-row">
-              <div class="meta"><strong>Hora:</strong> ${c.evento?.hora ?? ''}</div>
-              <div class="meta"><strong>Duración:</strong> ${c.evento?.duracion || 0}h</div>
-              <div class="meta"><strong>Asistentes:</strong> ${c.evento?.asistentes ?? 0} personas</div>
+            
+            ${c.estado && c.estado.toLowerCase() !== 'rechazada' ? `
+            <div class="info-grid info-grid--financial">
+              <div class="info-item">
+                <span class="info-label">Valor Total</span>
+                <span class="info-value highlight">${formatCurrency(valorTotal)}</span>
+              </div>
+              ${totalPagado > 0 ? `
+              <div class="info-item">
+                <span class="info-label">Total Pagado</span>
+                <span class="info-value success">${formatCurrency(totalPagado)}</span>
+              </div>
+              ` : `
+              <div class="info-item">
+                <span class="info-label">Abono Requerido (50%)</span>
+                <span class="info-value">${formatCurrency(abonoRequerido)}</span>
+              </div>
+              `}
+              ${saldoPendiente > 0 ? `
+              <div class="info-item">
+                <span class="info-label">Saldo Pendiente</span>
+                <span class="info-value warning">${formatCurrency(saldoPendiente)}</span>
+              </div>
+              ` : ''}
             </div>
-            <div class="meta"><strong>Cotización #:</strong> ${c.id}</div>
-            ${c.evento?.tipo ? `<div class="meta"><strong>Tipo de evento:</strong> ${c.evento.tipo}</div>` : ''}
-            <div class="divider"></div>
-            <div class="meta-row">
-              <div class="meta"><strong>Valor total:</strong> ${formatCurrency(valorTotal)}</div>
-              <div class="meta"><strong>Abono requerido (50%):</strong> ${formatCurrency(abonoRequerido)}</div>
+            ` : `
+            <div class="info-grid info-grid--financial">
+              <div class="info-item">
+                <span class="info-label">Valor Total</span>
+                <span class="info-value highlight">${formatCurrency(valorTotal)}</span>
+              </div>
             </div>
-            ${totalPagado > 0 ? `
-            <div class="meta-row">
-              <div class="meta meta--highlight"><strong>Total pagado:</strong> ${formatCurrency(totalPagado)}</div>
-              ${saldoPendiente > 0 ? `<div class="meta meta--warning"><strong>Saldo pendiente:</strong> ${formatCurrency(saldoPendiente)}</div>` : ''}
+            `}
+            
+            <div class="status-row">
+              <span class="badge badge-estado ${c.estado ? c.estado.toLowerCase() : ''}">${(c as any).estado_legible || c.estado || 'Sin estado'}</span>
+              <span class="badge badge-pago ${(c as any).estado_pago === 'pagado' ? 'pagado' : ''}">${(c as any).estado_pago_legible || c.estado_pago || 'Sin información de pago'}</span>
+            </div>
+          </div>
+          
+          <div class="day-card__footer">
+            ${c.estado && c.estado.toLowerCase() === 'pendiente' ? `
+            <div class="actions-section">
+              <p class="actions-label">Acciones Principales</p>
+              <div class="actions-row">
+                <button class="btn-action success" data-action="aceptar" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  Aceptar Reserva
+                </button>
+                <button class="btn-action danger" data-action="rechazar" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                  Rechazar
+                </button>
+              </div>
             </div>
             ` : ''}
-            <div class="divider"></div>
-            <div class="meta-row">
-              <span class="tag state ${c.estado ? c.estado.toLowerCase() : ''}">${c.estado || 'Sin estado'}</span>
-              <span class="tag pay">${c.estado_pago || 'Sin información de pago'}</span>
+            
+            ${c.estado && c.estado.toLowerCase() === 'aceptada' && saldoPendiente > 0 ? `
+            <div class="actions-section">
+              <p class="actions-label">Gestión de Pagos</p>
+              <div class="actions-row">
+                <button class="btn-action primary" data-action="pago" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                  </svg>
+                  Registrar Pago
+                </button>
+              </div>
             </div>
-          </div>
-          <div class="day-card__footer">
-            <div class="day-card__actions day-card__actions--left">
-              <button class="link" data-action="ver" data-id="${c.id}">Ver detalle</button>
-              <button class="link" data-action="pdf" data-id="${c.id}">Ver PDF</button>
-              <button class="link" data-action="correo" data-id="${c.id}">Reenviar correo</button>
-            </div>
-            <div class="day-card__actions day-card__actions--right">
-              ${c.estado && c.estado.toLowerCase() === 'pendiente' ? `
-                <button class="link" data-action="abonado" data-id="${c.id}">Registrar abonado</button>
-                <button class="link danger" data-action="rechazar" data-id="${c.id}">Rechazar</button>
-              ` : ''}
-              ${c.estado && c.estado.toLowerCase() === 'aceptada' ? `
-                <button class="link" data-action="pago" data-id="${c.id}">Registrar pago</button>
-              ` : ''}
+            ` : ''}
+            
+            <div class="actions-section">
+              <p class="actions-label">Información</p>
+              <div class="actions-row">
+                <button class="btn-action secondary" data-action="ver" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  Ver Detalle
+                </button>
+                <button class="btn-action secondary" data-action="pdf" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                  Ver PDF
+                </button>
+                <button class="btn-action secondary" data-action="correo" data-id="${c.id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                  Reenviar Correo
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -512,6 +819,364 @@ async function main() {
     } catch (err) {
       console.error(err)
       calendarDays.innerHTML = '<div class="error">No se pudieron cargar las cotizaciones.</div>'
+    }
+  }
+
+  async function aceptarCotizacion(id: number) {
+    const modal = new Modal()
+    
+    // First get the cotización to show total amounts
+    try {
+      const resp = await cotizacionesAPI.obtener(id)
+      const c = resp.data
+      const valorTotal = typeof c.totales?.subtotal === 'string' 
+        ? parseFloat(c.totales.subtotal) 
+        : (c.totales?.subtotal || 0)
+      const abonoRequerido = typeof c.totales?.abono_50_porciento === 'string'
+        ? parseFloat(c.totales.abono_50_porciento)
+        : (c.totales?.abono_50_porciento || 0)
+
+      const content = `
+        <div class="modal-detail">
+          <h2>Aceptar cotización #${c.numero}</h2>
+          <div class="detail-section">
+            <p><strong>Valor total:</strong> ${formatCurrency(valorTotal)}</p>
+            <p><strong>Abono requerido (50%):</strong> ${formatCurrency(abonoRequerido)}</p>
+          </div>
+          <div class="detail-section">
+            <h3>Estado del pago</h3>
+            <div style="margin-top: 1rem;">
+              <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;">
+                <input type="radio" name="estadoPago" value="abonado" checked style="margin-right: 0.5rem;">
+                Abonado 50% (${formatCurrency(abonoRequerido)})
+              </label>
+              <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;">
+                <input type="radio" name="estadoPago" value="pagado" style="margin-right: 0.5rem;">
+                Pagado 100% (${formatCurrency(valorTotal)})
+              </label>
+              <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;">
+                <input type="radio" name="estadoPago" value="custom" style="margin-right: 0.5rem;">
+                Monto personalizado
+              </label>
+            </div>
+            <div id="customAmountField" style="display: none; margin-top: 1rem;">
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Monto personalizado:</label>
+              <input type="text" id="customAmount" class="form-input" placeholder="Ejemplo: 500,000" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem;">
+              <p style="margin-top: 0.25rem; font-size: 0.875rem; color: #6b7280;">Ingrese el monto en COP</p>
+            </div>
+          </div>
+        </div>
+      `
+
+      modal.show(content, [
+        { label: 'Cancelar', handler: () => {}, variant: 'secondary' },
+        {
+          label: 'Aceptar',
+          handler: async () => {
+            const selectedRadio = modal.modal.querySelector('input[name="estadoPago"]:checked') as HTMLInputElement
+            const estadoPagoValue = selectedRadio?.value
+
+            const payload: any = {}
+            
+            if (estadoPagoValue === 'abonado') {
+              payload.estadoPago = 'abonado'
+            } else if (estadoPagoValue === 'pagado') {
+              payload.estadoPago = 'pagado'
+            } else if (estadoPagoValue === 'custom') {
+              const customInput = modal.modal.querySelector('#customAmount') as HTMLInputElement
+              const customValue = customInput?.value.replace(/,/g, '') || '0'
+              const customAmount = Number(customValue)
+              if (customAmount <= 0) {
+                const errorModal = new Modal()
+                errorModal.alert('Debes ingresar un monto válido', 'error')
+                return
+              }
+              // If custom amount >= total, mark as pagado, otherwise abonado
+              payload.estadoPago = customAmount >= valorTotal ? 'pagado' : 'abonado'
+              payload.montoPago = customAmount
+            }
+
+            try {
+              modal.close()
+              
+              const loading = new LoadingOverlay()
+              loading.show('Aceptando cotización...')
+              
+              await cotizacionesAPI.cerrar(id, payload)
+              
+              // Force immediate reload
+              await loadCotizaciones()
+              renderCalendar()
+              renderDayList()
+              if (vistaActual === 'lista') {
+                renderListaView()
+              }
+              
+              loading.hide()
+              
+              const successModal = new Modal()
+              successModal.alert('Cotización aceptada y calendario bloqueado exitosamente.', 'success')
+            } catch (err: any) {
+              const loading = new LoadingOverlay()
+              loading.hide()
+              const errorModal = new Modal()
+              errorModal.alert(err?.message || 'Error al aceptar la cotización', 'error')
+            }
+          },
+          variant: 'primary'
+        }
+      ])
+
+      // Show/hide custom amount field based on radio selection
+      const radios = modal.modal.querySelectorAll('input[name="estadoPago"]')
+      const customField = modal.modal.querySelector('#customAmountField') as HTMLElement
+      const customInput = modal.modal.querySelector('#customAmount') as HTMLInputElement
+      
+      // Format currency input with commas
+      if (customInput) {
+        customInput.addEventListener('input', (e) => {
+          const target = e.target as HTMLInputElement
+          const value = target.value.replace(/,/g, '')
+          if (value && !isNaN(Number(value))) {
+            target.value = Number(value).toLocaleString('es-CO')
+          }
+        })
+      }
+      
+      radios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const target = e.target as HTMLInputElement
+          if (target.value === 'custom') {
+            customField.style.display = 'block'
+            customInput?.focus()
+          } else {
+            customField.style.display = 'none'
+          }
+        })
+      })
+    } catch (err) {
+      modal.alert('No se pudo obtener el detalle de la cotización', 'error')
+    }
+  }
+
+  async function registrarPago(id: number) {
+    const modal = new Modal()
+    
+    try {
+      const resp = await cotizacionesAPI.obtener(id)
+      const c = resp.data
+      const valorTotal = typeof c.totales?.valor_total === 'string' 
+        ? parseFloat(c.totales.valor_total) 
+        : (c.totales?.valor_total || 0)
+      const pagadoRaw = c.totales?.total_pagado || 0
+      const pagado = typeof pagadoRaw === 'string' ? parseFloat(pagadoRaw) : pagadoRaw
+      const pendiente = valorTotal - pagado
+
+      const content = `
+        <div class="modal-detail">
+          <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 600;">Registrar pago - Cotización #${c.numero}</h2>
+          <div class="detail-section">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem;">
+              <div>
+                <p style="color: #6b7280; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Valor total</p>
+                <p style="font-size: 1.125rem; font-weight: 700; color: #111827;">${formatCurrency(valorTotal)}</p>
+              </div>
+              <div>
+                <p style="color: #6b7280; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Pagado</p>
+                <p style="font-size: 1.125rem; font-weight: 700; color: #059669;">${formatCurrency(pagado)}</p>
+              </div>
+              <div>
+                <p style="color: #6b7280; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Pendiente</p>
+                <p style="font-size: 1.125rem; font-weight: 700; color: ${pendiente > 0 ? '#dc2626' : '#10b981'};">${formatCurrency(pendiente)}</p>
+              </div>
+            </div>
+          </div>
+          <div class="detail-section">
+            <h3 style="margin: 0 0 1rem 0; font-size: 0.875rem; font-weight: 600; color: #374151;">¿Cuánto deseas registrar?</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+              ${pendiente > 0 ? `
+              <label style="display: flex; align-items: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s;" class="payment-option" data-selected="true">
+                <input type="radio" name="montoPago" value="pendiente" checked style="margin-right: 0.75rem; width: 18px; height: 18px; cursor: pointer;">
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #111827; margin-bottom: 0.125rem;">Completar pago</div>
+                  <div style="font-size: 0.875rem; color: #6b7280;">Pagar el saldo pendiente completo</div>
+                </div>
+                <div style="font-size: 1.125rem; font-weight: 700; color: #059669;">${formatCurrency(pendiente)}</div>
+              </label>
+              ` : ''}
+              ${pagado === 0 && valorTotal > 0 ? `
+              <label style="display: flex; align-items: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s;" class="payment-option">
+                <input type="radio" name="montoPago" value="abono50" style="margin-right: 0.75rem; width: 18px; height: 18px; cursor: pointer;">
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #111827; margin-bottom: 0.125rem;">Abono del 50%</div>
+                  <div style="font-size: 0.875rem; color: #6b7280;">Pagar la mitad del valor total</div>
+                </div>
+                <div style="font-size: 1.125rem; font-weight: 700; color: #3b82f6;">${formatCurrency(valorTotal * 0.5)}</div>
+              </label>
+              ` : ''}
+              <label style="display: flex; align-items: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s;" class="payment-option" ${pendiente <= 0 ? 'data-selected="true"' : ''}>
+                <input type="radio" name="montoPago" value="custom" ${pendiente <= 0 ? 'checked' : ''} style="margin-right: 0.75rem; width: 18px; height: 18px; cursor: pointer;">
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #111827; margin-bottom: 0.125rem;">Monto personalizado</div>
+                  <div style="font-size: 0.875rem; color: #6b7280;">Ingresa cualquier cantidad</div>
+                </div>
+              </label>
+            </div>
+            <div id="customAmountField" style="display: ${pendiente <= 0 ? 'block' : 'none'}; padding: 1rem; background: #f9fafb; border-radius: 0.5rem;">
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: #374151;">Monto a registrar</label>
+              <div style="position: relative;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-weight: 500;">$</span>
+                <input type="text" id="pagoAmount" class="form-input" placeholder="0" style="width: 100%; padding: 0.75rem 1rem 0.75rem 2rem; border: 2px solid #d1d5db; border-radius: 0.5rem; font-size: 1.125rem; font-weight: 600; transition: border-color 0.2s;">
+              </div>
+              <p style="margin-top: 0.75rem; font-size: 0.75rem; color: #6b7280; display: flex; align-items: center; gap: 0.375rem;">
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                  <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                </svg>
+                Puedes registrar un abono parcial o incluso un cargo adicional
+              </p>
+            </div>
+          </div>
+        </div>
+      `
+
+      modal.show(content, [
+        { label: 'Cancelar', handler: () => {}, variant: 'secondary' },
+        {
+          label: 'Registrar',
+          handler: async () => {
+            const selectedRadio = modal.modal.querySelector('input[name="montoPago"]:checked') as HTMLInputElement
+            const montoPagoValue = selectedRadio?.value
+            
+            let montoNum = 0
+
+            if (montoPagoValue === 'pendiente') {
+              montoNum = pendiente
+            } else if (montoPagoValue === 'abono50') {
+              montoNum = valorTotal * 0.5
+            } else if (montoPagoValue === 'custom') {
+              const pagoInput = modal.modal.querySelector('#pagoAmount') as HTMLInputElement
+              const pagoValue = pagoInput?.value.replace(/\./g, '') || '0'
+              montoNum = Number(pagoValue)
+            }
+            
+            if (montoNum <= 0) {
+              const errorModal = new Modal()
+              errorModal.alert('Debes ingresar un monto válido', 'error')
+              return
+            }
+            
+            // Validar que el monto total no exceda el valor total
+            if (pagado + montoNum > valorTotal) {
+              const errorModal = new Modal()
+              errorModal.alert(`El monto total pagado ($${formatCurrency(pagado + montoNum)}) excedería el valor total ($${formatCurrency(valorTotal)})`, 'error')
+              return
+            }
+
+            try {
+              modal.close()
+              
+              const loading = new LoadingOverlay()
+              loading.show('Registrando pago...')
+              
+              await cotizacionesAPI.registrarPago(id, { monto: montoNum })
+              
+              // Force immediate reload
+              await loadCotizaciones()
+              renderCalendar()
+              renderDayList()
+              if (vistaActual === 'lista') {
+                renderListaView()
+              }
+              
+              loading.hide()
+              
+              const successModal = new Modal()
+              successModal.alert(`Pago de ${formatCurrency(montoNum)} registrado correctamente.`, 'success')
+            } catch (err: any) {
+              loading.hide()
+              const errorModal = new Modal()
+              errorModal.alert(err?.message || 'Error al registrar el pago', 'error')
+            }
+          },
+          variant: 'primary'
+        }
+      ])
+
+      // Show/hide custom amount field and update option styles
+      const radios = modal.modal.querySelectorAll('input[name="montoPago"]')
+      const customField = modal.modal.querySelector('#customAmountField') as HTMLElement
+      const pagoInput = modal.modal.querySelector('#pagoAmount') as HTMLInputElement
+      const paymentOptions = modal.modal.querySelectorAll('.payment-option')
+      
+      // Update option styles based on selection
+      const updateOptionStyles = () => {
+        paymentOptions.forEach(option => {
+          const radio = option.querySelector('input[type="radio"]') as HTMLInputElement
+          if (radio?.checked) {
+            option.setAttribute('style', option.getAttribute('style')?.replace('border: 2px solid #e5e7eb', 'border: 2px solid #3b82f6; background: #eff6ff') || '')
+          } else {
+            option.setAttribute('style', option.getAttribute('style')?.replace('border: 2px solid #3b82f6; background: #eff6ff', 'border: 2px solid #e5e7eb').replace('background: #eff6ff', '') || '')
+          }
+        })
+      }
+      
+      radios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const target = e.target as HTMLInputElement
+          if (target.value === 'custom') {
+            customField.style.display = 'block'
+            pagoInput?.focus()
+          } else {
+            customField.style.display = 'none'
+          }
+          updateOptionStyles()
+        })
+      })
+      
+      // Initial style update
+      updateOptionStyles()
+
+      // Format currency input
+      if (pagoInput) {
+        pagoInput.addEventListener('focus', (e) => {
+          const target = e.target as HTMLInputElement
+          target.style.borderColor = '#3b82f6'
+        })
+        
+        pagoInput.addEventListener('blur', (e) => {
+          const target = e.target as HTMLInputElement
+          target.style.borderColor = '#d1d5db'
+        })
+        
+        // Auto-format while typing
+        pagoInput.addEventListener('input', (e) => {
+          const target = e.target as HTMLInputElement
+          // Remove all non-digits
+          const rawValue = target.value.replace(/\D/g, '')
+          
+          if (rawValue === '') {
+            target.value = ''
+            return
+          }
+          
+          // Format with thousand separators
+          const numValue = parseInt(rawValue, 10)
+          target.value = numValue.toLocaleString('es-CO')
+          
+          // Keep cursor at the end
+          setTimeout(() => {
+            target.setSelectionRange(target.value.length, target.value.length)
+          }, 0)
+        })
+        
+        // Focus if custom is pre-selected
+        if (pendiente <= 0) {
+          pagoInput.focus()
+        }
+      }
+    } catch (err) {
+      modal.alert('No se pudo obtener el detalle de la cotización', 'error')
     }
   }
 
@@ -604,23 +1269,206 @@ async function main() {
 
   async function registrarPago(id: number) {
     const modal = new Modal()
-    modal.prompt(
-      'Registrar pago adicional',
-      'Monto en COP',
-      async (monto) => {
-        if (!monto || monto.trim() === '') return
+    
+    try {
+      const resp = await cotizacionesAPI.obtener(id)
+      const c = resp.data
+      const valorTotal = typeof c.totales?.valor_total === 'string' 
+        ? parseFloat(c.totales.valor_total) 
+        : (c.totales?.valor_total || 0)
+      const pagadoRaw = c.totales?.total_pagado || 0
+      const pagado = typeof pagadoRaw === 'string' ? parseFloat(pagadoRaw) : pagadoRaw
+      const pendiente = valorTotal - pagado
 
-        try {
-          await cotizacionesAPI.registrarPago(id, { monto: Number(monto) })
-          await loadCotizaciones()
-          const successModal = new Modal()
-          successModal.alert(`Pago de ${formatCurrency(Number(monto))} registrado correctamente.`, 'success')
-        } catch (err: any) {
-          const errorModal = new Modal()
-          errorModal.alert(err?.message || 'Error al registrar el pago', 'error')
+      const content = `
+        <div class="modal-detail">
+          <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 600;">Registrar pago - Cotización #${c.numero}</h2>
+          <div class="detail-section">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem;">
+              <div>
+                <p style="color: #6b7280; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Valor total</p>
+                <p style="font-size: 1.125rem; font-weight: 700; color: #111827;">${formatCurrency(valorTotal)}</p>
+              </div>
+              <div>
+                <p style="color: #6b7280; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Pagado</p>
+                <p style="font-size: 1.125rem; font-weight: 700; color: #059669;">${formatCurrency(pagado)}</p>
+              </div>
+              <div>
+                <p style="color: #6b7280; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Pendiente</p>
+                <p style="font-size: 1.125rem; font-weight: 700; color: ${pendiente > 0 ? '#dc2626' : '#10b981'};">${formatCurrency(pendiente)}</p>
+              </div>
+            </div>
+          </div>
+          <div class="detail-section">
+            <h3 style="margin: 0 0 1rem 0; font-size: 0.875rem; font-weight: 600; color: #374151;">¿Cuánto deseas registrar?</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+              ${pendiente > 0 ? `
+              <label style="display: flex; align-items: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s;" class="payment-option" data-selected="true">
+                <input type="radio" name="montoPago" value="pendiente" checked style="margin-right: 0.75rem; width: 18px; height: 18px; cursor: pointer;">
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #111827; margin-bottom: 0.125rem;">Completar pago</div>
+                  <div style="font-size: 0.875rem; color: #6b7280;">Pagar el saldo pendiente completo</div>
+                </div>
+                <div style="font-size: 1.125rem; font-weight: 700; color: #059669;">${formatCurrency(pendiente)}</div>
+              </label>
+              ` : ''}
+              <label style="display: flex; align-items: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s;" class="payment-option" ${pendiente <= 0 ? 'data-selected="true"' : ''}>
+                <input type="radio" name="montoPago" value="custom" ${pendiente <= 0 ? 'checked' : ''} style="margin-right: 0.75rem; width: 18px; height: 18px; cursor: pointer;">
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; color: #111827; margin-bottom: 0.125rem;">Monto personalizado</div>
+                  <div style="font-size: 0.875rem; color: #6b7280;">Ingresa cualquier cantidad</div>
+                </div>
+              </label>
+            </div>
+            <div id="customAmountField" style="display: ${pendiente <= 0 ? 'block' : 'none'}; padding: 1rem; background: #f9fafb; border-radius: 0.5rem;">
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; color: #374151;">Monto a registrar</label>
+              <div style="position: relative;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-weight: 500;">$</span>
+                <input type="text" id="pagoAmount" class="form-input" placeholder="0" style="width: 100%; padding: 0.75rem 1rem 0.75rem 2rem; border: 2px solid #d1d5db; border-radius: 0.5rem; font-size: 1.125rem; font-weight: 600; transition: border-color 0.2s;">
+              </div>
+              <p style="margin-top: 0.75rem; font-size: 0.75rem; color: #6b7280; display: flex; align-items: center; gap: 0.375rem;">
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                  <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                </svg>
+                Puedes registrar un abono parcial o incluso un cargo adicional
+              </p>
+            </div>
+          </div>
+        </div>
+      `
+
+      modal.show(content, [
+        { label: 'Cancelar', handler: () => {}, variant: 'secondary' },
+        {
+          label: 'Registrar',
+          handler: async () => {
+            const selectedRadio = modal.modal.querySelector('input[name="montoPago"]:checked') as HTMLInputElement
+            const montoPagoValue = selectedRadio?.value
+            
+            let montoNum = 0
+
+            if (montoPagoValue === 'pendiente') {
+              montoNum = pendiente
+            } else if (montoPagoValue === 'custom') {
+              const pagoInput = modal.modal.querySelector('#pagoAmount') as HTMLInputElement
+              const pagoValue = pagoInput?.value.replace(/\./g, '') || '0'
+              montoNum = Number(pagoValue)
+            }
+            
+            if (montoNum <= 0) {
+              const errorModal = new Modal()
+              errorModal.alert('Debes ingresar un monto válido', 'error')
+              return
+            }
+            
+            // Validar que el monto total no exceda el valor total
+            if (pagado + montoNum > valorTotal) {
+              const errorModal = new Modal()
+              errorModal.alert(`El monto total pagado ($${formatCurrency(pagado + montoNum)}) excedería el valor total ($${formatCurrency(valorTotal)})`, 'error')
+              return
+            }
+
+            try {
+              modal.close()
+              
+              const loading = new LoadingOverlay()
+              loading.show('Registrando pago...')
+              
+              await cotizacionesAPI.registrarPago(id, { monto: montoNum })
+              
+              // Force immediate reload
+              await loadCotizaciones()
+              renderCalendar()
+              renderDayList()
+              if (vistaActual === 'lista') {
+                renderListaView()
+              }
+              
+              loading.hide()
+              
+              const successModal = new Modal()
+              successModal.alert(`Pago de ${formatCurrency(montoNum)} registrado correctamente.`, 'success')
+            } catch (err: any) {
+              loading.hide()
+              const errorModal = new Modal()
+              errorModal.alert(err?.message || 'Error al registrar el pago', 'error')
+            }
+          },
+          variant: 'primary'
         }
+      ])
+
+      // Show/hide custom amount field and update option styles
+      const radios = modal.modal.querySelectorAll('input[name="montoPago"]')
+      const customField = modal.modal.querySelector('#customAmountField') as HTMLElement
+      const pagoInput = modal.modal.querySelector('#pagoAmount') as HTMLInputElement
+      const paymentOptions = modal.modal.querySelectorAll('.payment-option')
+      
+      // Update option styles based on selection
+      const updateOptionStyles = () => {
+        paymentOptions.forEach(option => {
+          const radio = option.querySelector('input[type="radio"]') as HTMLInputElement
+          if (radio?.checked) {
+            option.setAttribute('style', option.getAttribute('style')?.replace('border: 2px solid #e5e7eb', 'border: 2px solid #3b82f6; background: #eff6ff') || '')
+          } else {
+            option.setAttribute('style', option.getAttribute('style')?.replace('border: 2px solid #3b82f6; background: #eff6ff', 'border: 2px solid #e5e7eb').replace('background: #eff6ff', '') || '')
+          }
+        })
       }
-    )
+      
+      radios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const target = e.target as HTMLInputElement
+          if (target.value === 'custom') {
+            customField.style.display = 'block'
+            pagoInput?.focus()
+          } else {
+            customField.style.display = 'none'
+          }
+          updateOptionStyles()
+        })
+      })
+      
+      // Initial style update
+      updateOptionStyles()
+
+      // Format currency input
+      if (pagoInput) {
+        pagoInput.addEventListener('focus', (e) => {
+          const target = e.target as HTMLInputElement
+          target.style.borderColor = '#3b82f6'
+        })
+        
+        pagoInput.addEventListener('blur', (e) => {
+          const target = e.target as HTMLInputElement
+          target.style.borderColor = '#d1d5db'
+        })
+        
+        // Auto-format while typing
+        pagoInput.addEventListener('input', (e) => {
+          const target = e.target as HTMLInputElement
+          // Remove all non-digits
+          const rawValue = target.value.replace(/\D/g, '')
+          
+          if (rawValue === '') {
+            target.value = ''
+            return
+          }
+          
+          // Format with thousand separators
+          const numValue = parseInt(rawValue, 10)
+          target.value = numValue.toLocaleString('es-CO')
+          
+          // Keep cursor at the end
+          setTimeout(() => {
+            target.setSelectionRange(target.value.length, target.value.length)
+          }, 0)
+        })
+      }
+    } catch (err) {
+      modal.alert('No se pudo obtener el detalle de la cotización', 'error')
+    }
   }
 
   async function rechazarCotizacion(id: number) {
@@ -638,11 +1486,25 @@ async function main() {
               'Escribe el motivo...',
               async (motivo) => {
                 try {
+                  const loading = new LoadingOverlay()
+                  loading.show('Rechazando cotización...')
+                  
                   await cotizacionesAPI.rechazar(id, motivo || undefined)
                   await loadCotizaciones()
+                  
+                  renderCalendar()
+                  renderDayList()
+                  if (vistaActual === 'lista') {
+                    renderListaView()
+                  }
+                  
+                  loading.hide()
+                  
                   const successModal = new Modal()
                   successModal.alert('Cotización rechazada. El cliente ha sido notificado.', 'success')
                 } catch (err: any) {
+                  const loading = new LoadingOverlay()
+                  loading.hide()
                   const errorModal = new Modal()
                   errorModal.alert(err?.message || 'Error al rechazar la cotización', 'error')
                 }
@@ -676,33 +1538,120 @@ async function main() {
     }
   }
 
+  async function eliminarCotizacion(id: number) {
+    const modal = new Modal()
+    modal.show(
+      '<h3>¿Estás seguro de eliminar esta cotización?</h3><p style="color: #dc2626; font-weight: 500;">Esta acción no se puede deshacer.</p>',
+      [
+        { label: 'Cancelar', handler: () => {}, variant: 'secondary' },
+        {
+          label: 'Eliminar',
+          handler: async () => {
+            try {
+              modal.close()
+              
+              const loading = new LoadingOverlay()
+              loading.show('Eliminando cotización...')
+              
+              await cotizacionesAPI.eliminar(id)
+              await loadCotizaciones()
+              
+              loading.hide()
+              
+              renderCalendar()
+              renderDayList()
+              if (vistaActual === 'lista') {
+                renderListaView()
+              }
+              
+              const successModal = new Modal()
+              successModal.alert('Cotización eliminada correctamente.', 'success')
+            } catch (err: any) {
+              const loading = new LoadingOverlay()
+              loading.hide()
+              const errorModal = new Modal()
+              errorModal.alert(err?.message || 'Error al eliminar la cotización', 'error')
+            }
+          },
+          variant: 'danger',
+        },
+      ]
+    )
+  }
+
   dayList?.addEventListener('click', (e) => {
     const target = e.target as HTMLElement
-    if (!target?.dataset) return
-    const action = target.dataset.action
-    const id = Number(target.dataset.id)
+    
+    // Handle menu button clicks
+    const menuBtn = target.closest('.card-menu__btn') as HTMLElement
+    if (menuBtn) {
+      const id = menuBtn.dataset.id
+      const dropdown = document.querySelector(`[data-menu="${id}"]`) as HTMLElement
+      if (dropdown) {
+        // Close all other dropdowns
+        document.querySelectorAll('.card-menu__dropdown').forEach(d => {
+          if (d !== dropdown) d.classList.remove('show')
+        })
+        dropdown.classList.toggle('show')
+      }
+      return
+    }
+    
+    const button = target.closest('button[data-action]') as HTMLElement
+    if (!button?.dataset) return
+    const action = button.dataset.action
+    const id = Number(button.dataset.id)
     if (!action || !id) return
+    
+    // Close dropdown after action
+    document.querySelectorAll('.card-menu__dropdown').forEach(d => d.classList.remove('show'))
+    
     if (action === 'ver') verCotizacion(id)
+    if (action === 'aceptar') aceptarCotizacion(id)
     if (action === 'abonado') cerrarCotizacion(id, 'abonado')
     if (action === 'pago') registrarPago(id)
     if (action === 'rechazar') rechazarCotizacion(id)
     if (action === 'pdf') abrirPdf(id)
     if (action === 'correo') reenviarCorreo(id)
+    if (action === 'eliminar') eliminarCotizacion(id)
   })
 
   // Event listener para la lista view
   listaContainer?.addEventListener('click', (e) => {
     const target = e.target as HTMLElement
-    if (!target?.dataset) return
-    const action = target.dataset.action
-    const id = Number(target.dataset.id)
+    
+    // Handle menu button clicks
+    const menuBtn = target.closest('.card-menu__btn') as HTMLElement
+    if (menuBtn) {
+      const id = menuBtn.dataset.id
+      const dropdown = document.querySelector(`[data-menu="${id}"]`) as HTMLElement
+      if (dropdown) {
+        // Close all other dropdowns
+        document.querySelectorAll('.card-menu__dropdown').forEach(d => {
+          if (d !== dropdown) d.classList.remove('show')
+        })
+        dropdown.classList.toggle('show')
+      }
+      return
+    }
+    
+    const button = target.closest('button[data-action]') as HTMLElement
+    if (!button?.dataset) return
+    const action = button.dataset.action
+    const id = Number(button.dataset.id)
     if (!action || !id) return
+    
+    // Close dropdown after action
+    document.querySelectorAll('.card-menu__dropdown').forEach(d => d.classList.remove('show'))
+    
     if (action === 'ver') verCotizacion(id)
+    if (action === 'aceptar') aceptarCotizacion(id)
     if (action === 'abonado') cerrarCotizacion(id, 'abonado')
     if (action === 'pago') registrarPago(id)
     if (action === 'rechazar') rechazarCotizacion(id)
     if (action === 'pdf') abrirPdf(id)
     if (action === 'correo') reenviarCorreo(id)
+    if (action === 'eliminar') eliminarCotizacion(id)
   })
 
   // Event listeners para alternar vistas
@@ -751,6 +1700,14 @@ async function main() {
     renderDayList()
     if (vistaActual === 'lista') {
       renderListaView()
+    }
+  })
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement
+    if (!target.closest('.card-menu')) {
+      document.querySelectorAll('.card-menu__dropdown').forEach(d => d.classList.remove('show'))
     }
   })
 

@@ -47,7 +47,7 @@ function formatearFechaLegible(fechaStr: string | Date | null | undefined): stri
   }
 
   const fecha = typeof fechaStr === 'string' ? new Date(fechaStr) : fechaStr
-  if (Number.isNaN(fecha?.getTime?.())) {
+  if (Number.isNaN(fecha?.getTime())) {
     return 'Fecha por confirmar'
   }
 
@@ -56,6 +56,15 @@ function formatearFechaLegible(fechaStr: string | Date | null | undefined): stri
     day: 'numeric',
     month: 'long',
   })
+}
+
+function formatearPrecio(valor: number | string): string {
+  const num = typeof valor === 'string' ? parseFloat(valor) : valor
+  return new Intl.NumberFormat('es-CO', { 
+    style: 'currency', 
+    currency: 'COP', 
+    minimumFractionDigits: 0 
+  }).format(num)
 }
 
 function formatearHora24(horaStr: string | null | undefined): string {

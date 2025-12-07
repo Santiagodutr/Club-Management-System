@@ -105,8 +105,24 @@ initWhenReady(() => {
   }
 
   function getAuthToken(): string | null {
-    const authData = localStorage.getItem('adminAuth')
-    return authData ? JSON.parse(authData).token : null
+    try {
+      const authData = localStorage.getItem('adminAuth')
+      if (!authData) return null
+      
+      const parsed = JSON.parse(authData)
+      const token = parsed?.token
+      
+      // Validar que el token existe y tiene formato JWT básico (3 partes)
+      if (!token || typeof token !== 'string' || token.split('.').length !== 3) {
+        console.warn('[Auth] Token inválido o corrupto en localStorage')
+        return null
+      }
+      
+      return token
+    } catch (error) {
+      console.error('[Auth] Error al obtener token:', error)
+      return null
+    }
   }
 
   // Cargar espacios

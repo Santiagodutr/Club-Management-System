@@ -18,8 +18,6 @@ interface Evento {
   espacioId: number | null
   titulo: string
   slug: string
-  excerpt: string | null
-  content: string
   imagenes: Imagen[] | null
   publicado: boolean
   publishedAt: string | null
@@ -90,8 +88,24 @@ function removeToast(toast: HTMLElement) {
 
 
 function getAuthToken(): string | null {
-  const authData = localStorage.getItem('adminAuth')
-  return authData ? JSON.parse(authData).token : null
+  try {
+    const authData = localStorage.getItem('adminAuth')
+    if (!authData) return null
+    
+    const parsed = JSON.parse(authData)
+    const token = parsed?.token
+    
+    // Validar que el token existe y tiene formato JWT básico (3 partes)
+    if (!token || typeof token !== 'string' || token.split('.').length !== 3) {
+      console.warn('[Auth] Token inválido o corrupto en localStorage')
+      return null
+    }
+    
+    return token
+  } catch (error) {
+    console.error('[Auth] Error al obtener token:', error)
+    return null
+  }
 }
 
 // Cargar espacios
@@ -129,6 +143,12 @@ async function cargarEventos() {
   
   try {
     const token = getAuthToken()
+    if (!token) {
+      console.warn('[Auth] No hay token válido, redirigiendo al login')
+      window.location.href = '/admin/login'
+      return
+    }
+
     const response = await fetch(`${API_URL}/admin/salon-posts`, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -297,13 +317,23 @@ function ocultarModalEliminar() {
 
 // Eliminar evento
 async function eliminarEvento() {
-  if (!eventoIdToDelete) return
+  if (eventoIdToDelete === null || eventoIdToDelete === undefined) {
+    console.error('ID de evento inválido:', eventoIdToDelete)
+    return
+  }
   
+  const idToDelete = eventoIdToDelete
   ocultarModalEliminar()
   
   try {
     const token = getAuthToken()
-    const response = await fetch(`${API_URL}/admin/salon-posts/${eventoIdToDelete}`, {
+    if (!token) {
+      console.warn('[Auth] No hay token válido, redirigiendo al login')
+      window.location.href = '/admin/login'
+      return
+    }
+
+    const response = await fetch(`${API_URL}/admin/salon-posts/${idToDelete}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`

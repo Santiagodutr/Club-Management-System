@@ -178,7 +178,19 @@ async function confirmarEliminar() {
   if (!espacioId) return
   
   try {
-    const token = localStorage.getItem('token')
+    const adminAuth = localStorage.getItem('adminAuth')
+    if (!adminAuth) {
+      window.location.href = '/admin/login'
+      return
+    }
+    
+    const { token } = JSON.parse(adminAuth)
+    if (!token || token.split('.').length !== 3) {
+      console.error('[Auth] Token inválido')
+      window.location.href = '/admin/login'
+      return
+    }
+    
     const response = await fetch(`http://localhost:3333/api/espacios/${espacioId}`, {
       method: 'DELETE',
       headers: {

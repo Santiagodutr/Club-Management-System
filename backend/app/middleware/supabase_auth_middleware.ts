@@ -1,9 +1,11 @@
 import { HttpContext } from '@adonisjs/core/http'
-import { createRemoteJWKSet, jwtVerify } from 'jose'
+import { createClient } from '@supabase/supabase-js'
 import Env from '#start/env'
 
-const SUPABASE_JWT_ISSUER = `${Env.get('SUPABASE_URL')}/auth/v1`
-const JWKS = createRemoteJWKSet(new URL(`${SUPABASE_JWT_ISSUER}/.well-known/jwks.json`))
+const supabase = createClient(
+  Env.get('SUPABASE_URL'),
+  Env.get('SUPABASE_SECRET_KEY')
+)
 
 export default class SupabaseAuthMiddleware {
   public async handle(ctx: HttpContext, next: () => Promise<void>) {
@@ -14,26 +16,44 @@ export default class SupabaseAuthMiddleware {
       return response.unauthorized({ message: 'Missing Authorization header' })
     }
 
-    const token = authHeader.replace('Bearer ', '').trim()
+    // Extraer token y limpiar espacios extra
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim()
+
+    // Validar formato JWT básico (debe tener 3 partes separadas por puntos)
+    if (!token || token.split('.').length !== 3) {
+      console.error('[SupabaseAuth] Invalid token format:', {
+        tokenLength: token.length,
+        tokenPreview: token.substring(0, 20) + '...',
+        parts: token.split('.').length
+      })
+      return response.unauthorized({ message: 'Invalid token format' })
+    }
 
     try {
-      const { payload } = await jwtVerify(token, JWKS, {
-        issuer: SUPABASE_JWT_ISSUER,
+      // Verificar el JWT usando supabase-js
+      const { data, error } = await supabase.auth.getUser(token)
+
+      if (error || !data.user) {
+        console.error('[SupabaseAuth] Token verification failed:', error?.message)
+        return response.unauthorized({ message: 'Invalid or expired token' })
+      }
+
+      console.log('[SupabaseAuth] Verified user:', {
+        id: data.user.id,
+        email: data.user.email,
+        role: data.user.role
       })
 
-      console.log('[SupabaseAuth] Verified JWT payload:', payload)
-
       ctx.request.user = {
-        id: payload.sub as string,
-        email: payload.email as string | undefined,
-        role: payload.role as string | undefined,
-        aud: payload.aud as string | undefined,
+        id: data.user.id,
+        email: data.user.email,
+        role: data.user.role,
       } as any
 
       await next()
     } catch (error) {
-      console.error('[SupabaseAuth] JWT verification failed:', error)
-      return response.unauthorized({ message: 'Invalid or expired token' })
+      console.error('[SupabaseAuth] Unexpected error:', error)
+      return response.unauthorized({ message: 'Authentication failed' })
     }
   }
 }
