@@ -6,9 +6,9 @@ export { renderers } from '../../renderers.mjs';
 const prerender = false;
 const $$Panel = createComponent(($$result, $$props, $$slots) => {
   return renderTemplate` ${maybeRenderHead()}<div style="font-family: Inter, system-ui; padding: 2rem; max-width: 720px; margin: 0 auto;"> <h1>Panel movido</h1> <p>El panel ahora está dividido en dos secciones:</p> <ul> <li><a href="/admin/reservas">Reservas</a></li> <li><a href="/admin/espacios">Espacios</a></li> </ul> <p>Serás redirigido automáticamente.</p> </div>`;
-}, "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/pages/admin/panel.astro", void 0);
+}, "C:/Club-Management-System/frontend/src/pages/admin/panel.astro", void 0);
 
-const $$file = "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/pages/admin/panel.astro";
+const $$file = "C:/Club-Management-System/frontend/src/pages/admin/panel.astro";
 const $$url = "/admin/panel";
 
 const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({

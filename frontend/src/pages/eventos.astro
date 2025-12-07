@@ -10,7 +10,7 @@ marked.setOptions({
   gfm: true,
 })
 
-const API_URL = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333'
+const API_URL = (import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333').replace(/\/$/, '')
 
 // Obtener posts desde la API
 let posts = []

@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
-import os from 'node:os';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import { removeQueryString } from '@astrojs/internal-helpers/path';
+import { isAbsolute } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import '@astrojs/internal-helpers/path';
 import { A as AstroError, f as NoImageMetadata, F as FailedToFetchRemoteImageDimensions, g as ExpectedImageOptions, h as ExpectedImage, i as ExpectedNotESMImage, r as resolveSrc, j as isRemoteImage, k as isCoreRemotePath, l as isESMImportedImage, m as isLocalService, D as DEFAULT_HASH_PROPS, n as InvalidImageService, o as ImageMissingAlt, p as isRemoteAllowed } from '../chunks/astro/assets-service_BZIICsh3.mjs';
 import { c as createComponent, a as createAstro, m as maybeRenderHead, b as addAttribute, s as spreadAttributes, r as renderTemplate } from '../chunks/astro/server_-MRgVDm6.mjs';
 import 'clsx';
@@ -951,11 +951,8 @@ const $$Image = createComponent(async ($$result, $$props, $$slots) => {
   if (image.srcSet.values.length > 0) {
     additionalAttributes.srcset = image.srcSet.attribute;
   }
-  {
-    additionalAttributes["data-image-component"] = "true";
-  }
   return renderTemplate`${maybeRenderHead()}<img${addAttribute(image.src, "src")}${spreadAttributes(additionalAttributes)}${spreadAttributes(image.attributes)}>`;
-}, "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/node_modules/astro/components/Image.astro", void 0);
+}, "C:/Club-Management-System/frontend/node_modules/astro/components/Image.astro", void 0);
 
 const $$Astro = createAstro();
 const $$Picture = createComponent(async ($$result, $$props, $$slots) => {
@@ -1011,14 +1008,11 @@ const $$Picture = createComponent(async ($$result, $$props, $$slots) => {
   if (fallbackImage.srcSet.values.length > 0) {
     imgAdditionalAttributes.srcset = fallbackImage.srcSet.attribute;
   }
-  {
-    imgAdditionalAttributes["data-image-component"] = "true";
-  }
   return renderTemplate`${maybeRenderHead()}<picture${spreadAttributes(pictureAttributes)}> ${Object.entries(optimizedImages).map(([_, image]) => {
     const srcsetAttribute = props.densities || !props.densities && !props.widths ? `${image.src}${image.srcSet.values.length > 0 ? ", " + image.srcSet.attribute : ""}` : image.srcSet.attribute;
     return renderTemplate`<source${addAttribute(srcsetAttribute, "srcset")}${addAttribute(mime.lookup(image.options.format ?? image.src) ?? `image/${image.options.format}`, "type")}${spreadAttributes(sourceAdditionalAttributes)}>`;
   })} <img${addAttribute(fallbackImage.src, "src")}${spreadAttributes(imgAdditionalAttributes)}${spreadAttributes(fallbackImage.attributes)}> </picture>`;
-}, "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/node_modules/astro/components/Picture.astro", void 0);
+}, "C:/Club-Management-System/frontend/node_modules/astro/components/Picture.astro", void 0);
 
 const imageConfig = {"service":{"entrypoint":"astro/assets/services/sharp","config":{}},"domains":[],"remotePatterns":[],"endpoint":"astro/assets/endpoint/node"};
 					// This is used by the @astrojs/node integration to locate images.
@@ -1027,7 +1021,7 @@ const imageConfig = {"service":{"entrypoint":"astro/assets/services/sharp","conf
 					// in the Lambda bundle, which would bloat the bundle with images.
 					// To prevent this, we mark the URL construction as pure,
 					// so that it's tree-shaken away for all platforms that don't need it.
-					const outDir = /* #__PURE__ */ new URL("file:///C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/dist/client/");
+					const outDir = /* #__PURE__ */ new URL("file:///C:/Club-Management-System/frontend/dist/client/");
 					const assetsDir = /* #__PURE__ */ new URL("_astro", outDir);
 					const getImage = async (options) => await getImage$1(options, imageConfig);
 
@@ -1056,14 +1050,23 @@ const etag = (payload, weak = false) => {
   return prefix + fnv1a52(payload).toString(36) + payload.length.toString(36) + '"';
 };
 
-function replaceFileSystemReferences(src) {
-  return os.platform().includes("win32") ? src.replace(/^\/@fs\//, "") : src.replace(/^\/@fs/, "");
-}
 async function loadLocalImage(src, url) {
-  fileURLToPath(assetsDir);
+  const assetsDirPath = fileURLToPath(assetsDir);
   let fileUrl;
   {
-    fileUrl = pathToFileURL(removeQueryString(replaceFileSystemReferences(src)));
+    try {
+      const idx = url.pathname.indexOf("/_image");
+      if (idx > 0) {
+        src = src.slice(idx);
+      }
+      fileUrl = new URL("." + src, outDir);
+      const filePath = fileURLToPath(fileUrl);
+      if (!isAbsolute(filePath) || !filePath.startsWith(assetsDirPath)) {
+        return void 0;
+      }
+    } catch {
+      return void 0;
+    }
   }
   let buffer = void 0;
   try {
@@ -1130,7 +1133,7 @@ const GET = async ({ request }) => {
   } catch (err) {
     console.error("Could not process image request:", err);
     return new Response(
-      `Could not process image request: ${err}` ,
+      `Internal Server Error`,
       {
         status: 500
       }

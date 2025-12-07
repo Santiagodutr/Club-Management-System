@@ -1,6 +1,6 @@
 import { c as createComponent, d as renderComponent, r as renderTemplate, m as maybeRenderHead } from '../../chunks/astro/server_-MRgVDm6.mjs';
 import 'kleur/colors';
-import { $ as $$BaseLayout } from '../../chunks/BaseLayout_CNFYT2Sv.mjs';
+import { $ as $$BaseLayout } from '../../chunks/BaseLayout_B_GwGFNh.mjs';
 /* empty css                                    */
 export { renderers } from '../../renderers.mjs';
 
@@ -11,9 +11,9 @@ Recordar sesión
 </label> </div> <div class="error-message" id="errorMessage" style="display: none;" data-astro-cid-rf56lckb> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-astro-cid-rf56lckb> <circle cx="12" cy="12" r="10" data-astro-cid-rf56lckb></circle> <line x1="12" y1="8" x2="12" y2="12" data-astro-cid-rf56lckb></line> <line x1="12" y1="16" x2="12.01" y2="16" data-astro-cid-rf56lckb></line> </svg> <span data-astro-cid-rf56lckb>Credenciales incorrectas. Intenta de nuevo.</span> </div> <button type="submit" class="login-btn" data-astro-cid-rf56lckb> <span data-astro-cid-rf56lckb>Iniciar Sesión</span> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-astro-cid-rf56lckb> <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" data-astro-cid-rf56lckb></path> <polyline points="10 17 15 12 10 7" data-astro-cid-rf56lckb></polyline> <line x1="15" y1="12" x2="3" y2="12" data-astro-cid-rf56lckb></line> </svg> </button> </form> <a href="/salones" class="back-link" data-astro-cid-rf56lckb> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-astro-cid-rf56lckb> <line x1="19" y1="12" x2="5" y2="12" data-astro-cid-rf56lckb></line> <polyline points="12 19 5 12 12 5" data-astro-cid-rf56lckb></polyline> </svg>
 Volver a Salones
 </a> </div> </section> ` })}  `;
-}, "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/pages/admin/login.astro", void 0);
+}, "C:/Club-Management-System/frontend/src/pages/admin/login.astro", void 0);
 
-const $$file = "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/pages/admin/login.astro";
+const $$file = "C:/Club-Management-System/frontend/src/pages/admin/login.astro";
 const $$url = "/admin/login";
 
 const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({

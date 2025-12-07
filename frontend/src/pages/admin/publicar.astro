@@ -55,7 +55,7 @@ const title = 'Publicar Cambios'
 <script>
   const btnPublicar = document.getElementById('btnPublicar') as HTMLButtonElement
   const mensaje = document.getElementById('mensaje') as HTMLDivElement
-  const backendUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333'
+  const backendUrl = (import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333').replace(/\/$/, '')
 
   function mostrarMensaje(texto: string, tipo: 'exito' | 'error' | 'info') {
     mensaje.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-blue-100', 'text-blue-800')

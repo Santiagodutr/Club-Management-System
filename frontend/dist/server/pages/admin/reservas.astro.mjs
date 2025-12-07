@@ -1,6 +1,6 @@
 import { c as createComponent, d as renderComponent, r as renderTemplate, m as maybeRenderHead } from '../../chunks/astro/server_-MRgVDm6.mjs';
 import 'kleur/colors';
-import { $ as $$AdminLayout } from '../../chunks/AdminLayout_B_1XKtrT.mjs';
+import { $ as $$AdminLayout } from '../../chunks/AdminLayout_DjiJ37gs.mjs';
 /* empty css                                       */
 export { renderers } from '../../renderers.mjs';
 
@@ -16,9 +16,9 @@ Estado
 Pago
 <select id="fPago" data-astro-cid-vhyo6aks> <option value="" data-astro-cid-vhyo6aks>Todos</option> <option value="Sin pagar" data-astro-cid-vhyo6aks>Sin pagar</option> <option value="Abonado" data-astro-cid-vhyo6aks>Abonado</option> <option value="Pagado completamente" data-astro-cid-vhyo6aks>Pagado completamente</option> </select> </label> </div> </div> </div> <!-- Vista Calendario --> <div id="vistaCalendario" class="vista-content active" data-astro-cid-vhyo6aks> <div class="calendar" data-astro-cid-vhyo6aks> <div class="calendar__header" data-astro-cid-vhyo6aks> <div class="calendar__nav" data-astro-cid-vhyo6aks> <button id="prevMonth" class="btn ghost" aria-label="Mes anterior" data-astro-cid-vhyo6aks>◀</button> <h3 id="monthLabel" data-astro-cid-vhyo6aks></h3> <button id="nextMonth" class="btn ghost" aria-label="Mes siguiente" data-astro-cid-vhyo6aks>▶</button> </div> <div class="calendar__legend" data-astro-cid-vhyo6aks> <span class="dot dot--event" data-astro-cid-vhyo6aks></span> Cotizaciones/Reservas
 </div> </div> <div class="calendar__weekdays" data-astro-cid-vhyo6aks> <span data-astro-cid-vhyo6aks>Lun</span><span data-astro-cid-vhyo6aks>Mar</span><span data-astro-cid-vhyo6aks>Mié</span><span data-astro-cid-vhyo6aks>Jue</span><span data-astro-cid-vhyo6aks>Vie</span><span data-astro-cid-vhyo6aks>Sáb</span><span data-astro-cid-vhyo6aks>Dom</span> </div> <div id="calendarDays" class="calendar__grid" data-astro-cid-vhyo6aks> <div class="placeholder" data-astro-cid-vhyo6aks>Cargando calendario...</div> </div> </div> </div> <!-- Vista Lista --> <div id="vistaLista" class="vista-content" data-astro-cid-vhyo6aks> <div id="listaContainer" class="lista-container" data-astro-cid-vhyo6aks> <div class="placeholder" data-astro-cid-vhyo6aks>Cargando cotizaciones...</div> </div> </div> </section> <section id="detalleDelDia" class="card details" data-astro-cid-vhyo6aks> <div class="card__header" data-astro-cid-vhyo6aks> <div data-astro-cid-vhyo6aks> <p class="eyebrow" data-astro-cid-vhyo6aks>Detalle del día</p> <h2 id="dayTitle" data-astro-cid-vhyo6aks>Selecciona un día</h2> </div> </div> <div id="dayList" class="day-list" data-astro-cid-vhyo6aks> <div class="placeholder" data-astro-cid-vhyo6aks>Elige una fecha en el calendario para ver cotizaciones o reservas.</div> </div> </section> </section> ` })}  `;
-}, "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/pages/admin/reservas.astro", void 0);
+}, "C:/Club-Management-System/frontend/src/pages/admin/reservas.astro", void 0);
 
-const $$file = "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/pages/admin/reservas.astro";
+const $$file = "C:/Club-Management-System/frontend/src/pages/admin/reservas.astro";
 const $$url = "/admin/reservas";
 
 const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({

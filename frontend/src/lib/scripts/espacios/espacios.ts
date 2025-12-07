@@ -76,7 +76,7 @@ async function publicarCambios() {
     }
 
     const { token } = JSON.parse(adminAuth)
-    const backendUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333'
+    const backendUrl = (import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333').replace(/\/$/, '')
 
     const response = await fetch(`${backendUrl}/admin/trigger-rebuild`, {
       method: 'POST',

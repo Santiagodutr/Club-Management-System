@@ -8,7 +8,7 @@ export const prerender = true
 
 // Obtener todos los espacios desde la API para generar rutas estáticas
 export async function getStaticPaths() {
-  const API_URL = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333'
+  const API_URL = (import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333').replace(/\/$/, '')
   
   try {
     const response = await fetch(`${API_URL}/api/espacios`)
