@@ -34,6 +34,12 @@ export default class CotizacionController {
 
       const data = await vine.validate({ schema, data: request.all() })
 
+      console.log('📋 Datos recibidos en crearCotizacion:', {
+        tipoCliente: data.tipoCliente,
+        codigoSocio: data.codigoSocio,
+        nombre: data.nombre,
+      })
+
       // Validación manual de fecha después de vine
       const fecha = DateTime.fromISO(data.fecha, { zone: 'America/Bogota' })
       if (!fecha.isValid) {
@@ -74,6 +80,7 @@ export default class CotizacionController {
         tipoEvento: data.tipoEvento,
         asistentes: data.asistentes,
         tipoCliente: data.tipoCliente,
+        codigoSocio: data.codigoSocio,
         servicios: data.servicios || [],
         nombre: data.nombre,
         email: data.email,
@@ -341,6 +348,7 @@ export default class CotizacionController {
           'duracion',
           'asistentes',
           'tipo_evento',
+          'tipo_cliente',
           'espacio_id',
           'valor_total',
           'monto_abono',
@@ -378,6 +386,7 @@ export default class CotizacionController {
             salon: c.espacio?.nombre || null,
             espacio_id: c.espacioId,
           },
+          tipoCliente: c.tipoCliente,
           totales: {
             valor_total: c.valorTotal,
             abono_requerido: c.calcularMontoAbono(),
@@ -430,6 +439,8 @@ export default class CotizacionController {
           configuracionEspacioId: cotizacion.configuracionEspacioId,
           disposicionId: cotizacion.disposicionId,
           serviciosIds: cotizacion.prestaciones || [], // Array de IDs de servicios
+          tipoCliente: cotizacion.tipoCliente,
+          codigoSocio: cotizacion.codigoSocio,
           cliente: {
             nombre: cotizacion.nombre,
             email: cotizacion.email,
@@ -910,15 +921,46 @@ export default class CotizacionController {
       let resultadoWhatsApp = null
       if (cotizacion.telefono) {
         try {
-          const WhatsAppService = (await import('#services/whatsapp_service')).default
-          resultadoWhatsApp = await WhatsAppService.enviarMensajeCotizacion({
-            telefono: cotizacion.telefono,
-            nombreCliente: cotizacion.nombre,
-            salon: salonNombre || 'No especificado',
-            fecha: cotizacion.fecha,
-            hora: cotizacion.hora,
-            cotizacionId: cotizacion.id,
-          })
+          const whatsappService = new WhatsAppService()
+          
+          // Obtener datos empresa para teléfono del gerente
+          const datosEmpresa = await DatosEmpresa.findBy('key', 'empresa')
+          if (!datosEmpresa?.whatsappGerente) {
+            console.warn('⚠️ No hay teléfono de gerente configurado')
+          } else {
+            // Generar PDF
+            const pdfBuffer = await PDFService.generarPDF(cotizacion)
+            
+            // Subir a Supabase Storage
+            const { getSupabaseClient } = await import('#services/supabase_service')
+            const supabase = getSupabaseClient()
+            const filename = `cotizacion_${cotizacion.id}_${Date.now()}.pdf`
+            
+            const { error: uploadError } = await supabase.storage
+              .from('cotizaciones_pdf')
+              .upload(filename, pdfBuffer, {
+                contentType: 'application/pdf',
+                upsert: true,
+              })
+
+            if (uploadError) {
+              console.error('❌ Error subiendo PDF:', uploadError)
+            } else {
+              const { data: { publicUrl } } = supabase.storage
+                .from('cotizaciones_pdf')
+                .getPublicUrl(filename)
+              
+              const telefonoCliente = whatsappService.formatPhoneNumber(cotizacion.telefono)
+              const telefonoGerente = whatsappService.formatPhoneNumber(datosEmpresa.whatsappGerente)
+              
+              resultadoWhatsApp = await whatsappService.enviarCotizacion(
+                telefonoCliente,
+                telefonoGerente,
+                publicUrl,
+                cotizacion.cotizacionNumero
+              )
+            }
+          }
         } catch (whatsappError) {
           console.error('Error enviando WhatsApp:', whatsappError)
           // No fallar si WhatsApp falla, continuar con respuesta exitosa

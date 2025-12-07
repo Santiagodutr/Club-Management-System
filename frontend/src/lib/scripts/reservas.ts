@@ -1266,6 +1266,7 @@ async function main() {
             <p><strong>Nombre:</strong> ${c.cliente.nombre}</p>
             <p><strong>Email:</strong> ${c.cliente.email}</p>
             ${c.cliente.telefono ? `<p><strong>Teléfono:</strong> ${c.cliente.telefono}</p>` : ''}
+            ${c.tipoCliente ? `<p><strong>Tipo de cliente:</strong> ${c.tipoCliente === 'socio' ? 'Socio del club' : 'Particular'}</p>` : ''}
           </div>
           <div class="detail-section">
             <h3>Evento</h3>

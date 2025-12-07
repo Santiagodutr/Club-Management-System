@@ -77,6 +77,12 @@ export default class Cotizacion extends BaseModel {
   @column({ columnName: 'tipo_evento' })
   declare tipoEvento: string | null // 'social', 'empresarial', 'capacitacion'
 
+  @column({ columnName: 'tipo_cliente' })
+  declare tipoCliente: 'socio' | 'particular' // 'socio', 'particular'
+
+  @column({ columnName: 'codigo_socio' })
+  declare codigoSocio: string | null
+
   @column()
   declare estado: string // 'pendiente', 'aceptada', 'rechazada', 'vencida'
 

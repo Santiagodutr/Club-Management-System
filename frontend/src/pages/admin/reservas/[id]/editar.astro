@@ -101,6 +101,22 @@ const { id } = Astro.params
               <input id="asistentes" name="asistentes" type="number" min="1" required />
             </div>
           </div>
+
+          <!-- Campo Tipo de Cliente (solo mostrar, no editable) -->
+          <div class="field">
+            <label>Tipo de Cliente</label>
+            <div id="tipo-cliente-display" style="padding: 0.75rem; background: #f1f5f9; border-radius: 8px; color: #475569; font-weight: 500;">
+              Cargando...
+            </div>
+          </div>
+
+          <!-- Campo Código de Socio (solo si es socio) -->
+          <div class="field" id="codigo-socio-field" style="display: none;">
+            <label>Código de Socio</label>
+            <div id="codigo-socio-display" style="padding: 0.75rem; background: #ecfdf5; border-radius: 8px; color: #065f46; font-weight: 500; font-family: monospace;">
+              <!-- Se llenará dinámicamente -->
+            </div>
+          </div>
         </div>
 
         <!-- Paso 4: Servicios Adicionales -->
@@ -542,6 +558,10 @@ const { id } = Astro.params
       const tipoEvento = cotizacionData.evento?.tipo || ''
       const asistentes = cotizacionData.evento?.asistentes || '50'
       
+      // TIPO DE CLIENTE
+      const tipoCliente = cotizacionData.tipoCliente || 'particular'
+      console.log('[Editar] Tipo de cliente:', tipoCliente)
+      
       // DATOS DEL CLIENTE
       const nombre = cotizacionData.cliente?.nombre || ''
       const email = cotizacionData.cliente?.email || ''
@@ -573,6 +593,28 @@ const { id } = Astro.params
       
       const observacionesEl = document.getElementById('observaciones')
       observacionesEl.value = observaciones
+
+      // TIPO DE CLIENTE (solo mostrar, no editable)
+      const tipoClienteDisplay = document.getElementById('tipo-cliente-display')
+      const codigoSocioField = document.getElementById('codigo-socio-field')
+      const codigoSocioDisplay = document.getElementById('codigo-socio-display')
+      
+      if (tipoCliente === 'socio') {
+        tipoClienteDisplay.innerHTML = '<strong>Socio del Club</strong>'
+        tipoClienteDisplay.style.background = '#ecfdf5'
+        tipoClienteDisplay.style.color = '#065f46'
+        tipoClienteDisplay.style.borderLeft = '3px solid #10b981'
+        
+        // Mostrar código de socio usado
+        const codigoSocio = cotizacionData.codigoSocio || 'No registrado'
+        codigoSocioDisplay.textContent = codigoSocio
+        codigoSocioField.style.display = 'block'
+      } else {
+        tipoClienteDisplay.textContent = 'Particular'
+        tipoClienteDisplay.style.background = '#f1f5f9'
+        tipoClienteDisplay.style.color = '#475569'
+        codigoSocioField.style.display = 'none'
+      }
 
       // CARGAR DISPOSICIONES
       const configuracionId = cotizacionData.configuracionEspacioId

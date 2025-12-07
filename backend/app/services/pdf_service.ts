@@ -1,6 +1,7 @@
 import Cotizacion from '#models/cotizacion'
 import Espacio from '#models/espacio'
 import Disposicion from '#models/disposicion'
+import DatosEmpresa from '#models/datos_empresa'
 import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
@@ -101,6 +102,28 @@ export class PDFService {
     const horaFinMins = horaFinMinutos % 60
     const horaFin = `${horaFinHoras.toString().padStart(2, '0')}:${horaFinMins.toString().padStart(2, '0')}`
 
+    // Obtener datos bancarios desde la base de datos
+    let datosBancarios = {
+      bancolombiaCc: '(Consultar con administración)',
+      daviviendaCc: '(Consultar con administración)',
+      daviviendaCa: '(Consultar con administración)',
+    }
+    try {
+      const datosEmpresa = await DatosEmpresa.findBy('key', 'empresa')
+      if (datosEmpresa) {
+        datosBancarios = {
+          bancolombiaCc: datosEmpresa.bancolombiaCc || '(Consultar con administración)',
+          daviviendaCc: datosEmpresa.daviviendaCc || '(Consultar con administración)',
+          daviviendaCa: datosEmpresa.daviviendaCa || '(Consultar con administración)',
+        }
+      }
+    } catch (error) {
+      console.warn('No se pudieron obtener los datos bancarios:', error)
+    }
+
+    // Determinar etiqueta del tipo de cliente
+    const tipoClienteLabel = cotizacion.tipoCliente === 'socio' ? 'Socio del Club' : 'Particular'
+
     return {
       numeroCotz: cotizacion.id.toString(),
       fecha: fechaFormato,
@@ -108,6 +131,7 @@ export class PDFService {
         nombre: cotizacion.nombre,
         telefono: cotizacion.telefono || '___________________',
         email: cotizacion.email,
+        tipoCliente: tipoClienteLabel,
       },
       evento: {
         fecha: fechaFormato,
@@ -123,6 +147,7 @@ export class PDFService {
         total: this.formatearDinero(total),
         abono50: this.formatearDinero(abono50),
       },
+      datosBancarios,
       observaciones: cotizacion.observaciones || 'Pendiente de detalles adicionales según requerimientos del cliente.',
     }
   }
@@ -187,6 +212,7 @@ export class PDFService {
     html = html.replace('{{cliente.nombre}}', variables.cliente.nombre)
     html = html.replace('{{cliente.telefono}}', variables.cliente.telefono)
     html = html.replace('{{cliente.email}}', variables.cliente.email)
+    html = html.replace('{{cliente.tipoCliente}}', variables.cliente.tipoCliente)
 
     // Reemplazar datos del evento
     html = html.replace('{{evento.fecha}}', variables.evento.fecha)
@@ -214,6 +240,11 @@ export class PDFService {
     // Reemplazar totales
     html = html.replace('{{totales.total}}', variables.totales.total)
     html = html.replace('{{totales.abono50}}', variables.totales.abono50)
+
+    // Reemplazar datos bancarios
+    html = html.replace('{{datosBancarios.bancolombiaCc}}', variables.datosBancarios.bancolombiaCc)
+    html = html.replace('{{datosBancarios.daviviendaCc}}', variables.datosBancarios.daviviendaCc)
+    html = html.replace('{{datosBancarios.daviviendaCa}}', variables.datosBancarios.daviviendaCa)
 
     // Reemplazar observaciones
     html = html.replace('{{observaciones}}', variables.observaciones)

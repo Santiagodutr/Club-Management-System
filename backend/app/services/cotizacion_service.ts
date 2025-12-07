@@ -222,6 +222,8 @@ export class CotizacionService {
   static async calcularCotizacion(solicitud: SolicitudCotizacion): Promise<DetalleCotizacion[]> {
     const detalles: DetalleCotizacion[] = []
 
+    console.log('💰 Calculando cotización con tipo de cliente:', solicitud.tipoCliente)
+
     // OPTIMIZADO: Obtener tarifa y tarifas adicionales en una sola query (if needed)
     const tarifa = await Tarifa.query()
       .where('configuracion_espacio_id', solicitud.configuracionEspacioId)
@@ -448,6 +450,8 @@ export class CotizacionService {
         valorTotal: 0,
         detalles: [],
         tipoEvento: solicitud.tipoEvento,
+        tipoCliente: solicitud.tipoCliente,
+        codigoSocio: solicitud.codigoSocio || null,
         estado: 'pendiente',
         estadoPago: 'sin_pagar',
         horasAdicionalesAplicadas: 0,
@@ -511,6 +515,8 @@ export class CotizacionService {
       valorTotal,
       detalles,
       tipoEvento: solicitud.tipoEvento,
+      tipoCliente: solicitud.tipoCliente,
+      codigoSocio: solicitud.codigoSocio || null,
       estado: 'pendiente',
       estadoPago: 'sin_pagar',
       horasAdicionalesAplicadas: solicitud.duracion > 8 ? solicitud.duracion - 8 : 0,

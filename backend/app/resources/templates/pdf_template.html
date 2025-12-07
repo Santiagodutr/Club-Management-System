@@ -34,6 +34,10 @@
           <td>{{cliente.nombre}}</td>
         </tr>
         <tr>
+          <td><strong>Tipo de Cliente:</strong></td>
+          <td>{{cliente.tipoCliente}}</td>
+        </tr>
+        <tr>
           <td><strong>Cel:</strong></td>
           <td>{{cliente.telefono}}</td>
         </tr>
@@ -141,9 +145,9 @@
       <p><strong>CORPORACIÓN CLUB META NIT: 892.000.682-1</strong></p>
 
       <p>
-        <strong>BANCOLOMBIA CUENTA CORRIENTE:</strong> (Consultar con administración)<br />
-        <strong>DAVIVIENDA CUENTA CORRIENTE:</strong> (Consultar con administración)<br />
-        <strong>DAVIVIENDA CUENTA DE AHORROS:</strong> (Consultar con administración)
+        <strong>BANCOLOMBIA CUENTA CORRIENTE:</strong> {{datosBancarios.bancolombiaCc}}<br />
+        <strong>DAVIVIENDA CUENTA CORRIENTE:</strong> {{datosBancarios.daviviendaCc}}<br />
+        <strong>DAVIVIENDA CUENTA DE AHORROS:</strong> {{datosBancarios.daviviendaCa}}
       </p>
 
       <br /><br /><br />
