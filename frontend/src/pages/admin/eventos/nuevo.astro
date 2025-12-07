@@ -95,6 +95,7 @@ export const prerender = false
 </AdminLayout>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+<link rel="stylesheet" href="/styles/easymde-custom.css">
 <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
 <script is:inline type="module" src="/src/pages/admin/eventos/nuevo.client.ts"></script>
 
@@ -112,17 +113,8 @@ export const prerender = false
   select:focus, input:focus, textarea:focus { outline: none; border-color: #0a4ba5; box-shadow: 0 0 0 3px rgba(10, 75, 165, 0.1); }
   textarea { resize: vertical; font-family: 'Consolas', 'Monaco', monospace; }
   
-  /* Editor EasyMDE */
+  /* Editor EasyMDE - estilos comunes en /src/styles/easymde-custom.css */
   #editorContainer { margin-top: 0.25rem; }
-  :global(.EasyMDEContainer) { border-radius: 10px; overflow: hidden; }
-  :global(.EasyMDEContainer .CodeMirror) { border-radius: 0 0 10px 10px; border: 1px solid #d1d5db; min-height: 300px; font-family: 'Consolas', 'Monaco', monospace; font-weight: 400; }
-  :global(.EasyMDEContainer .CodeMirror-line) { font-weight: 400; }
-  :global(.EasyMDEContainer .cm-strong) { font-weight: 700; }
-  :global(.EasyMDEContainer .editor-toolbar) { border-radius: 10px 10px 0 0; border: 1px solid #d1d5db; border-bottom: none; background: #f8fafc; }
-  :global(.EasyMDEContainer .editor-toolbar button) { color: #4b5563 !important; }
-  :global(.EasyMDEContainer .editor-toolbar button:hover) { background: #e5e7eb !important; border-color: #d1d5db !important; }
-  :global(.EasyMDEContainer .editor-toolbar button.active) { background: #dbeafe !important; border-color: #0a4ba5 !important; color: #0a4ba5 !important; }
-  :global(.EasyMDEContainer .CodeMirror-focused) { border-color: #0a4ba5; box-shadow: 0 0 0 3px rgba(10, 75, 165, 0.1); }
   .btn { border: none; border-radius: 10px; padding: 0.65rem 1rem; font-weight: 600; cursor: pointer; font: inherit; transition: all 0.2s ease; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
   .btn.primary { background: linear-gradient(135deg, #0a4ba5, #2563eb); color: #fff; box-shadow: 0 10px 20px rgba(37,99,235,0.2); }
   .btn.primary:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(37,99,235,0.3); }

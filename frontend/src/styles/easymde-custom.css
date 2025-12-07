@@ -1,0 +1,169 @@
+/* Estilos personalizados para EasyMDE Editor */
+
+/* Editor principal */
+:global(.EasyMDEContainer) {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+:global(.EasyMDEContainer .CodeMirror) {
+  border-radius: 0 0 10px 10px;
+  border: 1px solid #d1d5db;
+  min-height: 300px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+:global(.EasyMDEContainer .CodeMirror-line) {
+  font-weight: 400;
+}
+
+:global(.EasyMDEContainer .cm-strong) {
+  font-weight: 700;
+}
+
+/* Headings en modo escritura - tamaños reducidos */
+:global(.EasyMDEContainer .CodeMirror .cm-header-1) {
+  font-size: 1.15rem !important;
+  font-weight: 700;
+}
+
+:global(.EasyMDEContainer .CodeMirror .cm-header-2) {
+  font-size: 1.1rem !important;
+  font-weight: 700;
+}
+
+:global(.EasyMDEContainer .CodeMirror .cm-header-3) {
+  font-size: 1.05rem !important;
+  font-weight: 700;
+}
+
+:global(.EasyMDEContainer .CodeMirror .cm-header-4) {
+  font-size: 1rem !important;
+  font-weight: 700;
+}
+
+:global(.EasyMDEContainer .CodeMirror .cm-header-5) {
+  font-size: 0.95rem !important;
+  font-weight: 700;
+}
+
+:global(.EasyMDEContainer .CodeMirror .cm-header-6) {
+  font-size: 0.9rem !important;
+  font-weight: 700;
+}
+
+/* Toolbar */
+:global(.EasyMDEContainer .editor-toolbar) {
+  border-radius: 10px 10px 0 0;
+  border: 1px solid #d1d5db;
+  border-bottom: none;
+  background: #f8fafc;
+}
+
+:global(.EasyMDEContainer .editor-toolbar button) {
+  color: #4b5563 !important;
+}
+
+:global(.EasyMDEContainer .editor-toolbar button:hover) {
+  background: #e5e7eb !important;
+  border-color: #d1d5db !important;
+}
+
+:global(.EasyMDEContainer .editor-toolbar button.active) {
+  background: #dbeafe !important;
+  border-color: #0a4ba5 !important;
+  color: #0a4ba5 !important;
+}
+
+:global(.EasyMDEContainer .CodeMirror-focused) {
+  border-color: #0a4ba5;
+  box-shadow: 0 0 0 3px rgba(10, 75, 165, 0.1);
+}
+
+/* Preview - estilos que coinciden con la vista pública */
+:global(.EasyMDEContainer .editor-preview) {
+  padding: 1rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+:global(.EasyMDEContainer .editor-preview h1) {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 1rem 0 0.75rem;
+  color: #1e293b;
+}
+
+:global(.EasyMDEContainer .editor-preview h2) {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 1rem 0 0.75rem;
+  color: #1e293b;
+}
+
+:global(.EasyMDEContainer .editor-preview h3) {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 1rem 0 0.75rem;
+  color: #1e293b;
+}
+
+:global(.EasyMDEContainer .editor-preview h4) {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 1rem 0 0.75rem;
+  color: #1e293b;
+}
+
+:global(.EasyMDEContainer .editor-preview h5) {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 1rem 0 0.75rem;
+  color: #1e293b;
+}
+
+:global(.EasyMDEContainer .editor-preview h6) {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 1rem 0 0.75rem;
+  color: #1e293b;
+}
+
+:global(.EasyMDEContainer .editor-preview p) {
+  margin: 0 0 1rem;
+  color: #475569;
+  line-height: 1.8;
+}
+
+:global(.EasyMDEContainer .editor-preview ul),
+:global(.EasyMDEContainer .editor-preview ol) {
+  margin: 0 0 1rem;
+  padding-left: 1.5rem;
+}
+
+:global(.EasyMDEContainer .editor-preview li) {
+  margin: 0.5rem 0;
+  color: #475569;
+}
+
+:global(.EasyMDEContainer .editor-preview strong) {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+:global(.EasyMDEContainer .editor-preview blockquote) {
+  border-left: 4px solid #0a4ba5;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: #64748b;
+}

@@ -1,8 +1,102 @@
-import { c as cotizacionesAPI, a as supabase } from '../../chunks/supabase_DxPdPIs3.mjs';
+import { c as cotizacionesAPI, a as supabase } from '../../chunks/supabase_CYgU43WC.mjs';
 export { renderers } from '../../renderers.mjs';
 
 function qs(sel) {
   return document.querySelector(sel);
+}
+class Modal {
+  overlay;
+  modal;
+  constructor() {
+    this.overlay = document.createElement("div");
+    this.overlay.className = "modal-overlay";
+    this.modal = document.createElement("div");
+    this.modal.className = "modal";
+    this.overlay.appendChild(this.modal);
+  }
+  show(content, actions = []) {
+    this.modal.innerHTML = `
+      <div class="modal__content">${content}</div>
+      <div class="modal__actions">
+        ${actions.map((a) => `<button class="btn ${a.variant || "secondary"}" data-action="${a.label}">${a.label}</button>`).join("")}
+      </div>
+    `;
+    actions.forEach((action) => {
+      const btn = this.modal.querySelector(`[data-action="${action.label}"]`);
+      btn?.addEventListener("click", () => {
+        action.handler();
+        this.close();
+      });
+    });
+    document.body.appendChild(this.overlay);
+    setTimeout(() => this.overlay.classList.add("show"), 10);
+  }
+  prompt(title, placeholder, callback) {
+    this.modal.innerHTML = `
+      <div class="modal__content">
+        <h3>${title}</h3>
+        <input type="text" class="modal__input" placeholder="${placeholder}" />
+      </div>
+      <div class="modal__actions">
+        <button class="btn secondary" data-action="cancel">Cancelar</button>
+        <button class="btn primary" data-action="confirm">Confirmar</button>
+      </div>
+    `;
+    const input = this.modal.querySelector(".modal__input");
+    const cancelBtn = this.modal.querySelector('[data-action="cancel"]');
+    const confirmBtn = this.modal.querySelector('[data-action="confirm"]');
+    cancelBtn?.addEventListener("click", () => {
+      callback(null);
+      this.close();
+    });
+    confirmBtn?.addEventListener("click", () => {
+      callback(input.value);
+      this.close();
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        callback(input.value);
+        this.close();
+      }
+    });
+    document.body.appendChild(this.overlay);
+    setTimeout(() => {
+      this.overlay.classList.add("show");
+      input.focus();
+    }, 10);
+  }
+  alert(message, variant = "info") {
+    const icons = {
+      success: "✓",
+      error: "✕",
+      info: "ℹ"
+    };
+    this.modal.innerHTML = `
+      <div class="modal__content modal__content--${variant}">
+        <div class="modal__icon">${icons[variant]}</div>
+        <p>${message}</p>
+      </div>
+      <div class="modal__actions">
+        <button class="btn primary" data-action="ok">OK</button>
+      </div>
+    `;
+    const okBtn = this.modal.querySelector('[data-action="ok"]');
+    okBtn?.addEventListener("click", () => this.close());
+    document.body.appendChild(this.overlay);
+    setTimeout(() => this.overlay.classList.add("show"), 10);
+  }
+  close() {
+    this.overlay.classList.remove("show");
+    setTimeout(() => {
+      if (this.overlay.parentNode) {
+        document.body.removeChild(this.overlay);
+      }
+    }, 300);
+  }
+}
+function formatCurrency(value) {
+  const num = typeof value === "string" ? parseFloat(value) : value;
+  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(num);
 }
 function extractYMD(value) {
   if (typeof value === "string") {
@@ -51,31 +145,46 @@ async function main() {
   }
   const estadoSelect = qs("#fEstado");
   const pagoSelect = qs("#fPago");
-  const btnFiltrar = qs("#btnFiltrar");
-  const btnRefrescar = qs("#btnRefrescar");
   const monthLabel = qs("#monthLabel");
   const calendarDays = qs("#calendarDays");
   const prevMonthBtn = qs("#prevMonth");
   const nextMonthBtn = qs("#nextMonth");
   const dayTitle = qs("#dayTitle");
   const dayList = qs("#dayList");
+  const listaContainer = qs("#listaContainer");
+  const btnVistaCalendario = qs("#btnVistaCalendario");
+  const btnVistaLista = qs("#btnVistaLista");
+  const vistaCalendario = qs("#vistaCalendario");
+  const vistaLista = qs("#vistaLista");
+  const detalleDelDia = qs("#detalleDelDia");
+  const eyebrowVista = qs("#eyebrowVista");
   let cotizaciones = [];
+  let allCotizaciones = [];
   let eventosPorFecha = {};
   let selectedDate = null;
   let currentMonth = /* @__PURE__ */ new Date();
-  const aplicaFiltros = (c) => {
-    if (estadoSelect?.value && c.estado !== estadoSelect.value) return false;
-    if (pagoSelect?.value && c.estado_pago !== pagoSelect.value) return false;
-    return true;
-  };
+  let vistaActual = "calendario";
   function firstAvailableDate(keys) {
     if (!keys.length) return null;
     return keys.sort()[0];
   }
   function rebuildEventos() {
     eventosPorFecha = {};
+    cotizaciones = allCotizaciones.filter((c) => {
+      if (estadoSelect?.value) {
+        const estadoFiltro = estadoSelect.value.toLowerCase();
+        const estadoCotizacion = (c.estado || "").toLowerCase();
+        const estadoNormalizado = estadoCotizacion.includes("pendiente") ? "pendiente" : estadoCotizacion;
+        if (estadoNormalizado !== estadoFiltro) return false;
+      }
+      if (pagoSelect?.value) {
+        const pagoFiltro = pagoSelect.value.toLowerCase();
+        const pagoCotizacion = (c.estado_pago || "").toLowerCase();
+        if (pagoCotizacion !== pagoFiltro) return false;
+      }
+      return true;
+    });
     cotizaciones.forEach((c) => {
-      if (!aplicaFiltros(c)) return;
       const key = dateKey(c.evento?.fecha);
       if (!key) return;
       if (!eventosPorFecha[key]) eventosPorFecha[key] = [];
@@ -137,6 +246,90 @@ async function main() {
       renderDayList();
     };
   }
+  function renderListaView() {
+    if (!listaContainer) return;
+    if (cotizaciones.length === 0) {
+      listaContainer.innerHTML = '<div class="placeholder">No hay cotizaciones para mostrar con los filtros aplicados.</div>';
+      return;
+    }
+    const fechasOrdenadas = Object.keys(eventosPorFecha).sort().reverse();
+    if (fechasOrdenadas.length === 0) {
+      listaContainer.innerHTML = '<div class="placeholder">No hay cotizaciones para mostrar con los filtros aplicados.</div>';
+      return;
+    }
+    const html = fechasOrdenadas.map((fecha) => {
+      const items = eventosPorFecha[fecha] || [];
+      const fechaFormateada = formatFullDate(fecha);
+      const cotizacionesHTML = items.map((c) => {
+        const valorTotal = typeof c.totales?.valor_total === "string" ? parseFloat(c.totales.valor_total) : c.totales?.valor_total || 0;
+        const totalPagado = typeof c.totales?.total_pagado === "string" ? parseFloat(c.totales.total_pagado) : c.totales?.total_pagado || 0;
+        const abonoRequerido = typeof c.totales?.abono_requerido === "string" ? parseFloat(c.totales.abono_requerido) : c.totales?.abono_requerido || 0;
+        const saldoPendiente = valorTotal - totalPagado;
+        return `
+        <div class="day-card">
+          <div class="day-card__header">
+            <div class="day-card__title">${c.cliente.nombre}</div>
+            <div class="tag">${c.evento?.salon ?? "Salón"}</div>
+          </div>
+          <div class="day-card__body">
+            <div class="meta-row">
+              <div class="meta"><strong>Email:</strong> ${c.cliente.email}</div>
+              ${c.cliente.telefono ? `<div class="meta"><strong>Teléfono:</strong> ${c.cliente.telefono}</div>` : ""}
+            </div>
+            <div class="meta-row">
+              <div class="meta"><strong>Hora:</strong> ${c.evento?.hora ?? ""}</div>
+              <div class="meta"><strong>Duración:</strong> ${c.evento?.duracion || 0}h</div>
+              <div class="meta"><strong>Asistentes:</strong> ${c.evento?.asistentes ?? 0} personas</div>
+            </div>
+            <div class="meta"><strong>Cotización #:</strong> ${c.id}</div>
+            ${c.evento?.tipo ? `<div class="meta"><strong>Tipo de evento:</strong> ${c.evento.tipo}</div>` : ""}
+            <div class="divider"></div>
+            <div class="meta-row">
+              <div class="meta"><strong>Valor total:</strong> ${formatCurrency(valorTotal)}</div>
+              <div class="meta"><strong>Abono requerido (50%):</strong> ${formatCurrency(abonoRequerido)}</div>
+            </div>
+            ${totalPagado > 0 ? `
+            <div class="meta-row">
+              <div class="meta meta--highlight"><strong>Total pagado:</strong> ${formatCurrency(totalPagado)}</div>
+              ${saldoPendiente > 0 ? `<div class="meta meta--warning"><strong>Saldo pendiente:</strong> ${formatCurrency(saldoPendiente)}</div>` : ""}
+            </div>
+            ` : ""}
+            <div class="divider"></div>
+            <div class="meta-row">
+              <span class="tag state ${c.estado ? c.estado.toLowerCase() : ""}">${c.estado || "Sin estado"}</span>
+              <span class="tag pay">${c.estado_pago || "Sin información de pago"}</span>
+            </div>
+          </div>
+          <div class="day-card__footer">
+            <div class="day-card__actions day-card__actions--left">
+              <button class="link" data-action="ver" data-id="${c.id}">Ver detalle</button>
+              <button class="link" data-action="pdf" data-id="${c.id}">Ver PDF</button>
+              <button class="link" data-action="correo" data-id="${c.id}">Reenviar correo</button>
+            </div>
+            <div class="day-card__actions day-card__actions--right">
+              ${c.estado && c.estado.toLowerCase() === "pendiente" ? `
+                <button class="link" data-action="abonado" data-id="${c.id}">Registrar abonado</button>
+                <button class="link danger" data-action="rechazar" data-id="${c.id}">Rechazar</button>
+              ` : ""}
+              ${c.estado && c.estado.toLowerCase() === "aceptada" ? `
+                <button class="link" data-action="pago" data-id="${c.id}">Registrar pago</button>
+              ` : ""}
+            </div>
+          </div>
+        </div>
+        `;
+      }).join("");
+      return `
+        <div class="lista-day-section">
+          <h3 class="lista-day-title">${fechaFormateada}</h3>
+          <div class="day-list">
+            ${cotizacionesHTML}
+          </div>
+        </div>
+      `;
+    }).join("");
+    listaContainer.innerHTML = html;
+  }
   function renderDayList() {
     if (!dayList || !dayTitle) return;
     if (!selectedDate) {
@@ -151,7 +344,12 @@ async function main() {
       return;
     }
     dayList.innerHTML = items.map(
-      (c) => `
+      (c) => {
+        const valorTotal = typeof c.totales?.valor_total === "string" ? parseFloat(c.totales.valor_total) : c.totales?.valor_total || 0;
+        const totalPagado = typeof c.totales?.total_pagado === "string" ? parseFloat(c.totales.total_pagado) : c.totales?.total_pagado || 0;
+        const abonoRequerido = typeof c.totales?.abono_requerido === "string" ? parseFloat(c.totales.abono_requerido) : c.totales?.abono_requerido || 0;
+        const saldoPendiente = valorTotal - totalPagado;
+        return `
         <div class="day-card">
           <div class="day-card__header">
             <div class="day-card__title">${c.cliente.nombre}</div>
@@ -160,29 +358,51 @@ async function main() {
           <div class="day-card__body">
             <div class="meta-row">
               <div class="meta"><strong>Email:</strong> ${c.cliente.email}</div>
-              ${c.cliente.telefono ? `<div class="meta"><strong>Tel:</strong> ${c.cliente.telefono}</div>` : ""}
+              ${c.cliente.telefono ? `<div class="meta"><strong>Teléfono:</strong> ${c.cliente.telefono}</div>` : ""}
             </div>
             <div class="meta-row">
               <div class="meta"><strong>Hora:</strong> ${c.evento?.hora ?? ""}</div>
-              <div class="meta"><strong>Asistentes:</strong> ${c.evento?.asistentes ?? ""} pax</div>
+              <div class="meta"><strong>Duración:</strong> ${c.evento?.duracion || 0}h</div>
+              <div class="meta"><strong>Asistentes:</strong> ${c.evento?.asistentes ?? 0} personas</div>
             </div>
-            <div class="meta"><strong>#:</strong> ${c.numero}</div>
+            <div class="meta"><strong>Cotización #:</strong> ${c.id}</div>
+            ${c.evento?.tipo ? `<div class="meta"><strong>Tipo de evento:</strong> ${c.evento.tipo}</div>` : ""}
+            <div class="divider"></div>
             <div class="meta-row">
-              <span class="tag state ${c.estado ? c.estado.toLowerCase() : ""}">${c.estado}</span>
-              <span class="tag pay">${c.estado_pago}</span>
+              <div class="meta"><strong>Valor total:</strong> ${formatCurrency(valorTotal)}</div>
+              <div class="meta"><strong>Abono requerido (50%):</strong> ${formatCurrency(abonoRequerido)}</div>
+            </div>
+            ${totalPagado > 0 ? `
+            <div class="meta-row">
+              <div class="meta meta--highlight"><strong>Total pagado:</strong> ${formatCurrency(totalPagado)}</div>
+              ${saldoPendiente > 0 ? `<div class="meta meta--warning"><strong>Saldo pendiente:</strong> ${formatCurrency(saldoPendiente)}</div>` : ""}
+            </div>
+            ` : ""}
+            <div class="divider"></div>
+            <div class="meta-row">
+              <span class="tag state ${c.estado ? c.estado.toLowerCase() : ""}">${c.estado || "Sin estado"}</span>
+              <span class="tag pay">${c.estado_pago || "Sin información de pago"}</span>
             </div>
           </div>
-          <div class="day-card__actions actions-cell">
-            <button class="link" data-action="ver" data-id="${c.id}">Ver</button>
-            <button class="link" data-action="abonado" data-id="${c.id}">Cerrar abonado</button>
-            <button class="link" data-action="pagado" data-id="${c.id}">Cerrar pagado</button>
-            <button class="link" data-action="pago" data-id="${c.id}">Registrar pago</button>
-            <button class="link danger" data-action="rechazar" data-id="${c.id}">Rechazar</button>
-            <button class="link" data-action="pdf" data-id="${c.id}">PDF</button>
-            <button class="link" data-action="correo" data-id="${c.id}">Reenviar correo</button>
+          <div class="day-card__footer">
+            <div class="day-card__actions day-card__actions--left">
+              <button class="link" data-action="ver" data-id="${c.id}">Ver detalle</button>
+              <button class="link" data-action="pdf" data-id="${c.id}">Ver PDF</button>
+              <button class="link" data-action="correo" data-id="${c.id}">Reenviar correo</button>
+            </div>
+            <div class="day-card__actions day-card__actions--right">
+              ${c.estado && c.estado.toLowerCase() === "pendiente" ? `
+                <button class="link" data-action="abonado" data-id="${c.id}">Registrar abonado</button>
+                <button class="link danger" data-action="rechazar" data-id="${c.id}">Rechazar</button>
+              ` : ""}
+              ${c.estado && c.estado.toLowerCase() === "aceptada" ? `
+                <button class="link" data-action="pago" data-id="${c.id}">Registrar pago</button>
+              ` : ""}
+            </div>
           </div>
         </div>
-      `
+      `;
+      }
     ).join("");
   }
   async function loadCotizaciones() {
@@ -190,7 +410,7 @@ async function main() {
     calendarDays.innerHTML = '<div class="placeholder">Cargando...</div>';
     try {
       const resp = await cotizacionesAPI.listar({});
-      cotizaciones = resp.data || [];
+      allCotizaciones = resp.data || [];
       rebuildEventos();
       const todayKey = dateKey(/* @__PURE__ */ new Date());
       const availableKeys = Object.keys(eventosPorFecha);
@@ -209,65 +429,150 @@ async function main() {
     }
   }
   async function verCotizacion(id) {
+    const modal = new Modal();
     try {
       const resp = await cotizacionesAPI.obtener(id);
       const c = resp.data;
       const detalles = c.detalles || [];
-      const msg = `#${c.numero}
-${c.cliente.nombre} · ${c.cliente.email}
-${c.evento.fecha} ${c.evento.hora}
-Total: $${c.totales.valor_total}
-Estado: ${c.estado} / ${c.estado_pago}
-
-Detalles:
-${detalles.map((d) => `- ${d.servicio}: ${d.cantidad} x ${d.valorUnitario} = ${d.total}`).join("\n")}`;
-      alert(msg);
+      const valorTotal = typeof c.totales?.subtotal === "string" ? parseFloat(c.totales.subtotal) : c.totales?.subtotal || 0;
+      const abonoRequerido = typeof c.totales?.abono_50_porciento === "string" ? parseFloat(c.totales.abono_50_porciento) : c.totales?.abono_50_porciento || 0;
+      const content = `
+        <div class="modal-detail">
+          <h2>Cotización #${c.numero}</h2>
+          <div class="detail-section">
+            <h3>Cliente</h3>
+            <p><strong>Nombre:</strong> ${c.cliente.nombre}</p>
+            <p><strong>Email:</strong> ${c.cliente.email}</p>
+            ${c.cliente.telefono ? `<p><strong>Teléfono:</strong> ${c.cliente.telefono}</p>` : ""}
+          </div>
+          <div class="detail-section">
+            <h3>Evento</h3>
+            <p><strong>Fecha:</strong> ${c.evento.fecha}</p>
+            <p><strong>Hora:</strong> ${c.evento.hora}</p>
+            <p><strong>Duración:</strong> ${c.evento.duracion} horas</p>
+            <p><strong>Asistentes:</strong> ${c.evento.asistentes} personas</p>
+            <p><strong>Tipo:</strong> ${c.evento.tipo || "No especificado"}</p>
+          </div>
+          <div class="detail-section">
+            <h3>Detalles de la cotización</h3>
+            ${detalles.map((d) => `
+              <p><strong>${d.servicio}:</strong> ${d.cantidad} × ${formatCurrency(d.valorUnitario)} = ${formatCurrency(d.total)}</p>
+            `).join("")}
+          </div>
+          <div class="detail-section detail-section--highlight">
+            <h3>Totales</h3>
+            <p><strong>Valor total:</strong> ${formatCurrency(valorTotal)}</p>
+            <p><strong>Abono requerido (50%):</strong> ${formatCurrency(abonoRequerido)}</p>
+          </div>
+          <div class="detail-section">
+            <h3>Estado</h3>
+            <p><strong>Estado:</strong> <span class="badge badge--${c.estado}">${c.estado}</span></p>
+            <p><strong>Estado de pago:</strong> <span class="badge badge--${c.estado_pago}">${c.estado_pago}</span></p>
+          </div>
+          ${c.observaciones ? `
+          <div class="detail-section">
+            <h3>Observaciones</h3>
+            <p>${c.observaciones}</p>
+          </div>
+          ` : ""}
+        </div>
+      `;
+      modal.show(content, [{ label: "Cerrar", handler: () => {
+      }, variant: "primary" }]);
     } catch (err) {
-      alert("No se pudo obtener el detalle");
+      modal.alert("No se pudo obtener el detalle de la cotización", "error");
     }
   }
   async function cerrarCotizacion(id, estadoPago) {
-    const monto = prompt(`Monto a registrar como ${estadoPago}. Deja vacío para usar el mínimo requerido.`);
-    const payload = { estadoPago };
-    if (monto) payload.montoPago = Number(monto);
-    try {
-      await cotizacionesAPI.cerrar(id, payload);
-      await loadCotizaciones();
-      alert("Cotización cerrada y calendario bloqueado.");
-    } catch (err) {
-      alert(err?.message || "Error al cerrar la cotización");
-    }
+    const modal = new Modal();
+    modal.prompt(
+      `Monto a registrar como ${estadoPago}`,
+      "Deja vacío para usar el mínimo requerido",
+      async (monto) => {
+        if (monto === null) return;
+        const payload = { estadoPago };
+        if (monto && monto.trim() !== "") {
+          payload.montoPago = Number(monto);
+        }
+        try {
+          await cotizacionesAPI.cerrar(id, payload);
+          await loadCotizaciones();
+          const successModal = new Modal();
+          successModal.alert("Cotización cerrada y calendario bloqueado exitosamente.", "success");
+        } catch (err) {
+          const errorModal = new Modal();
+          errorModal.alert(err?.message || "Error al cerrar la cotización", "error");
+        }
+      }
+    );
   }
   async function registrarPago(id) {
-    const monto = prompt("Monto a registrar (COP):");
-    if (!monto) return;
-    try {
-      await cotizacionesAPI.registrarPago(id, { monto: Number(monto) });
-      await loadCotizaciones();
-      alert("Pago registrado");
-    } catch (err) {
-      alert(err?.message || "Error registrando pago");
-    }
+    const modal = new Modal();
+    modal.prompt(
+      "Registrar pago adicional",
+      "Monto en COP",
+      async (monto) => {
+        if (!monto || monto.trim() === "") return;
+        try {
+          await cotizacionesAPI.registrarPago(id, { monto: Number(monto) });
+          await loadCotizaciones();
+          const successModal = new Modal();
+          successModal.alert(`Pago de ${formatCurrency(Number(monto))} registrado correctamente.`, "success");
+        } catch (err) {
+          const errorModal = new Modal();
+          errorModal.alert(err?.message || "Error al registrar el pago", "error");
+        }
+      }
+    );
   }
   async function rechazarCotizacion(id) {
-    const motivo = prompt("Motivo de rechazo:") || void 0;
-    try {
-      await cotizacionesAPI.rechazar(id, motivo);
-      await loadCotizaciones();
-      alert("Cotización rechazada");
-    } catch (err) {
-      alert(err?.message || "Error al rechazar");
-    }
+    const modal = new Modal();
+    modal.show(
+      "<h3>¿Estás seguro de rechazar esta cotización?</h3><p>Esta acción notificará al cliente por correo.</p>",
+      [
+        { label: "Cancelar", handler: () => {
+        }, variant: "secondary" },
+        {
+          label: "Rechazar",
+          handler: async () => {
+            const modalMotivo = new Modal();
+            modalMotivo.prompt(
+              "Motivo del rechazo (opcional)",
+              "Escribe el motivo...",
+              async (motivo) => {
+                try {
+                  await cotizacionesAPI.rechazar(id, motivo || void 0);
+                  await loadCotizaciones();
+                  const successModal = new Modal();
+                  successModal.alert("Cotización rechazada. El cliente ha sido notificado.", "success");
+                } catch (err) {
+                  const errorModal = new Modal();
+                  errorModal.alert(err?.message || "Error al rechazar la cotización", "error");
+                }
+              }
+            );
+          },
+          variant: "danger"
+        }
+      ]
+    );
   }
   function abrirPdf(id) {
-    cotizacionesAPI.descargarPdf(id);
+    const url = cotizacionesAPI.getPdfUrl(id);
+    window.open(url, "_blank");
   }
   async function reenviarCorreo(id) {
+    const modal = new Modal();
+    modal.show('<div style="text-align: center;"><div class="loader"></div><p style="margin-top: 1rem;">Enviando correo...</p></div>', []);
     try {
       await cotizacionesAPI.reenviarCorreo(id);
-      alert("Correo reenviado");
+      modal.close();
+      const successModal = new Modal();
+      successModal.alert("Correo reenviado correctamente al cliente.", "success");
     } catch (err) {
-      alert(err?.message || "Error reenviando correo");
+      modal.close();
+      const errorModal = new Modal();
+      errorModal.alert(err?.message || "Error al reenviar el correo", "error");
     }
   }
   dayList?.addEventListener("click", (e) => {
@@ -278,22 +583,64 @@ ${detalles.map((d) => `- ${d.servicio}: ${d.cantidad} x ${d.valorUnitario} = ${d
     if (!action || !id) return;
     if (action === "ver") verCotizacion(id);
     if (action === "abonado") cerrarCotizacion(id, "abonado");
-    if (action === "pagado") cerrarCotizacion(id, "pagado");
     if (action === "pago") registrarPago(id);
     if (action === "rechazar") rechazarCotizacion(id);
     if (action === "pdf") abrirPdf(id);
     if (action === "correo") reenviarCorreo(id);
   });
-  btnFiltrar?.addEventListener("click", () => {
+  listaContainer?.addEventListener("click", (e) => {
+    const target = e.target;
+    if (!target?.dataset) return;
+    const action = target.dataset.action;
+    const id = Number(target.dataset.id);
+    if (!action || !id) return;
+    if (action === "ver") verCotizacion(id);
+    if (action === "abonado") cerrarCotizacion(id, "abonado");
+    if (action === "pago") registrarPago(id);
+    if (action === "rechazar") rechazarCotizacion(id);
+    if (action === "pdf") abrirPdf(id);
+    if (action === "correo") reenviarCorreo(id);
+  });
+  btnVistaCalendario?.addEventListener("click", () => {
+    vistaActual = "calendario";
+    btnVistaCalendario.classList.add("active");
+    btnVistaLista?.classList.remove("active");
+    vistaCalendario?.classList.add("active");
+    vistaLista?.classList.remove("active");
+    if (detalleDelDia) detalleDelDia.style.display = "block";
+    if (eyebrowVista) eyebrowVista.textContent = "Calendario";
+  });
+  btnVistaLista?.addEventListener("click", () => {
+    vistaActual = "lista";
+    btnVistaLista.classList.add("active");
+    btnVistaCalendario?.classList.remove("active");
+    vistaLista?.classList.add("active");
+    vistaCalendario?.classList.remove("active");
+    if (detalleDelDia) detalleDelDia.style.display = "none";
+    if (eyebrowVista) eyebrowVista.textContent = "Lista";
+    renderListaView();
+  });
+  estadoSelect?.addEventListener("change", () => {
     rebuildEventos();
     if (!selectedDate || !eventosPorFecha[selectedDate]?.length) {
       selectedDate = firstAvailableDate(Object.keys(eventosPorFecha));
     }
     renderCalendar();
     renderDayList();
+    if (vistaActual === "lista") {
+      renderListaView();
+    }
   });
-  btnRefrescar?.addEventListener("click", () => {
-    loadCotizaciones();
+  pagoSelect?.addEventListener("change", () => {
+    rebuildEventos();
+    if (!selectedDate || !eventosPorFecha[selectedDate]?.length) {
+      selectedDate = firstAvailableDate(Object.keys(eventosPorFecha));
+    }
+    renderCalendar();
+    renderDayList();
+    if (vistaActual === "lista") {
+      renderListaView();
+    }
   });
   prevMonthBtn?.addEventListener("click", () => {
     currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);

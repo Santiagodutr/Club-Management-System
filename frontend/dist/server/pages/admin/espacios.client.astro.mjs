@@ -1,8 +1,100 @@
-import { s as salonPostsAPI, e as espaciosAdminAPI, a as supabase } from '../../chunks/supabase_DxPdPIs3.mjs';
+import { s as salonPostsAPI, e as espaciosAdminAPI, a as supabase } from '../../chunks/supabase_CYgU43WC.mjs';
 export { renderers } from '../../renderers.mjs';
 
 function qs(sel) {
   return document.querySelector(sel);
+}
+let hayCambiosSinPublicar = false;
+function marcarCambiosSinPublicar() {
+  hayCambiosSinPublicar = true;
+  localStorage.setItem("hayCambiosSinPublicar", "true");
+  const btnPublicar = document.getElementById("btnPublicarCambios");
+  if (btnPublicar) {
+    btnPublicar.style.display = "inline-flex";
+  }
+}
+function verificarCambiosPendientes() {
+  const hayCambios = localStorage.getItem("hayCambiosSinPublicar") === "true";
+  if (hayCambios) {
+    const btnPublicar = document.getElementById("btnPublicarCambios");
+    if (btnPublicar) {
+      btnPublicar.style.display = "inline-flex";
+    }
+  }
+}
+function mostrarModalPublicar() {
+  const modal = document.getElementById("publicarModal");
+  if (modal) {
+    modal.classList.remove("hidden");
+  }
+}
+function cerrarModalPublicar() {
+  const modal = document.getElementById("publicarModal");
+  if (modal) {
+    modal.classList.add("hidden");
+  }
+  const mensaje = document.getElementById("mensajePublicar");
+  if (mensaje) {
+    mensaje.classList.add("hidden");
+    mensaje.textContent = "";
+  }
+}
+function mostrarMensajePublicar(texto, tipo) {
+  const mensaje = document.getElementById("mensajePublicar");
+  if (!mensaje) return;
+  mensaje.classList.remove("hidden", "exito", "error", "info");
+  mensaje.classList.add(tipo);
+  mensaje.textContent = texto;
+}
+async function publicarCambios() {
+  const btnConfirmar = document.getElementById("btnConfirmarPublicar");
+  const btnCancelar = document.getElementById("btnCancelarPublicar");
+  if (btnConfirmar) {
+    btnConfirmar.disabled = true;
+    btnConfirmar.textContent = "Publicando...";
+  }
+  if (btnCancelar) btnCancelar.disabled = true;
+  mostrarMensajePublicar("Iniciando publicación...", "info");
+  try {
+    const adminAuth = localStorage.getItem("adminAuth");
+    if (!adminAuth) {
+      throw new Error("No hay sesión activa");
+    }
+    const { token } = JSON.parse(adminAuth);
+    const backendUrl = "http://localhost:3333";
+    const response = await fetch(`${backendUrl}/admin/trigger-rebuild`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`Error al publicar: ${response.statusText}`);
+    }
+    mostrarMensajePublicar("✅ Publicación iniciada exitosamente. Los cambios se verán en el sitio en 2-3 minutos.", "exito");
+    hayCambiosSinPublicar = false;
+    localStorage.removeItem("hayCambiosSinPublicar");
+    const btnPublicar = document.getElementById("btnPublicarCambios");
+    if (btnPublicar) {
+      btnPublicar.style.display = "none";
+    }
+    setTimeout(() => {
+      cerrarModalPublicar();
+      if (btnConfirmar) {
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = "Publicar Ahora";
+      }
+      if (btnCancelar) btnCancelar.disabled = false;
+    }, 3e3);
+  } catch (error) {
+    console.error("Error al publicar:", error);
+    mostrarMensajePublicar(`❌ Error: ${error instanceof Error ? error.message : "Error desconocido"}`, "error");
+    if (btnConfirmar) {
+      btnConfirmar.disabled = false;
+      btnConfirmar.textContent = "Publicar Ahora";
+    }
+    if (btnCancelar) btnCancelar.disabled = false;
+  }
 }
 async function ensureSession() {
   const { data } = await supabase.auth.getSession();
@@ -151,6 +243,7 @@ async function main() {
     try {
       await espaciosAdminAPI.actualizar(seleccionado, payload);
       await loadEspacios();
+      marcarCambiosSinPublicar();
       alert("Salón actualizado");
     } catch (err) {
       alert(err?.message || "No se pudo guardar el salón");
@@ -168,6 +261,7 @@ async function main() {
       await espaciosAdminAPI.agregarConfiguracion(seleccionado, { disposicionId, capacidad });
       nuevaCapacidad && (nuevaCapacidad.value = "");
       await loadEspacios();
+      marcarCambiosSinPublicar();
       alert("Configuración agregada");
     } catch (err) {
       alert(err?.message || "No se pudo agregar la configuración");
@@ -182,6 +276,7 @@ async function main() {
     try {
       await espaciosAdminAPI.actualizarConfiguracion(espacioId, configId, { capacidad });
       await loadEspacios();
+      marcarCambiosSinPublicar();
       alert("Configuración actualizada");
     } catch (err) {
       alert(err?.message || "No se pudo actualizar");
@@ -192,6 +287,7 @@ async function main() {
     try {
       await espaciosAdminAPI.eliminarConfiguracion(espacioId, configId);
       await loadEspacios();
+      marcarCambiosSinPublicar();
       alert("Configuración eliminada");
     } catch (err) {
       alert(err?.message || "No se pudo eliminar");
@@ -214,6 +310,7 @@ async function main() {
         if (espacioSelect) espacioSelect.value = String(createdId);
       }
       showEspacio(seleccionado);
+      marcarCambiosSinPublicar();
       alert("Salón creado");
     } catch (err) {
       alert(err?.message || "No se pudo crear el salón");
@@ -439,9 +536,16 @@ async function main() {
     if (action === "editar-post") showPostEditor(postId);
     if (action === "eliminar-post") eliminarPost(postId);
   });
+  const btnPublicarCambios = document.getElementById("btnPublicarCambios");
+  const btnCancelarPublicar = document.getElementById("btnCancelarPublicar");
+  const btnConfirmarPublicar = document.getElementById("btnConfirmarPublicar");
+  btnPublicarCambios?.addEventListener("click", mostrarModalPublicar);
+  btnCancelarPublicar?.addEventListener("click", cerrarModalPublicar);
+  btnConfirmarPublicar?.addEventListener("click", publicarCambios);
   await ensureSession();
   await loadDisposiciones();
   await loadEspacios();
+  verificarCambiosPendientes();
   if (seleccionado) {
     await loadPosts();
   }

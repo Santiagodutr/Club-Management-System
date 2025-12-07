@@ -80,13 +80,16 @@ router.delete('/admin/socios/:id', [SociosController, 'eliminar']).use(middlewar
 // Socios búsqueda pública (para cotizaciones)
 router.get('/api/socios/buscar', [SociosController, 'buscarPublico'])
 
-// Espacios routes (públicas)
+// Espacios routes (públicas y admin)
 const EspacioController = () => import('#controllers/espacio_controller')
 router.get('/api/espacios', [EspacioController, 'index'])
 router.get('/api/espacios/simplificado', [EspacioController, 'listarSimplificado'])
 router.get('/api/espacios/:espacioId/tarifas', [EspacioController, 'obtenerTarifasEspacio'])
 router.get('/api/espacios/:espacioId/configuraciones', [EspacioController, 'obtenerConfiguracionesEspacio'])
 router.get('/api/espacios/:id', [EspacioController, 'show'])
+router.post('/api/espacios', [EspacioController, 'store']).use(middleware.auth()).use(middleware.checkRole('admin'))
+router.put('/api/espacios/:id', [EspacioController, 'update']).use(middleware.auth()).use(middleware.checkRole('admin'))
+router.delete('/api/espacios/:id', [EspacioController, 'destroy']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.get('/api/disposiciones', [EspacioController, 'listarDisposiciones'])
 router.get('/api/prestaciones', [EspacioController, 'listarPrestaciones'])
 router.get('/api/servicios-adicionales', [EspacioController, 'listarPrestaciones'])
@@ -124,6 +127,10 @@ router.delete('/admin/espacios/:id/configuraciones/:configId', [EspaciosAdminCon
 router.get('/admin/disposiciones', [EspaciosAdminController, 'listarDisposiciones']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.post('/admin/disposiciones', [EspaciosAdminController, 'crearDisposicion']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.put('/admin/disposiciones/:id', [EspaciosAdminController, 'actualizarDisposicion']).use(middleware.auth()).use(middleware.checkRole('admin'))
+
+// Webhook para trigger rebuild del frontend
+const WebhookController = await import('#controllers/webhook_controller')
+router.post('/admin/trigger-rebuild', [WebhookController.default, 'triggerRebuild']).use(middleware.auth()).use(middleware.checkRole('admin'))
 
 // --- API Docs ---
 // Sirve el OpenAPI spec en JSON generado desde archivos "solo-docs"

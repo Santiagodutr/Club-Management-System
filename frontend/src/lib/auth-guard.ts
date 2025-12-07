@@ -1,6 +1,6 @@
 // Auth Guard - Protección global para páginas admin
 export function checkAuthOnLoad() {
-  // Solo ejecutar en páginas admin
+  // Solo ejecutar en páginas admin (excluyendo login)
   if (!window.location.pathname.startsWith('/admin')) return
   if (window.location.pathname === '/admin/login') return
 
@@ -15,20 +15,19 @@ export function checkAuthOnLoad() {
   try {
     const authData = JSON.parse(auth)
     
-    // Verificar que el token existe
-    if (!authData.token || authData.token === 'demo-token') {
-      console.warn('[Auth Guard] Token inválido, redirigiendo al login')
+    // Verificar que el token existe y es válido
+    if (!authData.token || !authData.isAuthenticated) {
+      console.warn('[Auth Guard] Token inválido o sesión no autenticada, redirigiendo al login')
       localStorage.removeItem('adminAuth')
       window.location.href = '/admin/login'
       return
     }
 
-    // Verificar si el token está expirado (si tiene expiresAt)
+    // Verificar si el token está expirado (si tiene expiresAt en formato Unix timestamp)
     if (authData.expiresAt) {
-      const expiresAt = new Date(authData.expiresAt).getTime()
-      const now = Date.now()
+      const now = Math.floor(Date.now() / 1000) // Unix timestamp en segundos
       
-      if (now >= expiresAt) {
+      if (now >= authData.expiresAt) {
         console.warn('[Auth Guard] Token expirado, redirigiendo al login')
         localStorage.removeItem('adminAuth')
         window.location.href = '/admin/login'
@@ -70,8 +69,5 @@ export function setupGlobalAuthInterceptor() {
   }
 }
 
-// Inicializar al cargar el script
-if (typeof window !== 'undefined') {
-  checkAuthOnLoad()
-  setupGlobalAuthInterceptor()
-}
+// NO inicializar automáticamente - dejar que AdminLayout lo haga explícitamente
+// Esto evita problemas de timing con el almacenamiento del token después del login

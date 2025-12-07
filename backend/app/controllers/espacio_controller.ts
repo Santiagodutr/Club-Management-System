@@ -35,7 +35,6 @@ export default class EspacioController {
       const espacio = await db
         .from('espacios')
         .where('id', params.id)
-        .where('activo', true)
         .first()
 
       if (!espacio) {
@@ -45,14 +44,186 @@ export default class EspacioController {
         })
       }
 
+      return response.json(espacio)
+    } catch (error) {
+      return response.status(404).json({
+        success: false,
+        message: 'Espacio no encontrado',
+      })
+    }
+  }
+
+  /**
+   * Crear un nuevo espacio
+   */
+  async store({ request, response }: HttpContext) {
+    try {
+      const datos = request.only([
+        'nombre',
+        'slug',
+        'subtitulo',
+        'descripcion_completa',
+        'capacidad_minima',
+        'capacidad_maxima',
+        'area_m2',
+        'horario_disponible',
+        'precio_desde',
+        'caracteristicas',
+        'servicios_incluidos',
+        'imagenes',
+        'destacado',
+        'activo',
+      ])
+
+      // Validar campo requerido
+      if (!datos.nombre) {
+        return response.status(400).json({
+          success: false,
+          message: 'El nombre es obligatorio',
+        })
+      }
+
+      // Generar slug si no viene
+      if (!datos.slug) {
+        datos.slug = datos.nombre
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+      }
+
+      // Convertir arrays a JSON para campos JSONB
+      if (datos.caracteristicas && Array.isArray(datos.caracteristicas)) {
+        datos.caracteristicas = JSON.stringify(datos.caracteristicas)
+      }
+      if (datos.servicios_incluidos && Array.isArray(datos.servicios_incluidos)) {
+        datos.servicios_incluidos = JSON.stringify(datos.servicios_incluidos)
+      }
+      if (datos.imagenes && Array.isArray(datos.imagenes)) {
+        datos.imagenes = JSON.stringify(datos.imagenes)
+      }
+
+      // Insertar el espacio
+      const [espacio] = await db
+        .from('espacios')
+        .insert({
+          ...datos,
+          contenido_actualizado_at: new Date(),
+        })
+        .returning('*')
+
       return response.json({
         success: true,
         data: espacio,
       })
     } catch (error) {
-      return response.status(404).json({
+      console.error('Error al crear espacio:', error)
+      return response.status(500).json({
         success: false,
-        message: 'Espacio no encontrado',
+        message: 'Error al crear espacio',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+  }
+
+  /**
+   * Eliminar un espacio
+   */
+  async destroy({ params, response }: HttpContext) {
+    try {
+      const espacioId = parseInt(params.id)
+
+      // Validar que el espacio existe
+      const espacioExistente = await db.from('espacios').where('id', espacioId).first()
+
+      if (!espacioExistente) {
+        return response.status(404).json({
+          success: false,
+          message: 'Espacio no encontrado',
+        })
+      }
+
+      // Eliminar el espacio (esto eliminará en cascada las configuraciones relacionadas)
+      await db.from('espacios').where('id', espacioId).delete()
+
+      return response.json({
+        success: true,
+        message: 'Espacio eliminado exitosamente',
+      })
+    } catch (error) {
+      console.error('Error al eliminar espacio:', error)
+      return response.status(500).json({
+        success: false,
+        message: 'Error al eliminar espacio',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+  }
+
+  /**
+   * Actualizar un espacio completo
+   */
+  async update({ params, request, response }: HttpContext) {
+    try {
+      const espacioId = parseInt(params.id)
+      const datos = request.only([
+        'nombre',
+        'slug',
+        'subtitulo',
+        'descripcion_completa',
+        'capacidad_minima',
+        'capacidad_maxima',
+        'area_m2',
+        'horario_disponible',
+        'precio_desde',
+        'caracteristicas',
+        'servicios_incluidos',
+        'imagenes',
+        'destacado',
+        'activo',
+      ])
+
+      // Validar que el espacio existe
+      const espacioExistente = await db.from('espacios').where('id', espacioId).first()
+
+      if (!espacioExistente) {
+        return response.status(404).json({
+          success: false,
+          message: 'Espacio no encontrado',
+        })
+      }
+
+      // Convertir arrays a JSON para campos JSONB
+      if (datos.caracteristicas && Array.isArray(datos.caracteristicas)) {
+        datos.caracteristicas = JSON.stringify(datos.caracteristicas)
+      }
+      if (datos.servicios_incluidos && Array.isArray(datos.servicios_incluidos)) {
+        datos.servicios_incluidos = JSON.stringify(datos.servicios_incluidos)
+      }
+      if (datos.imagenes && Array.isArray(datos.imagenes)) {
+        datos.imagenes = JSON.stringify(datos.imagenes)
+      }
+
+      // Actualizar timestamp de contenido
+      datos.contenido_actualizado_at = new Date()
+
+      // Actualizar el espacio
+      await db.from('espacios').where('id', espacioId).update(datos)
+
+      // Obtener el espacio actualizado
+      const espacioActualizado = await db.from('espacios').where('id', espacioId).first()
+
+      return response.json({
+        success: true,
+        data: espacioActualizado,
+      })
+    } catch (error) {
+      console.error('Error al actualizar espacio:', error)
+      return response.status(500).json({
+        success: false,
+        message: 'Error al actualizar espacio',
+        error: error instanceof Error ? error.message : 'Unknown error',
       })
     }
   }

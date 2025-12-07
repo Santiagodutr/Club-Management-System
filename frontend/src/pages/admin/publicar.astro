@@ -1,0 +1,116 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro'
+const title = 'Publicar Cambios'
+---
+
+<AdminLayout title={title}>
+  <div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+      <h1 class="text-3xl font-bold mb-6 text-gray-800">Publicar Cambios</h1>
+      
+      <div class="mb-8">
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+          <p class="text-blue-700">
+            <strong>💡 Importante:</strong> Este botón genera una nueva versión del sitio web público con todos los cambios que hayas hecho en los salones.
+          </p>
+        </div>
+
+        <div class="space-y-3 text-gray-700 mb-6">
+          <p><strong>Usa este botón cuando:</strong></p>
+          <ul class="list-disc list-inside space-y-2 ml-4">
+            <li>Hayas terminado de editar uno o varios salones</li>
+            <li>Quieras que los cambios se vean en el sitio público</li>
+            <li>Hayas agregado nuevos espacios</li>
+          </ul>
+        </div>
+
+        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-8">
+          <p class="text-yellow-800 text-sm">
+            ⏱️ La publicación toma aproximadamente 2-3 minutos. El sitio no se cae durante este proceso.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center gap-4">
+        <button 
+          id="btnPublicar" 
+          class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg text-xl transition-colors shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          🚀 Publicar Cambios
+        </button>
+
+        <div id="mensaje" class="hidden mt-4 p-4 rounded-lg w-full text-center"></div>
+
+        <a 
+          href="/admin/espacios" 
+          class="text-gray-600 hover:text-gray-800 underline mt-4"
+        >
+          ← Volver a Espacios
+        </a>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const btnPublicar = document.getElementById('btnPublicar') as HTMLButtonElement
+  const mensaje = document.getElementById('mensaje') as HTMLDivElement
+  const backendUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333'
+
+  function mostrarMensaje(texto: string, tipo: 'exito' | 'error' | 'info') {
+    mensaje.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-blue-100', 'text-blue-800')
+    
+    if (tipo === 'exito') {
+      mensaje.classList.add('bg-green-100', 'text-green-800')
+    } else if (tipo === 'error') {
+      mensaje.classList.add('bg-red-100', 'text-red-800')
+    } else {
+      mensaje.classList.add('bg-blue-100', 'text-blue-800')
+    }
+    
+    mensaje.textContent = texto
+  }
+
+  btnPublicar.addEventListener('click', async () => {
+    if (!confirm('¿Estás seguro que deseas publicar los cambios? Esto actualizará el sitio web público.')) {
+      return
+    }
+
+    btnPublicar.disabled = true
+    btnPublicar.textContent = '⏳ Publicando...'
+    mostrarMensaje('Iniciando publicación...', 'info')
+
+    try {
+      const adminAuth = localStorage.getItem('adminAuth')
+      if (!adminAuth) {
+        throw new Error('No hay sesión activa')
+      }
+
+      const { token } = JSON.parse(adminAuth)
+
+      const response = await fetch(`${backendUrl}/admin/trigger-rebuild`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`Error al publicar: ${response.statusText}`)
+      }
+
+      mostrarMensaje('✅ Publicación iniciada exitosamente. Los cambios se verán en el sitio en 2-3 minutos.', 'exito')
+      
+      setTimeout(() => {
+        btnPublicar.disabled = false
+        btnPublicar.textContent = '🚀 Publicar Cambios'
+      }, 5000)
+
+    } catch (error) {
+      console.error('Error al publicar:', error)
+      mostrarMensaje(`❌ Error al publicar: ${error instanceof Error ? error.message : 'Error desconocido'}`, 'error')
+      btnPublicar.disabled = false
+      btnPublicar.textContent = '🚀 Publicar Cambios'
+    }
+  })
+</script>

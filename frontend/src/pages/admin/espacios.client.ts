@@ -7,6 +7,118 @@ function qs<T extends HTMLElement>(sel: string): Maybe<T> {
   return document.querySelector(sel) as Maybe<T>
 }
 
+// Variable para rastrear si hay cambios sin publicar
+let hayCambiosSinPublicar = false
+
+function marcarCambiosSinPublicar() {
+  hayCambiosSinPublicar = true
+  localStorage.setItem('hayCambiosSinPublicar', 'true')
+  const btnPublicar = document.getElementById('btnPublicarCambios') as HTMLButtonElement
+  if (btnPublicar) {
+    btnPublicar.style.display = 'inline-flex'
+  }
+}
+
+function verificarCambiosPendientes() {
+  const hayCambios = localStorage.getItem('hayCambiosSinPublicar') === 'true'
+  if (hayCambios) {
+    const btnPublicar = document.getElementById('btnPublicarCambios') as HTMLButtonElement
+    if (btnPublicar) {
+      btnPublicar.style.display = 'inline-flex'
+    }
+  }
+}
+
+function mostrarModalPublicar() {
+  const modal = document.getElementById('publicarModal')
+  if (modal) {
+    modal.classList.remove('hidden')
+  }
+}
+
+function cerrarModalPublicar() {
+  const modal = document.getElementById('publicarModal')
+  if (modal) {
+    modal.classList.add('hidden')
+  }
+  const mensaje = document.getElementById('mensajePublicar')
+  if (mensaje) {
+    mensaje.classList.add('hidden')
+    mensaje.textContent = ''
+  }
+}
+
+function mostrarMensajePublicar(texto: string, tipo: 'exito' | 'error' | 'info') {
+  const mensaje = document.getElementById('mensajePublicar')
+  if (!mensaje) return
+  
+  mensaje.classList.remove('hidden', 'exito', 'error', 'info')
+  mensaje.classList.add(tipo)
+  mensaje.textContent = texto
+}
+
+async function publicarCambios() {
+  const btnConfirmar = document.getElementById('btnConfirmarPublicar') as HTMLButtonElement
+  const btnCancelar = document.getElementById('btnCancelarPublicar') as HTMLButtonElement
+  
+  if (btnConfirmar) {
+    btnConfirmar.disabled = true
+    btnConfirmar.textContent = 'Publicando...'
+  }
+  if (btnCancelar) btnCancelar.disabled = true
+
+  mostrarMensajePublicar('Iniciando publicación...', 'info')
+
+  try {
+    const adminAuth = localStorage.getItem('adminAuth')
+    if (!adminAuth) {
+      throw new Error('No hay sesión activa')
+    }
+
+    const { token } = JSON.parse(adminAuth)
+    const backendUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333'
+
+    const response = await fetch(`${backendUrl}/admin/trigger-rebuild`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Error al publicar: ${response.statusText}`)
+    }
+
+    mostrarMensajePublicar('✅ Publicación iniciada exitosamente. Los cambios se verán en el sitio en 2-3 minutos.', 'exito')
+    hayCambiosSinPublicar = false
+    localStorage.removeItem('hayCambiosSinPublicar')
+    
+    const btnPublicar = document.getElementById('btnPublicarCambios') as HTMLButtonElement
+    if (btnPublicar) {
+      btnPublicar.style.display = 'none'
+    }
+    
+    setTimeout(() => {
+      cerrarModalPublicar()
+      if (btnConfirmar) {
+        btnConfirmar.disabled = false
+        btnConfirmar.textContent = 'Publicar Ahora'
+      }
+      if (btnCancelar) btnCancelar.disabled = false
+    }, 3000)
+
+  } catch (error) {
+    console.error('Error al publicar:', error)
+    mostrarMensajePublicar(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`, 'error')
+    
+    if (btnConfirmar) {
+      btnConfirmar.disabled = false
+      btnConfirmar.textContent = 'Publicar Ahora'
+    }
+    if (btnCancelar) btnCancelar.disabled = false
+  }
+}
+
 async function ensureSession() {
   const { data } = await supabase.auth.getSession()
   if (!data.session) {
@@ -170,6 +282,7 @@ async function main() {
     try {
       await espaciosAdminAPI.actualizar(seleccionado, payload)
       await loadEspacios()
+      marcarCambiosSinPublicar()
       alert('Salón actualizado')
     } catch (err: any) {
       alert(err?.message || 'No se pudo guardar el salón')
@@ -188,6 +301,7 @@ async function main() {
       await espaciosAdminAPI.agregarConfiguracion(seleccionado, { disposicionId, capacidad })
       nuevaCapacidad && (nuevaCapacidad.value = '')
       await loadEspacios()
+      marcarCambiosSinPublicar()
       alert('Configuración agregada')
     } catch (err: any) {
       alert(err?.message || 'No se pudo agregar la configuración')
@@ -203,6 +317,7 @@ async function main() {
     try {
       await espaciosAdminAPI.actualizarConfiguracion(espacioId, configId, { capacidad })
       await loadEspacios()
+      marcarCambiosSinPublicar()
       alert('Configuración actualizada')
     } catch (err: any) {
       alert(err?.message || 'No se pudo actualizar')
@@ -214,6 +329,7 @@ async function main() {
     try {
       await espaciosAdminAPI.eliminarConfiguracion(espacioId, configId)
       await loadEspacios()
+      marcarCambiosSinPublicar()
       alert('Configuración eliminada')
     } catch (err: any) {
       alert(err?.message || 'No se pudo eliminar')
@@ -237,6 +353,7 @@ async function main() {
         if (espacioSelect) espacioSelect.value = String(createdId)
       }
       showEspacio(seleccionado)
+      marcarCambiosSinPublicar()
       alert('Salón creado')
     } catch (err: any) {
       alert(err?.message || 'No se pudo crear el salón')
@@ -537,12 +654,22 @@ async function main() {
     if (action === 'eliminar-post') eliminarPost(postId)
   })
 
+  // Setup modal publicar
+  const btnPublicarCambios = document.getElementById('btnPublicarCambios')
+  const btnCancelarPublicar = document.getElementById('btnCancelarPublicar')
+  const btnConfirmarPublicar = document.getElementById('btnConfirmarPublicar')
+  
+  btnPublicarCambios?.addEventListener('click', mostrarModalPublicar)
+  btnCancelarPublicar?.addEventListener('click', cerrarModalPublicar)
+  btnConfirmarPublicar?.addEventListener('click', publicarCambios)
   await ensureSession()
   await loadDisposiciones()
   await loadEspacios()
+  verificarCambiosPendientes()
   if (seleccionado) {
     await loadPosts()
   }
+   
 }
 
 window.addEventListener('DOMContentLoaded', () => {

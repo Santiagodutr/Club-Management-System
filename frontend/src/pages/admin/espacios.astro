@@ -10,11 +10,12 @@ export const prerender = false
       <div>
         <p class="eyebrow">Administración</p>
         <h1>Espacios</h1>
-        <p class="muted">Selecciona un salón para editarlo y ajusta sus disposiciones con una interfaz más limpia y guiada.</p>
+        <p class="muted">Gestiona los salones del club: edita información, imágenes, disposiciones y precios.</p>
       </div>
       <div class="actions">
         <button id="btnRefrescarEspacios" class="btn secondary">Refrescar</button>
-        <a class="btn ghost" href="/admin/login">Cerrar sesión</a>
+        <button id="btnPublicarCambios" class="btn" style="background: #16a34a; color: white; display: none;">Publicar Cambios</button>
+        <button id="btnNuevoEspacio" class="btn primary">+ Nuevo Salón</button>
       </div>
     </header>
 
@@ -23,191 +24,57 @@ export const prerender = false
         <div class="card__header">
           <div>
             <p class="eyebrow">Salones</p>
-            <h2>Selecciona un espacio</h2>
+            <h2>Lista de espacios</h2>
           </div>
-          <div class="selector">
-            <label>
-              Salón
-              <select id="espacioSelect">
-                <option value="">Elegir salón...</option>
-              </select>
-            </label>
-            <span id="estadoBadge" class="pill pill-muted">Sin selección</span>
-          </div>
+        </div>
+        <div id="espaciosList" class="espacios-list">
+          <div class="placeholder">Cargando espacios...</div>
         </div>
       </section>
 
-      <section class="card" id="postsSection" hidden>
-        <div class="card__header">
-          <div>
-            <p class="eyebrow">Blog del salón</p>
-            <h2 id="postsSectionTitle">Posts de información</h2>
-          </div>
-          <button id="btnNuevoPost" class="btn primary">+ Nuevo post</button>
-        </div>
-        <div id="postsList" class="posts-list">
-          <div class="placeholder">Selecciona un salón para ver sus posts.</div>
-        </div>
-      </section>
-
-      <section class="card" id="postEditorCard" hidden>
-        <div class="card__header">
-          <div>
-            <p class="eyebrow">Editor de post</p>
-            <h2 id="postEditorTitle">Nuevo post</h2>
-          </div>
-          <div class="inline-actions">
-            <button id="btnCancelarPost" class="btn ghost">Cancelar</button>
-            <button id="btnGuardarPost" class="btn primary">Guardar post</button>
-          </div>
-        </div>
-        <div class="form">
-          <div class="form-grid">
-            <label>
-              Título
-              <input id="postTitulo" type="text" placeholder="Título del post" />
-            </label>
-            <label>
-              Slug (URL)
-              <input id="postSlug" type="text" placeholder="url-del-post" />
-            </label>
-            <label class="wide">
-              Imagen principal (URL)
-              <input id="postImageUrl" type="text" placeholder="https://..." />
-            </label>
-            <label class="wide">
-              Extracto (resumen corto)
-              <textarea id="postExcerpt" rows="2" placeholder="Resumen corto para listados..."></textarea>
-            </label>
-            <label class="wide">
-              Contenido (Markdown)
-              <textarea id="postContent" rows="12" placeholder="# Título&#10;&#10;Contenido en **Markdown**..."></textarea>
-            </label>
-            <label class="switch">
-              <input type="checkbox" id="postPublicado" />
-              <span>Publicado (visible en el sitio web)</span>
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <section class="card" id="espacioFormCard">
-        <div class="card__header">
-          <div>
-            <p class="eyebrow">Detalle</p>
-            <h2 id="espacioTitulo">Selecciona un salón</h2>
-          </div>
-          <div class="inline-actions">
-            <label class="switch">
-              <input type="checkbox" id="espacioActivo" />
-              <span>Activo</span>
-            </label>
-            <button id="btnGuardarEspacio" class="btn primary">Guardar cambios</button>
-          </div>
-        </div>
-        <div id="espacioEmpty" class="placeholder">Elige un salón para mostrar su información.</div>
-        <div id="espacioForm" class="form" hidden>
-          <div class="form-grid">
-            <label>
-              Nombre
-              <input id="espacioNombre" type="text" placeholder="Nombre del salón" />
-            </label>
-            <label class="wide">
-              Descripción
-              <textarea id="espacioDescripcion" rows="3" placeholder="Descripción breve"></textarea>
-            </label>
-          </div>
-
-          <div class="subcard">
-            <div class="subcard__header">
-              <div>
-                <p class="eyebrow">Disposiciones</p>
-                <h3>Capacidades por disposición</h3>
-              </div>
-              <div class="add-config">
-                <select id="nuevaDisposicion"></select>
-                <input id="nuevaCapacidad" type="number" min="1" placeholder="Capacidad" />
-                <button id="btnAgregarConfig" class="btn secondary">Agregar</button>
-              </div>
-            </div>
-            <div id="configList" class="config-list">
-              <div class="placeholder">Sin disposiciones.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card__header">
-          <div>
-            <p class="eyebrow">Nuevo salón</p>
-            <h2>Crear espacio</h2>
-          </div>
-        </div>
-        <div class="form-grid">
-          <label>
-            Nombre
-            <input id="nuevoNombre" type="text" placeholder="Ej. Salón principal" />
-          </label>
-          <label class="wide">
-            Descripción
-            <textarea id="nuevoDescripcion" rows="2" placeholder="Opcional"></textarea>
-          </label>
-          <label class="switch">
-            <input type="checkbox" id="nuevoActivo" checked />
-            <span>Activo al crear</span>
-          </label>
-        </div>
-        <div class="actions-end">
-          <button id="btnCrearEspacio" class="btn primary">Crear salón</button>
-        </div>
-      </section>
-
-      <section class="card" id="postEditorCard" hidden>
-        <div class="card__header">
-          <div>
-            <p class="eyebrow">Editor de post</p>
-            <h2 id="postEditorTitle">Nuevo post</h2>
-          </div>
-          <div class="inline-actions">
-            <button id="btnCancelarPost" class="btn ghost">Cancelar</button>
-            <button id="btnGuardarPost" class="btn primary">Guardar post</button>
-          </div>
-        </div>
-        <div class="form">
-          <div class="form-grid">
-            <label>
-              Título
-              <input id="postTitulo" type="text" placeholder="Título del post" />
-            </label>
-            <label>
-              Slug (URL)
-              <input id="postSlug" type="text" placeholder="url-del-post" />
-            </label>
-            <label class="wide">
-              Imagen principal (URL)
-              <input id="postImageUrl" type="text" placeholder="https://..." />
-            </label>
-            <label class="wide">
-              Extracto (resumen corto)
-              <textarea id="postExcerpt" rows="2" placeholder="Resumen corto para listados..."></textarea>
-            </label>
-            <label class="wide">
-              Contenido (Markdown)
-              <textarea id="postContent" rows="12" placeholder="# Título&#10;&#10;Contenido en **Markdown**..."></textarea>
-            </label>
-            <label class="switch">
-              <input type="checkbox" id="postPublicado" />
-              <span>Publicado (visible en el sitio web)</span>
-            </label>
-          </div>
-        </div>
-      </section>
     </div>
   </section>
+
+  <!-- Modal de confirmación para eliminar -->
+  <div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-confirm">
+      <div class="modal-confirm__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </div>
+      <h3 class="modal-confirm__title">¿Eliminar espacio?</h3>
+      <p class="modal-confirm__message">Esta acción no se puede deshacer. El espacio <strong id="espacioEliminarNombre"></strong> será eliminado permanentemente con todas sus configuraciones.</p>
+      <div class="modal-confirm__actions">
+        <button id="btnCancelarEliminar" class="btn ghost">Cancelar</button>
+        <button id="btnConfirmarEliminar" class="btn danger">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de publicar cambios -->
+  <div id="publicarModal" class="modal-overlay hidden">
+    <div class="modal-publicar">
+      <h3 class="modal-publicar__title">Publicar Cambios</h3>
+      
+      <div class="modal-publicar__info">
+        <p><strong>✓</strong> Esto actualizará el sitio web público con todos los cambios realizados.</p>
+        <p><strong>⏱️</strong> El proceso toma 2-3 minutos y el sitio no se cae durante la publicación.</p>
+      </div>
+
+      <div id="mensajePublicar" class="modal-publicar__mensaje hidden"></div>
+
+      <div class="modal-publicar__actions">
+        <button id="btnCancelarPublicar" class="btn ghost">Cancelar</button>
+        <button id="btnConfirmarPublicar" class="btn" style="background: #16a34a; color: white;">Publicar Ahora</button>
+      </div>
+    </div>
+  </div>
 </AdminLayout>
 
-<script is:inline type="module" src="/src/pages/admin/espacios.client.ts"></script>
+<script src="/src/_scripts/admin/espacios/lista.ts"></script>
 
 <style>
   .panel { padding: 2rem; max-width: 1200px; margin: 0 auto 4rem; }
@@ -225,11 +92,13 @@ export const prerender = false
   label { font-size: 0.9rem; color: #4b5563; display: flex; flex-direction: column; gap: 0.25rem; }
   select, input, textarea { border: 1px solid #d1d5db; border-radius: 10px; padding: 0.55rem 0.75rem; font: inherit; background: #ffffff; color: #111827; }
   textarea { resize: vertical; }
-  .btn { border: none; border-radius: 10px; padding: 0.65rem 1rem; font-weight: 600; cursor: pointer; font: inherit; transition: transform 0.1s ease, box-shadow 0.2s ease; }
+  .btn { border: none; border-radius: 10px; padding: 0.65rem 1rem; font-weight: 600; cursor: pointer; font: inherit; transition: transform 0.1s ease, box-shadow 0.2s ease; text-decoration: none; display: inline-block; }
   .btn.primary { background: linear-gradient(135deg, #0a4ba5, #2563eb); color: #fff; box-shadow: 0 10px 20px rgba(37,99,235,0.2); }
   .btn.secondary { background: #eef2ff; color: #1d4ed8; border: 1px solid #dbeafe; }
   .btn.ghost { background: #ffffff; color: #0f172a; border: 1px solid #e5e7eb; }
+  .btn.danger { background: linear-gradient(135deg, #dc2626, #b91c1c); color: #fff; box-shadow: 0 10px 20px rgba(220, 38, 38, 0.25); }
   .btn:hover { transform: translateY(-1px); }
+  .btn.danger:hover { background: linear-gradient(135deg, #b91c1c, #991b1b); box-shadow: 0 12px 24px rgba(220, 38, 38, 0.3); transform: translateY(-2px); }
   .pill { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.75rem; border-radius: 999px; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; }
   .pill-active { background: #ecfdf3; color: #166534; border-color: #bbf7d0; }
   .pill-inactive { background: #fef2f2; color: #b91c1c; border-color: #fecdd3; }
@@ -287,49 +156,265 @@ export const prerender = false
   }
   .switch { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; color: #4b5563; }
   .switch input { width: 18px; height: 18px; }
-  .posts-list { display: grid; gap: 0.75rem; margin-top: 0.75rem; }
-  :global(.post-card) { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: start; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 12px; background: #ffffff; box-shadow: 0 6px 16px rgba(15,23,42,0.04); transition: box-shadow 0.2s ease; }
-  :global(.post-card:hover) { box-shadow: 0 10px 24px rgba(15,23,42,0.08); }
-  :global(.post-info) { display: grid; gap: 0.35rem; }
-  :global(.post-title) { font-weight: 700; color: #0f172a; font-size: 1.05rem; margin: 0; }
-  :global(.post-excerpt) { color: #6b7280; font-size: 0.9rem; margin: 0; }
-  :global(.post-meta) { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-  :global(.post-status) { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.5rem; border-radius: 999px; font-weight: 600; font-size: 0.8rem; }
-  :global(.post-status.published) { background: #ecfdf3; color: #166534; border: 1px solid #bbf7d0; }
-  :global(.post-status.draft) { background: #fef2f2; color: #b91c1c; border: 1px solid #fecdd3; }
-  :global(.post-actions) { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-  :global(.post-actions .btn) { 
+  .espacios-list { display: grid; gap: 0.75rem; margin-top: 0.75rem; }
+  
+  :global(.espacio-card) { 
+    display: grid; 
+    grid-template-columns: 120px 1fr auto; 
+    gap: 1rem; 
+    align-items: center; 
+    padding: 1rem; 
+    border: 1px solid #e5e7eb; 
+    border-radius: 12px; 
+    background: #ffffff; 
+    box-shadow: 0 6px 16px rgba(15,23,42,0.04); 
+    transition: box-shadow 0.2s ease; 
+  }
+  
+  :global(.espacio-card:hover) { 
+    box-shadow: 0 10px 24px rgba(15,23,42,0.08); 
+  }
+  
+  :global(.espacio-card img) {
+    width: 120px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  :global(.espacio-info) { 
+    display: grid; 
+    gap: 0.5rem; 
+  }
+  
+  :global(.espacio-tag) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    width: fit-content;
+  }
+  
+  :global(.destacado-tag) {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+  
+  :global(.espacio-nombre) { 
+    font-weight: 700; 
+    color: #0f172a; 
+    font-size: 1.1rem; 
+    margin: 0; 
+  }
+  
+  :global(.espacio-meta) { 
+    display: flex; 
+    gap: 0.75rem; 
+    align-items: center; 
+    flex-wrap: wrap; 
+    color: #6b7280; 
+    font-size: 0.9rem; 
+  }
+  
+  :global(.espacio-actions) { 
+    display: flex; 
+    gap: 0.5rem; 
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  :global(.espacio-actions .btn) { 
     font-size: 0.85rem; 
     padding: 0.5rem 0.85rem; 
     white-space: nowrap;
     font-weight: 600;
   }
-  :global(.post-actions .btn.secondary) {
+  
+  :global(.espacio-actions .btn.secondary) {
     background: #eef2ff;
     color: #1d4ed8;
     border: 1px solid #dbeafe;
     box-shadow: 0 4px 10px rgba(37,99,235,0.1);
   }
-  :global(.post-actions .btn.secondary:hover) {
+  
+  :global(.espacio-actions .btn.secondary:hover) {
     background: #dbeafe;
     box-shadow: 0 6px 14px rgba(37,99,235,0.15);
   }
-  :global(.post-actions .btn.ghost) {
+  
+  :global(.espacio-actions .btn.ghost) {
     background: #ffffff;
     color: #dc2626;
     border: 1px solid #fecaca;
     box-shadow: 0 4px 10px rgba(220,38,38,0.08);
   }
-  :global(.post-actions .btn.ghost:hover) {
+  
+  :global(.espacio-actions .btn.ghost:hover) {
     background: #fef2f2;
     border-color: #dc2626;
     box-shadow: 0 6px 14px rgba(220,38,38,0.12);
   }
+  /* Modal de confirmación */
+  .hidden { display: none !important; }
+  
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+  
+  .modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .modal-confirm {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 440px;
+    width: 90%;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    transform: scale(1);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .modal-overlay.hidden .modal-confirm {
+    transform: scale(0.9);
+  }
+  
+  .modal-confirm__icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-confirm__icon svg {
+    color: #dc2626;
+  }
+  
+  .modal-confirm__title {
+    text-align: center;
+    font-size: 1.5rem;
+    color: #0f172a;
+    margin: 0 0 0.75rem;
+  }
+  
+  .modal-confirm__message {
+    text-align: center;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0 0 2rem;
+  }
+  
+  .modal-confirm__message strong {
+    color: #0f172a;
+    font-weight: 600;
+  }
+  
+  .modal-confirm__actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+  
+  .modal-confirm__actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .modal-publicar {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+
+  .modal-publicar__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #0f172a;
+  }
+
+  .modal-publicar__info {
+    background: #f0fdf4;
+    border-left: 4px solid #16a34a;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+  }
+
+  .modal-publicar__info p {
+    margin: 0 0 0.5rem;
+    color: #15803d;
+    font-size: 0.9rem;
+  }
+
+  .modal-publicar__info p:last-child {
+    margin: 0;
+  }
+
+  .modal-publicar__mensaje {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .modal-publicar__mensaje.hidden {
+    display: none;
+  }
+
+  .modal-publicar__mensaje.exito {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .modal-publicar__mensaje.error {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .modal-publicar__mensaje.info {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .modal-publicar__actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .modal-publicar__actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
   @media (max-width: 900px) {
     .panel__header { flex-direction: column; }
     .card__header { flex-direction: column; align-items: flex-start; }
     .config-card { grid-template-columns: 1fr; }
     .inline-actions { width: 100%; justify-content: space-between; }
-    :global(.post-card) { grid-template-columns: 1fr; }
+    :global(.espacio-card) { grid-template-columns: 1fr; }
+    :global(.espacio-card img) { width: 100%; height: 200px; }
   }
 </style>

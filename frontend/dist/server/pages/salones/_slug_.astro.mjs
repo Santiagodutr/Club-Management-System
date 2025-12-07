@@ -1,6 +1,7 @@
 import { c as createComponent, a as createAstro, r as renderTemplate, g as defineScriptVars, d as renderComponent, m as maybeRenderHead, b as addAttribute, u as unescapeHTML } from '../../chunks/astro/server_-MRgVDm6.mjs';
 import 'kleur/colors';
-import { $ as $$BaseLayout, a as $$Navbar } from '../../chunks/BaseLayout_BIRoUIkO.mjs';
+import { $ as $$BaseLayout, a as $$Navbar } from '../../chunks/BaseLayout_CNFYT2Sv.mjs';
+import { marked } from 'marked';
 /* empty css                                     */
 export { renderers } from '../../renderers.mjs';
 
@@ -9,6 +10,7 @@ var __defProp = Object.defineProperty;
 var __template = (cooked, raw) => __freeze(__defProp(cooked, "raw", { value: __freeze(cooked.slice()) }));
 var _a;
 const $$Astro = createAstro();
+const prerender = true;
 async function getStaticPaths() {
   const API_URL = "http://localhost:3333";
   try {
@@ -41,7 +43,7 @@ const $$slug = createComponent(async ($$result, $$props, $$slots) => {
     slug: espacio.slug,
     subtitulo: espacio.subtitulo || "",
     descripcionCorta: espacio.descripcion || "",
-    descripcionCompleta: espacio.descripcion_completa || "",
+    descripcionCompleta: espacio.descripcion_completa ? marked.parse(espacio.descripcion_completa) : "",
     caracteristicas: espacio.caracteristicas || [],
     serviciosIncluidos: espacio.servicios_incluidos || [],
     capacidad: {
@@ -74,6 +76,7 @@ const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: $$slug,
   file: $$file,
   getStaticPaths,
+  prerender,
   url: $$url
 }, Symbol.toStringTag, { value: 'Module' }));
 

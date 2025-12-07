@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Configuración
-const API_URL = 'http://localhost:3333'
-const SUPABASE_URL = 'https://bnoftsxwpxzmwjrmxoxc.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_YLeoJK1Kxf_Xm0nAHlmO8Q_2cHXCub1'
+const API_URL = import.meta.env.PUBLIC_BACKEND_URL
+const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL
+const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY
 const BUCKET_NAME = 'eventos_imagenes'
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)

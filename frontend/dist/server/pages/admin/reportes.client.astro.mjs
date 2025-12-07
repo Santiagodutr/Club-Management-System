@@ -1,4 +1,4 @@
-import { c as cotizacionesAPI, a as supabase } from '../../chunks/supabase_DxPdPIs3.mjs';
+import { c as cotizacionesAPI, a as supabase } from '../../chunks/supabase_CYgU43WC.mjs';
 export { renderers } from '../../renderers.mjs';
 
 function qs(sel) {
@@ -116,12 +116,13 @@ async function main() {
   const calendarGrid = qs("#calendarGrid");
   const donutChart = qs("#donutChart");
   const donutLegend = qs("#donutLegend");
-  const btnRefrescar = qs("#btnRefrescar");
+  const estadoDonutSelect = qs("#estadoDonutSelect");
   let cotizaciones = [];
   let vista = "dia";
   let year = (/* @__PURE__ */ new Date()).getFullYear();
   let month = (/* @__PURE__ */ new Date()).getMonth() + 1;
   let yearsDisponibles = [];
+  let estadoDonutFiltro = "todas";
   function updateSelectors() {
     if (!yearSelect || !monthSelect || !monthWrap || !yearWrap) return;
     if (!yearsDisponibles.length) yearsDisponibles = [year];
@@ -199,7 +200,11 @@ async function main() {
   }
   function buildSalonShare() {
     const acc = {};
-    filteredData().forEach((c) => {
+    let dataToProcess = filteredData();
+    if (estadoDonutFiltro !== "todas") {
+      dataToProcess = dataToProcess.filter((c) => statusKey(c.estado) === estadoDonutFiltro);
+    }
+    dataToProcess.forEach((c) => {
       const name = c.evento?.salon || "Sin salón";
       acc[name] = (acc[name] || 0) + 1;
     });
@@ -248,18 +253,19 @@ async function main() {
   vistaSelect?.addEventListener("change", (e) => {
     vista = e.target.value || "dia";
     updateSelectors();
-    render();
+    loadData();
   });
   monthSelect?.addEventListener("change", (e) => {
     month = Number(e.target.value) || month;
-    render();
+    loadData();
   });
   yearSelect?.addEventListener("change", (e) => {
     year = Number(e.target.value) || year;
-    render();
-  });
-  btnRefrescar?.addEventListener("click", () => {
     loadData();
+  });
+  estadoDonutSelect?.addEventListener("change", (e) => {
+    estadoDonutFiltro = e.target.value || "todas";
+    render();
   });
   await ensureSession();
   await loadData();

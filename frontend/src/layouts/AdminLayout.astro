@@ -155,20 +155,25 @@ const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.pro
     <script>
       import { checkAuthOnLoad, setupGlobalAuthInterceptor } from '../lib/auth-guard'
 
-      // Inicializar protección de autenticación
-      checkAuthOnLoad()
-      setupGlobalAuthInterceptor()
+      // Esperar a que el DOM esté listo antes de verificar auth
+      document.addEventListener('DOMContentLoaded', () => {
+        // Inicializar protección de autenticación
+        console.log('[AdminLayout] Inicializando auth guard...')
+        checkAuthOnLoad()
+        setupGlobalAuthInterceptor()
 
-      // Logout functionality
-      const logoutBtn = document.getElementById('logoutBtn');
-      logoutBtn?.addEventListener('click', () => {
-        // Clear all authentication data
-        localStorage.removeItem('adminAuth');
-        sessionStorage.clear();
-        
-        // Redirect to login
-        window.location.href = '/admin/login';
-      });
+        // Logout functionality
+        const logoutBtn = document.getElementById('logoutBtn');
+        logoutBtn?.addEventListener('click', () => {
+          console.log('[AdminLayout] Cerrando sesión...')
+          // Clear all authentication data
+          localStorage.removeItem('adminAuth');
+          sessionStorage.clear();
+          
+          // Redirect to login
+          window.location.href = '/admin/login';
+        });
+      })
     </script>
   </body>
 </html>

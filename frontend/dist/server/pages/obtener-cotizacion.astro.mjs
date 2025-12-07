@@ -1,9 +1,86 @@
 import { c as createComponent, d as renderComponent, r as renderTemplate, b as addAttribute, m as maybeRenderHead } from '../chunks/astro/server_-MRgVDm6.mjs';
 import 'kleur/colors';
-import { $ as $$BaseLayout } from '../chunks/BaseLayout_BIRoUIkO.mjs';
-import { p as presidencialImg, k as kioskoImg, t as terrazaImg, e as empresarialImg, b as barImg, m as millanuraImg } from '../chunks/presidencial_C5RCjFQ1.mjs';
+import { $ as $$BaseLayout } from '../chunks/BaseLayout_CNFYT2Sv.mjs';
 /* empty css                                              */
 export { renderers } from '../renderers.mjs';
+
+const millanuraImg = new Proxy({"src":"/_astro/millanura.BbpMHCtF.jpg","width":1600,"height":900,"format":"jpg"}, {
+						get(target, name, receiver) {
+							if (name === 'clone') {
+								return structuredClone(target);
+							}
+							if (name === 'fsPath') {
+								return "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/assets/millanura.jpg";
+							}
+							
+							return target[name];
+						}
+					});
+
+const barImg = new Proxy({"src":"/_astro/bar.CTVT5oWx.jpg","width":1086,"height":1448,"format":"jpg"}, {
+						get(target, name, receiver) {
+							if (name === 'clone') {
+								return structuredClone(target);
+							}
+							if (name === 'fsPath') {
+								return "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/assets/bar.jpg";
+							}
+							
+							return target[name];
+						}
+					});
+
+const empresarialImg = new Proxy({"src":"/_astro/empresarial.02G5Lnxl.jpg","width":1200,"height":1600,"format":"jpg"}, {
+						get(target, name, receiver) {
+							if (name === 'clone') {
+								return structuredClone(target);
+							}
+							if (name === 'fsPath') {
+								return "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/assets/empresarial.jpg";
+							}
+							
+							return target[name];
+						}
+					});
+
+const terrazaImg = new Proxy({"src":"/_astro/terraza.C75resU0.jpg","width":1600,"height":1200,"format":"jpg"}, {
+						get(target, name, receiver) {
+							if (name === 'clone') {
+								return structuredClone(target);
+							}
+							if (name === 'fsPath') {
+								return "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/assets/terraza.jpg";
+							}
+							
+							return target[name];
+						}
+					});
+
+const kioskoImg = new Proxy({"src":"/_astro/kiosko.pcdOycul.jpg","width":2048,"height":2048,"format":"jpg"}, {
+						get(target, name, receiver) {
+							if (name === 'clone') {
+								return structuredClone(target);
+							}
+							if (name === 'fsPath') {
+								return "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/assets/kiosko.jpg";
+							}
+							
+							return target[name];
+						}
+					});
+
+const presidencialImg = new Proxy({"src":"/_astro/presidencial.B2VXJPTj.jpg","width":1200,"height":1600,"format":"jpg"}, {
+						get(target, name, receiver) {
+							if (name === 'clone') {
+								return structuredClone(target);
+							}
+							if (name === 'fsPath') {
+								return "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/assets/presidencial.jpg";
+							}
+							
+							return target[name];
+						}
+					});
 
 var __freeze = Object.freeze;
 var __defProp = Object.defineProperty;
@@ -1474,10 +1551,10 @@ const $$file = "C:/Users/SSierra/Documents/DesarrolloClubElMeta/frontend/src/pag
 const $$url = "/obtener-cotizacion";
 
 const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
-  __proto__: null,
-  default: $$ObtenerCotizacion,
-  file: $$file,
-  url: $$url
+	__proto__: null,
+	default: $$ObtenerCotizacion,
+	file: $$file,
+	url: $$url
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const page = () => _page;
