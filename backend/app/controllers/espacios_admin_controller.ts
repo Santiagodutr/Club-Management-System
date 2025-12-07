@@ -24,6 +24,8 @@ export default class EspaciosAdminController {
           nombre: espacio.nombre,
           descripcion: espacio.descripcion,
           activo: espacio.activo,
+          tiempoMontajeHoras: espacio.tiempoMontajeHoras || 2,
+          tiempoDesmontajeHoras: espacio.tiempoDesmontajeHoras || 2,
           configuraciones: espacio.configuraciones.map(config => ({
             id: config.id,
             disposicionId: config.disposicionId,
@@ -135,6 +137,8 @@ export default class EspaciosAdminController {
         nombre: vine.string().trim().minLength(3).maxLength(100).optional(),
         descripcion: vine.string().trim().optional(),
         activo: vine.boolean().optional(),
+        tiempoMontajeHoras: vine.number().min(0).max(12).optional(),
+        tiempoDesmontajeHoras: vine.number().min(0).max(12).optional(),
       })
 
       const data = await vine.validate({ schema, data: request.all() })
@@ -142,6 +146,8 @@ export default class EspaciosAdminController {
       if (data.nombre !== undefined) espacio.nombre = data.nombre
       if (data.descripcion !== undefined) espacio.descripcion = data.descripcion || null
       if (data.activo !== undefined) espacio.activo = data.activo
+      if (data.tiempoMontajeHoras !== undefined) espacio.tiempoMontajeHoras = data.tiempoMontajeHoras
+      if (data.tiempoDesmontajeHoras !== undefined) espacio.tiempoDesmontajeHoras = data.tiempoDesmontajeHoras
 
       await espacio.save()
 
@@ -153,6 +159,8 @@ export default class EspaciosAdminController {
           nombre: espacio.nombre,
           descripcion: espacio.descripcion,
           activo: espacio.activo,
+          tiempoMontajeHoras: espacio.tiempoMontajeHoras,
+          tiempoDesmontajeHoras: espacio.tiempoDesmontajeHoras,
         },
       })
     } catch (error: any) {

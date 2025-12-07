@@ -6,6 +6,7 @@ import ServicioAdicional from '#models/servicio_adicional'
 import Tarifa from '#models/tarifa'
 import TarifaHoraAdicional from '#models/tarifa_hora_adicional'
 import ConfiguracionEspacio from '#models/configuracion_espacio'
+import Espacio from '#models/espacio'
 
 export interface SolicitudCotizacion {
   espacioId: number
@@ -65,6 +66,20 @@ export class CotizacionService {
 
       console.log('Validando disponibilidad:', { espacioId, fecha, horaInicio, duracion, tipoEvento, diaSemana })
 
+      // Obtener configuración de tiempos de montaje/desmontaje del espacio
+      const espacio = await Espacio.find(espacioId)
+      if (!espacio) {
+        return {
+          disponible: false,
+          mensaje: 'Espacio no encontrado',
+        }
+      }
+
+      const tiempoMontaje = espacio.tiempoMontajeHoras || 2
+      const tiempoDesmontaje = espacio.tiempoDesmontajeHoras || 2
+
+      console.log('Tiempos de montaje/desmontaje:', { tiempoMontaje, tiempoDesmontaje })
+
       // 1. Validar horario de operación
       const horario = await HorarioOperacion.findBy('dia_semana', diaSemana)
       if (!horario || !horario.estaActivo) {
@@ -95,11 +110,23 @@ export class CotizacionService {
         minutosFin = minutosFin - 1440
       }
 
-      // 3. Validar horarios operativos
-      if (minutosInicio < minutosOpInicio) {
+      // Calcular tiempos con montaje/desmontaje
+      const minutosInicioConMontaje = minutosInicio - (tiempoMontaje * 60)
+      const minutosFinConDesmontaje = minutosFin + (tiempoDesmontaje * 60)
+
+      console.log('Horarios calculados:', {
+        horaEventoInicio: horaInicio,
+        horaEventoFin: this.minutosAHora(minutosFin),
+        horaBloqueadoDesde: this.minutosAHora(minutosInicioConMontaje),
+        horaBloqueadoHasta: this.minutosAHora(minutosFinConDesmontaje),
+      })
+
+      // 3. Validar que haya tiempo suficiente para montaje
+      if (minutosInicioConMontaje < minutosOpInicio) {
+        const horaMinima = this.minutosAHora(minutosOpInicio + (tiempoMontaje * 60)).split(':').slice(0, 2).join(':')
         return {
           disponible: false,
-          mensaje: `El evento no puede empezar a las ${horaInicio}, el club abre a las ${horario.horaInicio}`,
+          mensaje: `El evento requiere ${tiempoMontaje}h de montaje. El club abre a las ${horario.horaInicio}, puedes empezar desde las ${horaMinima}`,
         }
       }
 
@@ -119,12 +146,14 @@ export class CotizacionService {
         }
       }
 
-      // 4. Validar hora de fin
-      if (!horarioPasaMedianoche && !eventoFinalPasaMedianoche && minutosFin > minutosOpFin) {
+      // 4. Validar que haya tiempo suficiente para desmontaje
+      const minutosFinConDesmontajeAjustado = minutosFinConDesmontaje >= 1440 ? minutosFinConDesmontaje - 1440 : minutosFinConDesmontaje
+      if (!horarioPasaMedianoche && !eventoFinalPasaMedianoche && minutosFinConDesmontajeAjustado > minutosOpFin) {
         const horaFinFormato = this.minutosAHora(minutosFin).split(':').slice(0, 2).join(':')
+        const horaFinDesmontaje = this.minutosAHora(minutosFinConDesmontajeAjustado).split(':').slice(0, 2).join(':')
         return {
           disponible: false,
-          mensaje: `El evento terminaría a las ${horaFinFormato}, pero el club cierra a las ${horario.horaFin}`,
+          mensaje: `El evento termina a las ${horaFinFormato} + ${tiempoDesmontaje}h desmontaje (${horaFinDesmontaje}), pero el club cierra a las ${horario.horaFin}`,
         }
       }
 
@@ -148,19 +177,7 @@ export class CotizacionService {
         }
       }
 
-      // 5. Validar tiempo de montaje para empresariales
-      if (tipoEvento === 'empresarial') {
-        const minutosMontajeInicio = minutosInicio - 120
-        if (minutosMontajeInicio < 0 || minutosMontajeInicio < minutosOpInicio) {
-          const horaParaMontaje = this.minutosAHora(minutosOpInicio + 120).split(':').slice(0, 2).join(':')
-          return {
-            disponible: false,
-            mensaje: `Para eventos empresariales necesitamos 2 horas de montaje. Puedes empezar desde las ${horaParaMontaje}`,
-          }
-        }
-      }
-
-      // 6. Validar bloqueos (OPTIMIZADO: una sola query)
+      // 5. Validar bloqueos existentes considerando montaje/desmontaje
       const bloqueos = await BloqueoCalendario.query()
         .where('espacio_id', espacioId)
         .where('fecha', fecha)
@@ -169,11 +186,15 @@ export class CotizacionService {
         for (const bloqueo of bloqueos) {
           const minBloqueoInicio = this.horaAMinutos(bloqueo.horaInicio)
           const minBloqueoFin = this.horaAMinutos(bloqueo.horaFin)
-          const seSuperpone = !(minutosFin <= minBloqueoInicio || minutosInicio >= minBloqueoFin)
+          
+          // Validar superposición incluyendo tiempos de montaje/desmontaje
+          const seSuperpone = !(minutosFinConDesmontaje <= minBloqueoInicio || minutosInicioConMontaje >= minBloqueoFin)
           if (seSuperpone) {
+            const horaBloqueadoDesde = this.minutosAHora(minBloqueoInicio).split(':').slice(0, 2).join(':')
+            const horaBloqueadoHasta = this.minutosAHora(minBloqueoFin).split(':').slice(0, 2).join(':')
             return {
               disponible: false,
-              mensaje: `Ese horario no está disponible: ${bloqueo.razon || 'El espacio está reservado'}`,
+              mensaje: `Ese horario no está disponible (${horaBloqueadoDesde}-${horaBloqueadoHasta}): ${bloqueo.razon || 'El espacio está reservado'}. Recuerda que se requieren ${tiempoMontaje}h montaje y ${tiempoDesmontaje}h desmontaje`,
             }
           }
         }
@@ -186,11 +207,13 @@ export class CotizacionService {
         disponible: true,
         horaInicio,
         horaFin: horaFinFormato,
+        tiempoMontaje,
+        tiempoDesmontaje,
       })
       
       return {
         disponible: true,
-        mensaje: `Disponible de ${horaInicio} a ${horaFinFormato}${eventoFinalPasaMedianoche ? ' (día siguiente)' : ''}`,
+        mensaje: `Disponible de ${horaInicio} a ${horaFinFormato}${eventoFinalPasaMedianoche ? ' (día siguiente)' : ''} (incluye ${tiempoMontaje}h montaje + ${tiempoDesmontaje}h desmontaje)`,
         horaFin: horaFinFormato,
       }
     } catch (error) {
@@ -454,20 +477,34 @@ export class CotizacionService {
   static async confirmarCotizacion(cotizacionId: number): Promise<void> {
     const cotizacion = await Cotizacion.findOrFail(cotizacionId)
 
+    // Obtener tiempos de montaje/desmontaje del espacio
+    const espacio = await Espacio.findOrFail(cotizacion.espacioId!)
+    const tiempoMontaje = espacio.tiempoMontajeHoras || 2
+    const tiempoDesmontaje = espacio.tiempoDesmontajeHoras || 2
+
+    // Calcular hora de inicio con montaje y hora de fin con desmontaje
+    const minutosInicio = this.horaAMinutos(cotizacion.hora)
+    const minutosInicioConMontaje = minutosInicio - (tiempoMontaje * 60)
+    const minutosFin = minutosInicio + (cotizacion.duracion * 60)
+    const minutosFinConDesmontaje = minutosFin + (tiempoDesmontaje * 60)
+
+    const horaInicioBloqueo = this.minutosAHora(minutosInicioConMontaje)
+    const horaFinBloqueo = this.minutosAHora(minutosFinConDesmontaje)
+
     // Actualizar estado
     cotizacion.estado = 'aceptada'
     cotizacion.fechaConfirmacion = DateTime.now()
     cotizacion.estadoPago = 'abono_pendiente'
     await cotizacion.save()
 
-    // Bloquear fecha en calendario con referencia a cotización (CASCADE DELETE)
+    // Bloquear fecha en calendario con tiempos de montaje/desmontaje
     await BloqueoCalendario.create({
       espacioId: cotizacion.espacioId!,
       cotizacionId: cotizacion.id,
       fecha: cotizacion.fecha,
-      horaInicio: cotizacion.hora,
-      horaFin: this.calcularHoraFin(cotizacion.hora, cotizacion.duracion),
-      razon: `Evento confirmado: ${cotizacion.nombre}`,
+      horaInicio: horaInicioBloqueo,
+      horaFin: horaFinBloqueo,
+      razon: `Evento: ${cotizacion.nombre} (${cotizacion.hora}-${this.calcularHoraFin(cotizacion.hora, cotizacion.duracion).split(':').slice(0, 2).join(':')} + ${tiempoMontaje}h montaje + ${tiempoDesmontaje}h desmontaje)`,
       tipoBloqueo: 'reserva_confirmada',
     })
   }
