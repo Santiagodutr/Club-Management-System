@@ -480,3 +480,100 @@ export const salonPostsAPI = {
     })
   },
 }
+
+// ============================================================
+// DATOS DE EMPRESA API
+// ============================================================
+
+export interface DatosEmpresa {
+  key: string
+  nit: string
+  bancolombia_cc: string | null
+  davivienda_cc: string | null
+  davivienda_ca: string | null
+  direccion: string | null
+  lat: string | null
+  lng: string | null
+  email_gerente: string | null
+  whatsapp_gerente: string | null
+  created_at: string
+  updated_at: string
+}
+
+export const datosEmpresaAPI = {
+  // Obtener datos de la empresa
+  obtener: async (): Promise<{ success: boolean; data: DatosEmpresa }> => {
+    return fetchAPI('/api/datos-empresa')
+  },
+
+  // Actualizar datos de la empresa
+  actualizar: async (data: Partial<DatosEmpresa>): Promise<{ success: boolean; data: DatosEmpresa; message: string }> => {
+    return fetchAPI('/api/datos-empresa', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  },
+}
+
+// ============================================================
+// SERVICIOS ADICIONALES API
+// ============================================================
+
+export interface ServicioAdicional {
+  id: number
+  nombre: string
+  descripcion: string | null
+  configuracion_espacio_id: number | null
+  tipo_cliente: 'socio' | 'particular'
+  precio: string | number
+  activo: boolean
+  created_at: string
+  updated_at: string
+}
+
+export const serviciosAdicionalesAPI = {
+  // Listar servicios adicionales con filtros opcionales
+  listar: async (filtros?: { tipo_cliente?: string; activo?: string }): Promise<{ success: boolean; data: ServicioAdicional[] }> => {
+    const params = new URLSearchParams()
+    if (filtros?.tipo_cliente) params.append('tipo_cliente', filtros.tipo_cliente)
+    if (filtros?.activo !== undefined && filtros?.activo !== '') params.append('activo', filtros.activo)
+    
+    const query = params.toString() ? `?${params.toString()}` : ''
+    return fetchAPI(`/api/servicios-adicionales${query}`)
+  },
+
+  // Obtener un servicio por ID
+  obtener: async (id: number): Promise<{ success: boolean; data: ServicioAdicional }> => {
+    return fetchAPI(`/api/servicios-adicionales/${id}`)
+  },
+
+  // Crear nuevo servicio
+  crear: async (data: Partial<ServicioAdicional>): Promise<{ success: boolean; data: ServicioAdicional; message: string }> => {
+    return fetchAPI('/api/servicios-adicionales', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  // Actualizar servicio existente
+  actualizar: async (id: number, data: Partial<ServicioAdicional>): Promise<{ success: boolean; data: ServicioAdicional; message: string }> => {
+    return fetchAPI(`/api/servicios-adicionales/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  },
+
+  // Eliminar servicio
+  eliminar: async (id: number): Promise<{ success: boolean; message: string }> => {
+    return fetchAPI(`/api/servicios-adicionales/${id}`, {
+      method: 'DELETE',
+    })
+  },
+
+  // Toggle estado activo/inactivo
+  toggle: async (id: number): Promise<{ success: boolean; data: ServicioAdicional; message: string }> => {
+    return fetchAPI(`/api/servicios-adicionales/${id}/toggle`, {
+      method: 'PATCH',
+    })
+  },
+}
