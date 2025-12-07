@@ -87,9 +87,6 @@ function renderServicios() {
         ? `<div class="servicio-descripcion">${servicio.descripcion}</div>` 
         : '<div class="servicio-descripcion muted">Sin descripción</div>'
 
-      const toggleText = servicio.activo ? 'Desactivar' : 'Activar'
-      const toggleClass = servicio.activo ? 'toggle-on' : 'toggle-off'
-
       return `
         <tr class="${!servicio.activo ? 'inactivo' : ''}">
           <td>
@@ -103,9 +100,6 @@ function renderServicios() {
             <div class="servicio-actions">
               <button class="btn-action edit" onclick="window.editarServicio(${servicio.id})">
                 Editar
-              </button>
-              <button class="btn-action ${toggleClass}" onclick="window.toggleServicio(${servicio.id})">
-                ${toggleText}
               </button>
               <button class="btn-action delete" onclick="window.abrirModalEliminar(${servicio.id})">
                 Eliminar
@@ -198,20 +192,7 @@ async function guardarServicio(e: Event) {
   }
 }
 
-async function toggleServicio(id: number) {
-  const servicio = servicios.find(s => s.id === id)
-  if (!servicio) return
 
-  try {
-    await serviciosAdicionalesAPI.toggle(id)
-    const nuevoEstado = servicio.activo ? 'desactivado' : 'activado'
-    mostrarExito(`Servicio ${nuevoEstado} correctamente`)
-    await cargarServicios()
-  } catch (error) {
-    console.error('Error al cambiar estado:', error)
-    mostrarError('Error al cambiar el estado del servicio')
-  }
-}
 
 function abrirModalEliminar(id: number) {
   const servicio = servicios.find(s => s.id === id)
@@ -294,13 +275,11 @@ modalEliminar.addEventListener('click', (e) => {
 declare global {
   interface Window {
     editarServicio: (id: number) => void
-    toggleServicio: (id: number) => void
     abrirModalEliminar: (id: number) => void
   }
 }
 
 window.editarServicio = abrirModalEditar
-window.toggleServicio = toggleServicio
 window.abrirModalEliminar = abrirModalEliminar
 
 // Inicializar
