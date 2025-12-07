@@ -4,7 +4,7 @@ import faviconIco from '../assets/logo_corpmeta.ico'
 
 interface Props {
   title?: string
-  active?: 'reservas' | 'espacios' | 'reportes' | 'login' | 'eventos' | 'datos-empresa' | 'parametros'
+  active?: 'reservas' | 'espacios' | 'reportes' | 'login' | 'eventos' | 'datos-empresa' | 'parametros' | 'socios'
 }
 
 const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.props as Props
@@ -141,6 +141,7 @@ const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.pro
         <nav>
           <a class={`nav-item ${active === 'reservas' ? 'active' : ''}`} href="/admin/reservas">Reservas</a>
           <a class={`nav-item ${active === 'espacios' ? 'active' : ''}`} href="/admin/espacios">Espacios</a>
+          <a class={`nav-item ${active === 'socios' ? 'active' : ''}`} href="/admin/socios">Socios</a>
           <a class={`nav-item ${active === 'eventos' ? 'active' : ''}`} href="/admin/eventos">Eventos</a>
           <a class={`nav-item ${active === 'reportes' ? 'active' : ''}`} href="/admin/reportes">Reportes</a>
           <a class={`nav-item ${active === 'parametros' ? 'active' : ''}`} href="/admin/parametros-adicionales">Parámetros Adicionales</a>
