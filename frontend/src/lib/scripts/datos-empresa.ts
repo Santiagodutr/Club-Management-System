@@ -1,6 +1,9 @@
 import { supabase } from '../../lib/supabase'
 import { datosEmpresaAPI, type DatosEmpresa } from '../../services/api'
 
+let modoEdicion = false
+let datosOriginales: any = null
+
 // Verificar sesión
 async function ensureSession() {
   const { data } = await supabase.auth.getSession()
@@ -31,30 +34,121 @@ function showMessage(type: 'success' | 'error', message?: string) {
   }
 }
 
-// Helper para marcar campos como modificados
-function markAsChanged(element: HTMLInputElement | HTMLTextAreaElement) {
-  element.classList.add('changed')
-  const card = element.closest('.card')
-  if (card) {
-    card.classList.add('changed')
+function activarModoEdicion() {
+  modoEdicion = true
+  
+  // Ocultar displays y mostrar inputs
+  document.querySelectorAll('.field-display').forEach(el => {
+    ;(el as HTMLElement).style.display = 'none'
+  })
+  
+  document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('#nit, #bancolombiaCc, #daviviendaCc, #daviviendaCa, #direccion, #emailGerente, #whatsappGerente').forEach(el => {
+    el.style.display = 'block'
+    el.disabled = false
+  })
+  
+  const whatsappInput = document.getElementById('whatsappGerenteInput') as HTMLElement
+  if (whatsappInput) {
+    whatsappInput.style.display = 'flex'
   }
   
-  const btnGuardar = document.getElementById('btnGuardarCambios')
-  if (btnGuardar) {
-    btnGuardar.style.display = 'inline-block'
+  // Mostrar botones de guardar y cancelar, ocultar editar
+  const btnEditar = document.getElementById('btnEditar') as HTMLButtonElement
+  const btnGuardar = document.getElementById('btnGuardarCambios') as HTMLButtonElement
+  const btnCancelar = document.getElementById('btnCancelar') as HTMLButtonElement
+  
+  if (btnEditar) btnEditar.style.display = 'none'
+  if (btnGuardar) btnGuardar.style.display = 'inline-block'
+  if (btnCancelar) btnCancelar.style.display = 'inline-block'
+}
+
+function desactivarModoEdicion() {
+  modoEdicion = false
+  
+  // Mostrar displays y ocultar inputs
+  actualizarDisplays()
+  
+  document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('#nit, #bancolombiaCc, #daviviendaCc, #daviviendaCa, #direccion, #emailGerente, #whatsappGerente').forEach(el => {
+    el.style.display = 'none'
+    el.disabled = true
+  })
+  
+  const whatsappInput = document.getElementById('whatsappGerenteInput') as HTMLElement
+  if (whatsappInput) {
+    whatsappInput.style.display = 'none'
+  }
+  
+  // Mostrar botón editar, ocultar guardar y cancelar
+  const btnEditar = document.getElementById('btnEditar') as HTMLButtonElement
+  const btnGuardar = document.getElementById('btnGuardarCambios') as HTMLButtonElement
+  const btnCancelar = document.getElementById('btnCancelar') as HTMLButtonElement
+  
+  if (btnEditar) btnEditar.style.display = 'inline-block'
+  if (btnGuardar) btnGuardar.style.display = 'none'
+  if (btnCancelar) btnCancelar.style.display = 'none'
+}
+
+function actualizarDisplays() {
+  const fields = [
+    { input: 'nit', display: 'nitDisplay' },
+    { input: 'bancolombiaCc', display: 'bancolombiaCcDisplay' },
+    { input: 'daviviendaCc', display: 'daviviendaCcDisplay' },
+    { input: 'daviviendaCa', display: 'daviviendaCaDisplay' },
+    { input: 'direccion', display: 'direccionDisplay' },
+    { input: 'emailGerente', display: 'emailGerenteDisplay' },
+  ]
+  
+  fields.forEach(({ input, display }) => {
+    const inputEl = document.getElementById(input) as HTMLInputElement | HTMLTextAreaElement
+    const displayEl = document.getElementById(display) as HTMLElement
+    
+    if (inputEl && displayEl) {
+      displayEl.textContent = inputEl.value || ''
+      displayEl.style.display = 'flex'
+    }
+  })
+  
+  // WhatsApp especial
+  const whatsappInput = document.getElementById('whatsappGerente') as HTMLInputElement
+  const whatsappDisplay = document.getElementById('whatsappGerenteDisplay') as HTMLElement
+  
+  if (whatsappInput && whatsappDisplay) {
+    const valor = whatsappInput.value
+    whatsappDisplay.textContent = valor ? `+57 ${valor}` : ''
+    whatsappDisplay.style.display = 'flex'
   }
 }
 
-// Helper para limpiar marcas de cambios
-function clearChangedMarks() {
-  document.querySelectorAll('.changed').forEach(el => {
-    el.classList.remove('changed')
-  })
-  
-  const btnGuardar = document.getElementById('btnGuardarCambios')
-  if (btnGuardar) {
-    btnGuardar.style.display = 'none'
+function cancelarEdicion() {
+  if (datosOriginales) {
+    cargarDatosEnFormulario(datosOriginales)
   }
+  desactivarModoEdicion()
+}
+
+function cargarDatosEnFormulario(datos: any) {
+  const nit = document.getElementById('nit') as HTMLInputElement
+  const bancolombiaCc = document.getElementById('bancolombiaCc') as HTMLInputElement
+  const daviviendaCc = document.getElementById('daviviendaCc') as HTMLInputElement
+  const daviviendaCa = document.getElementById('daviviendaCa') as HTMLInputElement
+  const direccion = document.getElementById('direccion') as HTMLTextAreaElement
+  const emailGerente = document.getElementById('emailGerente') as HTMLInputElement
+  const whatsappGerente = document.getElementById('whatsappGerente') as HTMLInputElement
+  
+  if (nit) nit.value = datos.nit || ''
+  if (bancolombiaCc) bancolombiaCc.value = datos.bancolombia_cc || ''
+  if (daviviendaCc) daviviendaCc.value = datos.davivienda_cc || ''
+  if (daviviendaCa) daviviendaCa.value = datos.davivienda_ca || ''
+  if (direccion) direccion.value = datos.direccion || ''
+  if (emailGerente) emailGerente.value = datos.emailGerente || ''
+  
+  // Para WhatsApp, mostrar solo después del código de país 57
+  if (whatsappGerente) {
+    const whatsapp = datos.whatsappGerente || ''
+    whatsappGerente.value = whatsapp.startsWith('57') ? whatsapp.substring(2) : whatsapp
+  }
+  
+  actualizarDisplays()
 }
 
 // Cargar datos de la empresa
@@ -63,41 +157,8 @@ async function cargarDatos() {
     const response = await datosEmpresaAPI.obtener()
     
     if (response.success && response.data) {
-      const datos = response.data
-      
-      // Llenar los campos del formulario
-      const nit = document.getElementById('nit') as HTMLInputElement
-      const bancolombiaCc = document.getElementById('bancolombiaCc') as HTMLInputElement
-      const daviviendaCc = document.getElementById('daviviendaCc') as HTMLInputElement
-      const daviviendaCa = document.getElementById('daviviendaCa') as HTMLInputElement
-      const direccion = document.getElementById('direccion') as HTMLTextAreaElement
-      const emailGerente = document.getElementById('emailGerente') as HTMLInputElement
-      const whatsappGerente = document.getElementById('whatsappGerente') as HTMLInputElement
-      
-      if (nit) nit.value = datos.nit || ''
-      if (bancolombiaCc) bancolombiaCc.value = datos.bancolombia_cc || ''
-      if (daviviendaCc) daviviendaCc.value = datos.davivienda_cc || ''
-      if (daviviendaCa) daviviendaCa.value = datos.davivienda_ca || ''
-      if (direccion) direccion.value = datos.direccion || ''
-      if (emailGerente) emailGerente.value = datos.emailGerente || ''
-      // Para WhatsApp, mostrar solo después del código de país 57
-      if (whatsappGerente) {
-        const whatsapp = datos.whatsappGerente || ''
-        whatsappGerente.value = whatsapp.startsWith('57') ? whatsapp.substring(2) : whatsapp
-      }
-      
-      // Guardar valores originales para detectar cambios
-      if (nit) nit.dataset.original = nit.value
-      if (bancolombiaCc) bancolombiaCc.dataset.original = bancolombiaCc.value
-      if (daviviendaCc) daviviendaCc.dataset.original = daviviendaCc.value
-      if (daviviendaCa) daviviendaCa.dataset.original = daviviendaCa.value
-      if (direccion) direccion.dataset.original = direccion.value
-      if (emailGerente) emailGerente.dataset.original = emailGerente.value
-      if (whatsappGerente) {
-        whatsappGerente.dataset.original = whatsappGerente.value
-        // Guardar también el valor completo original para comparación
-        whatsappGerente.dataset.originalFull = datos.whatsappGerente || ''
-      }
+      datosOriginales = response.data
+      cargarDatosEnFormulario(response.data)
     }
   } catch (error) {
     console.error('Error cargando datos:', error)
@@ -153,13 +214,8 @@ async function guardarCambios() {
     
     if (response.success) {
       showMessage('success')
-      clearChangedMarks()
-      
-      // Actualizar valores originales
-      const inputs = document.querySelectorAll('input, textarea') as NodeListOf<HTMLInputElement | HTMLTextAreaElement>
-      inputs.forEach(input => {
-        input.dataset.original = input.value
-      })
+      datosOriginales = response.data
+      desactivarModoEdicion()
     }
   } catch (error: any) {
     console.error('Error guardando cambios:', error)
@@ -175,28 +231,21 @@ async function init() {
   await ensureSession()
   await cargarDatos()
   
-  // Event listeners para detectar cambios en los campos
-  const inputs = document.querySelectorAll('input, textarea') as NodeListOf<HTMLInputElement | HTMLTextAreaElement>
-  inputs.forEach(input => {
-    input.addEventListener('input', () => {
-      if (input.value !== input.dataset.original) {
-        markAsChanged(input)
-      } else {
-        input.classList.remove('changed')
-        
-        // Verificar si todavía hay cambios en algún campo
-        const hayCambios = Array.from(inputs).some(inp => inp.value !== inp.dataset.original)
-        if (!hayCambios) {
-          clearChangedMarks()
-        }
-      }
-    })
-  })
-  
-  // Event listener para el botón de guardar
+  // Event listeners
+  const btnEditar = document.getElementById('btnEditar')
   const btnGuardar = document.getElementById('btnGuardarCambios')
+  const btnCancelar = document.getElementById('btnCancelar')
+  
+  if (btnEditar) {
+    btnEditar.addEventListener('click', activarModoEdicion)
+  }
+  
   if (btnGuardar) {
     btnGuardar.addEventListener('click', guardarCambios)
+  }
+  
+  if (btnCancelar) {
+    btnCancelar.addEventListener('click', cancelarEdicion)
   }
 }
 

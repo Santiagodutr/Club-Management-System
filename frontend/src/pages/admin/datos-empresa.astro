@@ -13,7 +13,9 @@ export const prerender = false
         <p class="muted">Gestiona la información de la empresa: NIT, cuentas bancarias, dirección y contactos.</p>
       </div>
       <div class="actions">
+        <button id="btnEditar" class="btn primary">Editar</button>
         <button id="btnGuardarCambios" class="btn primary" style="display: none;">Guardar Cambios</button>
+        <button id="btnCancelar" class="btn ghost" style="display: none;">Cancelar</button>
       </div>
     </header>
 
@@ -29,11 +31,14 @@ export const prerender = false
         <div class="form-group">
           <label for="nit">
             NIT
+            <div class="field-display" id="nitDisplay"></div>
             <input 
               type="text" 
               id="nit" 
               placeholder="900123456-7"
               required
+              disabled
+              style="display: none;"
             />
           </label>
         </div>
@@ -50,26 +55,35 @@ export const prerender = false
         <div class="form-group">
           <label for="bancolombiaCc">
             Bancolombia - Cuenta Corriente
+            <div class="field-display" id="bancolombiaCcDisplay"></div>
             <input 
               type="text" 
               id="bancolombiaCc" 
               placeholder="1234567890"
+              disabled
+              style="display: none;"
             />
           </label>
           <label for="daviviendaCc">
             Davivienda - Cuenta Corriente
+            <div class="field-display" id="daviviendaCcDisplay"></div>
             <input 
               type="text" 
               id="daviviendaCc" 
               placeholder="1234567890"
+              disabled
+              style="display: none;"
             />
           </label>
           <label for="daviviendaCa">
             Davivienda - Cuenta de Ahorros
+            <div class="field-display" id="daviviendaCaDisplay"></div>
             <input 
               type="text" 
               id="daviviendaCa" 
               placeholder="1234567890"
+              disabled
+              style="display: none;"
             />
           </label>
         </div>
@@ -86,10 +100,13 @@ export const prerender = false
         <div class="form-group">
           <label for="direccion">
             Dirección
+            <div class="field-display" id="direccionDisplay"></div>
             <textarea 
               id="direccion" 
               rows="2"
               placeholder="Calle 123 # 45-67, Villavicencio, Meta"
+              disabled
+              style="display: none;"
             ></textarea>
           </label>
         </div>
@@ -106,15 +123,19 @@ export const prerender = false
         <div class="form-group">
           <label for="emailGerente">
             Email del Gerente
+            <div class="field-display" id="emailGerenteDisplay"></div>
             <input 
               type="email" 
               id="emailGerente" 
               placeholder="gerente@clubdelmeta.com"
+              disabled
+              style="display: none;"
             />
           </label>
           <label for="whatsappGerente">
             WhatsApp del Gerente
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div class="field-display" id="whatsappGerenteDisplay"></div>
+            <div id="whatsappGerenteInput" style="display: none; align-items: center; gap: 0.5rem;">
               <span style="color: #6b7280; font-weight: 500; padding: 0.65rem 0.85rem; border: 1px solid #d1d5db; border-radius: 10px 0 0 10px; background: #f9fafb;">+57</span>
               <input 
                 type="tel" 
@@ -123,6 +144,7 @@ export const prerender = false
                 style="border-radius: 0 10px 10px 0; flex: 1;"
                 maxlength="10"
                 pattern="[0-9]{10}"
+                disabled
               />
             </div>
           </label>
@@ -251,6 +273,23 @@ import '@scripts/datos-empresa.ts'
   }
   
   .hidden { display: none !important; }
+  
+  .field-display {
+    padding: 0.65rem 0.85rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    color: #111827;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .field-display:empty::before {
+    content: 'Sin información';
+    color: #9ca3af;
+    font-style: italic;
+  }
   
   .mensaje-confirmacion, .mensaje-error {
     position: fixed;
