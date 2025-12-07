@@ -591,3 +591,55 @@ export const serviciosAdicionalesAPI = {
     })
   },
 }
+
+// ============================================================
+// SOCIOS API
+// ============================================================
+
+export interface Socio {
+  id: number
+  codigo: string
+  activo: boolean
+  created_at: string
+  updated_at: string
+}
+
+export const sociosAPI = {
+  // Listar todos los socios (admin)
+  listar: async (): Promise<{ success: boolean; data: Socio[] }> => {
+    return fetchAPI('/admin/socios')
+  },
+
+  // Obtener un socio por ID (admin)
+  obtener: async (id: number): Promise<{ success: boolean; data: Socio }> => {
+    return fetchAPI(`/admin/socios/${id}`)
+  },
+
+  // Crear nuevo socio (admin)
+  crear: async (data: { codigo: string; activo?: boolean }): Promise<{ success: boolean; data: Socio; message: string }> => {
+    return fetchAPI('/admin/socios', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  // Actualizar socio existente (admin)
+  actualizar: async (id: number, data: { codigo?: string; activo?: boolean }): Promise<{ success: boolean; data: Socio; message: string }> => {
+    return fetchAPI(`/admin/socios/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  },
+
+  // Eliminar socio (admin)
+  eliminar: async (id: number): Promise<{ success: boolean; message: string }> => {
+    return fetchAPI(`/admin/socios/${id}`, {
+      method: 'DELETE',
+    })
+  },
+
+  // Buscar socio por código (público - para cotizaciones)
+  buscarPorCodigo: async (codigo: string): Promise<{ success: boolean; data: Socio }> => {
+    return fetchAPI(`/api/socios/buscar?codigo=${encodeURIComponent(codigo)}`)
+  },
+}
