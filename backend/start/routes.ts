@@ -86,8 +86,11 @@ router.get('/api/datos-empresa', [DatosEmpresaController, 'index']).use(middlewa
 router.post('/api/datos-empresa', [DatosEmpresaController, 'store']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.put('/api/datos-empresa', [DatosEmpresaController, 'update']).use(middleware.auth()).use(middleware.checkRole('admin'))
 
-// Servicios Adicionales routes (admin)
+// Servicios Adicionales routes
 const ServiciosAdicionalesController = () => import('#controllers/servicios_adicionales_controller')
+// Pública: solo servicios activos para cotizaciones
+router.get('/api/servicios-adicionales/publico', [ServiciosAdicionalesController, 'index'])
+// Admin: todos los servicios
 router.get('/api/servicios-adicionales', [ServiciosAdicionalesController, 'index']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.get('/api/servicios-adicionales/:id', [ServiciosAdicionalesController, 'show']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.post('/api/servicios-adicionales', [ServiciosAdicionalesController, 'store']).use(middleware.auth()).use(middleware.checkRole('admin'))

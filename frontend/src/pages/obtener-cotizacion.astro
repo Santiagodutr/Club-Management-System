@@ -1163,10 +1163,10 @@ const espacios = [
     // CARGAR SERVICIOS
     async function cargarServicios() {
       try {
-        const response = await fetch(`${API_URL}/api/prestaciones`)
+        const response = await fetch(`${API_URL}/api/servicios-adicionales/publico?activo=true`)
         const result = await response.json()
         
-        if (result.success && result.data) {
+        if (result.success && result.data && result.data.length > 0) {
           const container = document.getElementById('servicios-checkboxes')
           let html = ''
           result.data.forEach(s => {
@@ -1176,9 +1176,14 @@ const espacios = [
             </label>`
           })
           container.innerHTML = html
+        } else {
+          const container = document.getElementById('servicios-checkboxes')
+          container.innerHTML = '<p style="color: #64748b; font-size: 0.9rem;">No hay servicios adicionales disponibles en este momento.</p>'
         }
       } catch (error) {
         console.error('Error cargando servicios:', error)
+        const container = document.getElementById('servicios-checkboxes')
+        container.innerHTML = '<p style="color: #ef4444; font-size: 0.9rem;">Error al cargar servicios adicionales.</p>'
       }
     }
 
