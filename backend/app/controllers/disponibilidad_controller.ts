@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import HorarioOperacion from '#models/horario_operacion'
 import BloqueoCalendario from '#models/bloqueo_calendario'
+import Espacio from '#models/espacio'
 import { DateTime } from 'luxon'
 
 export default class DisponibilidadController {
@@ -21,6 +22,25 @@ export default class DisponibilidadController {
 
       // Duración mínima por defecto es 4 horas
       const duracionHoras = duracion ? parseInt(duracion) : 4
+
+      // Obtener configuración de montaje/desmontaje del espacio
+      const espacio = await Espacio.find(espacioId)
+      if (!espacio) {
+        return response.status(404).json({
+          success: false,
+          message: 'Espacio no encontrado',
+        })
+      }
+
+      const tiempoMontaje = espacio.tiempoMontajeHoras || 2
+      const tiempoDesmontaje = espacio.tiempoDesmontajeHoras || 2
+
+      console.log('Configuración espacio:', {
+        espacioId,
+        tiempoMontaje,
+        tiempoDesmontaje,
+        duracionEvento: duracionHoras,
+      })
 
       // Validar formato de fecha
       const fechaObj = DateTime.fromISO(fecha, { zone: 'America/Bogota' })
@@ -60,25 +80,30 @@ export default class DisponibilidadController {
       })
 
       // Si hora_fin es menor que hora_inicio, significa que cruza medianoche
-      // Ejemplo: 08:00 a 02:00 (viernes/sábado que cierra a las 2 AM del sábado/domingo)
       if (horaFin.hour < horaInicio.hour) {
-        // Ajustar horaFin al día siguiente
         horaFin = horaFin.plus({ days: 1 })
       }
 
-      // Calcular la última hora válida de inicio basada en la duración
-      // Si cierra a 22:00 y necesitan 4h, última hora de inicio = 18:00
+      // Calcular la última hora válida de inicio basada en la duración del evento
+      // Si cierra a 22:00 y el evento dura 4h, última hora de inicio = 18:00
       const ultimaHoraInicio = horaFin.minus({ hours: duracionHoras })
+
+      console.log('Cálculo de horarios:', {
+        horaInicioOperacion: horaInicio.toFormat('HH:mm'),
+        horaFinOperacion: horaFin.toFormat('HH:mm'),
+        duracionEvento: duracionHoras,
+        ultimaHoraInicioEvento: ultimaHoraInicio.toFormat('HH:mm'),
+      })
 
       const slots: { hora: string; disponible: boolean }[] = []
       let horaActual = horaInicio
 
-      // Solo generar slots hasta la última hora válida de inicio
+      // Generar slots cada hora desde la apertura hasta la última hora válida
       while (horaActual <= ultimaHoraInicio) {
         const horaStr = horaActual.toFormat('HH:mm')
         slots.push({
           hora: horaStr,
-          disponible: true, // Por defecto disponible
+          disponible: true,
         })
         horaActual = horaActual.plus({ hours: 1 })
       }
@@ -97,14 +122,33 @@ export default class DisponibilidadController {
           zone: 'America/Bogota',
         })
 
+        console.log('Verificando bloqueo:', {
+          desde: bloqueadoInicio.toFormat('HH:mm'),
+          hasta: bloqueadoFin.toFormat('HH:mm'),
+          razon: bloqueo.razon,
+        })
+
         for (const slot of slots) {
           const slotHora = DateTime.fromFormat(slot.hora, 'HH:mm', {
             zone: 'America/Bogota',
           })
 
-          // Si el slot está dentro del rango bloqueado, marcarlo como no disponible
-          if (slotHora >= bloqueadoInicio && slotHora < bloqueadoFin) {
+          // Calcular el rango total del evento con montaje/desmontaje
+          const eventoInicioConMontaje = slotHora.minus({ hours: tiempoMontaje })
+          const eventoFinConDesmontaje = slotHora.plus({
+            hours: duracionHoras + tiempoDesmontaje,
+          })
+
+          // Si el evento (con montaje/desmontaje) se cruza con el bloqueo, marcar como no disponible
+          const seCruza = !(
+            eventoFinConDesmontaje <= bloqueadoInicio || eventoInicioConMontaje >= bloqueadoFin
+          )
+
+          if (seCruza) {
             slot.disponible = false
+            console.log(
+              `Slot ${slot.hora} bloqueado por cruce con ${bloqueadoInicio.toFormat('HH:mm')}-${bloqueadoFin.toFormat('HH:mm')}`
+            )
           }
         }
       }
@@ -112,13 +156,19 @@ export default class DisponibilidadController {
       // Filtrar solo slots disponibles
       const horasDisponibles = slots.filter((s) => s.disponible).map((s) => s.hora)
 
+      console.log('Resultado final:', {
+        totalSlots: slots.length,
+        slotsDisponibles: horasDisponibles.length,
+        horasDisponibles,
+      })
+
       return response.json({
         success: true,
         data: {
           fecha,
           espacioId: parseInt(espacioId),
           horarioOperacion: {
-            horaInicio: horario.horaInicio.substring(0, 5), // HH:mm
+            horaInicio: horario.horaInicio.substring(0, 5),
             horaFin: horario.horaFin.substring(0, 5),
             diaSemana: horario.nombreDia,
           },

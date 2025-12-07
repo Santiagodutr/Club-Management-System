@@ -93,6 +93,12 @@ export default class Espacio extends BaseModel {
   @column({ columnName: 'activo' })
   declare activo: boolean
 
+  @column({ columnName: 'tiempo_montaje_horas' })
+  declare tiempoMontajeHoras: number
+
+  @column({ columnName: 'tiempo_desmontaje_horas' })
+  declare tiempoDesmontajeHoras: number
+
   @column.dateTime({ columnName: 'contenido_actualizado_at' })
   declare contenidoActualizadoAt: DateTime | null
 
