@@ -54,37 +54,17 @@ export default class SociosController {
     try {
       const schema = vine.object({
         codigo: vine.string().trim().minLength(3).maxLength(50),
-        nombre: vine.string().trim().minLength(3).maxLength(150),
-        tipoDocumento: vine.enum(['CC', 'CE', 'TI', 'NIT']).optional(),
-        numeroDocumento: vine.string().trim().minLength(5).maxLength(50),
-        email: vine.string().email().optional(),
-        telefono: vine.string().maxLength(20).optional(),
-        observaciones: vine.string().optional(),
         activo: vine.boolean().optional(),
       })
 
       const payload = await vine.validate({ schema, data: request.all() })
 
-      // Establecer tipo documento por defecto
-      if (!payload.tipoDocumento) {
-        payload.tipoDocumento = 'CC'
-      }
-
       // Verificar que no exista otro socio con el mismo código
-      const socioCodigoDuplicado = await Socio.findBy('codigo', payload.codigo)
-      if (socioCodigoDuplicado) {
+      const socioExistente = await Socio.findBy('codigo', payload.codigo)
+      if (socioExistente) {
         return response.status(400).json({
           success: false,
           message: `Ya existe un socio con el código ${payload.codigo}`,
-        })
-      }
-
-      // Verificar que no exista otro socio con el mismo documento
-      const socioDocDuplicado = await Socio.findBy('numero_documento', payload.numeroDocumento)
-      if (socioDocDuplicado) {
-        return response.status(400).json({
-          success: false,
-          message: `Ya existe un socio con el documento ${payload.tipoDocumento}-${payload.numeroDocumento}`,
         })
       }
 
@@ -125,12 +105,6 @@ export default class SociosController {
 
       const schema = vine.object({
         codigo: vine.string().trim().minLength(3).maxLength(50).optional(),
-        nombre: vine.string().trim().minLength(3).maxLength(150).optional(),
-        tipoDocumento: vine.enum(['CC', 'CE', 'TI', 'NIT']).optional(),
-        numeroDocumento: vine.string().trim().minLength(5).maxLength(50).optional(),
-        email: vine.string().email().optional(),
-        telefono: vine.string().maxLength(20).optional(),
-        observaciones: vine.string().optional(),
         activo: vine.boolean().optional(),
       })
 
@@ -143,17 +117,6 @@ export default class SociosController {
           return response.status(400).json({
             success: false,
             message: `Ya existe un socio con el código ${payload.codigo}`,
-          })
-        }
-      }
-
-      // Si se intenta cambiar el documento, verificar que sea único
-      if (payload.numeroDocumento && payload.numeroDocumento !== socio.numeroDocumento) {
-        const socioDocExistente = await Socio.findBy('numero_documento', payload.numeroDocumento)
-        if (socioDocExistente) {
-          return response.status(400).json({
-            success: false,
-            message: `Ya existe un socio con el documento ${payload.tipoDocumento || socio.tipoDocumento}-${payload.numeroDocumento}`,
           })
         }
       }
@@ -210,27 +173,27 @@ export default class SociosController {
   }
 
   /**
-   * Buscar socio por documento (público - para cotizaciones)
+   * Buscar socio por código (público - para cotizaciones)
    */
   async buscarPublico({ request, response }: HttpContext) {
     try {
-      const { numeroDocumento } = request.only(['numeroDocumento']) as {
-        numeroDocumento?: string
+      const { codigo } = request.only(['codigo']) as {
+        codigo?: string
       }
 
-      if (!numeroDocumento) {
+      if (!codigo) {
         return response.status(400).json({
           success: false,
-          message: 'numeroDocumento es requerido',
+          message: 'codigo es requerido',
         })
       }
 
-      const socio = await Socio.porDocumento(numeroDocumento)
+      const socio = await Socio.porCodigo(codigo)
 
       if (!socio) {
         return response.status(404).json({
           success: false,
-          message: `Socio con documento ${numeroDocumento} no encontrado`,
+          message: `Socio con código ${codigo} no encontrado`,
         })
       }
 
@@ -239,9 +202,7 @@ export default class SociosController {
         data: {
           id: socio.id,
           codigo: socio.codigo,
-          nombre: socio.nombre,
-          tipoDocumento: socio.tipoDocumento,
-          numeroDocumento: socio.numeroDocumento,
+          activo: socio.activo,
         },
       })
     } catch (error) {
