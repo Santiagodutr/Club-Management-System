@@ -20,6 +20,20 @@ interface TemplateMessage {
   languageCode?: string
 }
 
+interface WhatsAppResponse {
+  messaging_product?: string
+  contacts?: Array<{ input: string; wa_id: string }>
+  messages?: Array<{ id: string; message_status?: string }>
+  error?: {
+    message: string
+    type: string
+    code: number
+    error_data?: {
+      details: string
+    }
+  }
+}
+
 export default class WhatsAppService {
   private config: WhatsAppConfig
 
@@ -38,48 +52,77 @@ export default class WhatsAppService {
     try {
       const url = `https://graph.facebook.com/${this.config.apiVersion}/${this.config.phoneNumberId}/media`
 
-      // Usar node-fetch con form-data
+      // Crear FormData con form-data de Node.js
       const FormData = (await import('form-data')).default
       const formData = new FormData()
       
+      // Primero agregar messaging_product
+      formData.append('messaging_product', 'whatsapp')
+      
+      // Luego agregar el archivo con sus opciones
       formData.append('file', fileBuffer, {
         filename: 'document.pdf',
         contentType: mimeType,
       })
-      formData.append('messaging_product', 'whatsapp')
 
-      // Hacer request con headers de form-data
-      const headers = {
-        Authorization: `Bearer ${this.config.accessToken}`,
-        ...formData.getHeaders(),
-      }
+      // Importante: usar el tipo correcto para el archivo
+      formData.append('type', mimeType)
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: formData as any,
+      // Hacer request usando el método submit de form-data (recomendado para Node.js)
+      return new Promise((resolve, reject) => {
+        formData.submit(
+          {
+            protocol: 'https:',
+            host: 'graph.facebook.com',
+            path: `/${this.config.apiVersion}/${this.config.phoneNumberId}/media`,
+            headers: {
+              Authorization: `Bearer ${this.config.accessToken}`,
+            },
+          },
+          (err, res) => {
+            if (err) {
+              logger.error({ error: err.message }, 'Error en request de upload media')
+              reject(err)
+              return
+            }
+
+            let responseText = ''
+            res.on('data', (chunk) => {
+              responseText += chunk.toString()
+            })
+
+            res.on('end', () => {
+              logger.info({ status: res.statusCode, body: responseText }, 'Respuesta de WhatsApp uploadMedia')
+
+              try {
+                const data = JSON.parse(responseText)
+
+                if (res.statusCode !== 200) {
+                  logger.error({ response: data }, 'Error subiendo media a WhatsApp')
+                  resolve(null)
+                  return
+                }
+
+                logger.info({ mediaId: data.id }, '✅ Media subido a WhatsApp exitosamente')
+                resolve(data.id)
+              } catch (parseError) {
+                logger.error({ responseText }, 'Error parseando respuesta de WhatsApp')
+                resolve(null)
+              }
+            })
+
+            res.on('error', (error) => {
+              logger.error({ error: error.message }, 'Error en response de upload media')
+              resolve(null)
+            })
+          }
+        )
       })
-
-      const responseText = await response.text()
-      logger.info({ status: response.status, body: responseText }, 'Respuesta de WhatsApp uploadMedia')
-
-      let data
-      try {
-        data = JSON.parse(responseText)
-      } catch {
-        logger.error({ responseText }, 'Error parseando respuesta de WhatsApp')
-        return null
-      }
-
-      if (!response.ok) {
-        logger.error({ response: data }, 'Error subiendo media a WhatsApp')
-        return null
-      }
-
-      logger.info({ mediaId: data.id }, 'Media subido a WhatsApp exitosamente')
-      return data.id
     } catch (error) {
-      logger.error({ error: error instanceof Error ? error.message : error, stack: error instanceof Error ? error.stack : undefined }, 'Error en WhatsAppService.uploadMedia')
+      logger.error({ 
+        error: error instanceof Error ? error.message : error, 
+        stack: error instanceof Error ? error.stack : undefined 
+      }, 'Error en WhatsAppService.uploadMedia')
       return null
     }
   }
@@ -103,6 +146,14 @@ export default class WhatsAppService {
         },
       }
 
+      logger.info({ 
+        to, 
+        mediaId, 
+        filename,
+        phoneNumberId: this.config.phoneNumberId,
+        apiVersion: this.config.apiVersion 
+      }, '📤 Enviando documento con media_id a WhatsApp')
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -112,17 +163,38 @@ export default class WhatsAppService {
         body: JSON.stringify(payload),
       })
 
-      const data = await response.json()
+      const data = await response.json() as WhatsAppResponse
+
+      // Log completo de la respuesta para debugging
+      logger.info({ 
+        status: response.status,
+        response: data,
+        to,
+        mediaId 
+      }, '📥 Respuesta completa de WhatsApp al enviar documento')
 
       if (!response.ok) {
-        logger.error({ response: data }, 'Error enviando documento por WhatsApp')
+        logger.error({ response: data, payload }, '❌ Error enviando documento por WhatsApp')
         return false
       }
 
-      logger.info({ to, filename, messageId: data.messages?.[0]?.id }, 'Documento enviado por WhatsApp')
-      return true
+      // Verificar que el mensaje fue aceptado
+      const messageId = data.messages?.[0]?.id
+      const messageStatus = data.messages?.[0]?.message_status
+      const hasContacts = data.contacts && data.contacts.length > 0
+
+      logger.info({ 
+        to, 
+        filename, 
+        messageId,
+        messageStatus,
+        contacts: data.contacts,
+        hasContacts
+      }, messageId ? '✅ Documento enviado por WhatsApp' : '⚠️ Documento enviado pero sin message_id')
+
+      return !!messageId
     } catch (error) {
-      logger.error({ error }, 'Error en WhatsAppService.sendDocumentByMediaId')
+      logger.error({ error, to, mediaId }, '❌ Error en WhatsAppService.sendDocumentByMediaId')
       return false
     }
   }
@@ -155,7 +227,7 @@ export default class WhatsAppService {
         body: JSON.stringify(payload),
       })
 
-      const data = await response.json()
+      const data = await response.json() as WhatsAppResponse
 
       if (!response.ok) {
         logger.error({ response: data }, 'Error enviando documento por WhatsApp')
@@ -209,7 +281,7 @@ export default class WhatsAppService {
         body: JSON.stringify(payload),
       })
 
-      const data = await response.json()
+      const data = await response.json() as WhatsAppResponse
 
       if (!response.ok) {
         logger.error({ response: data }, 'Error enviando template por WhatsApp')
@@ -288,7 +360,7 @@ export default class WhatsAppService {
         body: JSON.stringify(payload),
       })
 
-      const data = await response.json()
+      const data = await response.json() as WhatsAppResponse
 
       if (!response.ok) {
         logger.error({ response: data }, 'Error enviando documento con botón por WhatsApp')
@@ -369,7 +441,7 @@ export default class WhatsAppService {
         body: JSON.stringify(payload),
       })
 
-      const data = await response.json()
+      const data = await response.json() as WhatsAppResponse
 
       if (!response.ok) {
         logger.error({ response: data }, 'Error enviando mensaje con dos botones por WhatsApp')
@@ -437,7 +509,7 @@ export default class WhatsAppService {
         body: JSON.stringify(payload),
       })
 
-      const data = await response.json()
+      const data = await response.json() as WhatsAppResponse
 
       if (!response.ok) {
         logger.error({ response: data }, 'Error enviando mensaje con botón por WhatsApp')
@@ -598,6 +670,93 @@ export default class WhatsAppService {
       cliente: clienteEnviado,
       gerente: gerenteEnviado
     }, '📱 Resultado envío cotización por WhatsApp')
+
+    return {
+      cliente: clienteEnviado,
+      gerente: gerenteEnviado,
+    }
+  }
+
+  /**
+   * Envía la cotización al cliente y al gerente usando Media ID (PDF subido a WhatsApp)
+   * Este es el método RECOMENDADO para enviar PDFs
+   */
+  async enviarCotizacionConMediaId(
+    telefonoCliente: string,
+    telefonoGerente: string,
+    mediaId: string,
+    numeroCotizacion: string,
+    detallesCotizacion: {
+      salon: string
+      fecha: string
+      horaInicio: string
+      horaFin: string
+      valorTotal: number
+      nombreCliente: string
+      emailCliente?: string
+    }
+  ): Promise<{ cliente: boolean; gerente: boolean }> {
+    const filename = `Cotizacion_${numeroCotizacion}.pdf`
+    
+    const whatsappGerenteUrl = `https://wa.me/${telefonoGerente}`
+    
+    const captionCliente = 
+      `Reciban un cordial saludo de la *CORPORACIÓN CLUB EL META*.\n\n` +
+      `Nos complace dar a conocer nuestro portafolio de servicios para la realización de su evento en nuestras instalaciones.\n\n` +
+      `*Salón:* ${detallesCotizacion.salon}\n` +
+      `*Fecha:* ${detallesCotizacion.fecha}\n` +
+      `*Horario:* ${detallesCotizacion.horaInicio} - ${detallesCotizacion.horaFin}\n` +
+      `*Valor Total:* $${detallesCotizacion.valorTotal.toLocaleString('es-CO')}\n\n` +
+      `Adjunto encontrará el detalle completo de su cotización.\n\n` +
+      `Nos comunicaremos con usted pronto para confirmar los detalles. Si tiene alguna consulta:\n` +
+      `${whatsappGerenteUrl}`
+    
+    // Enviar documento al cliente usando media_id
+    const clienteEnviado = await this.sendDocumentByMediaId(
+      telefonoCliente,
+      mediaId,
+      filename,
+      captionCliente
+    )
+
+    // Para el gerente: mensaje con toda la información y datos de contacto del cliente
+    let bodyGerente = 
+      `Nueva cotización generada:\n\n` +
+      `*Cliente:* ${detallesCotizacion.nombreCliente}\n` +
+      `*Salón:* ${detallesCotizacion.salon}\n` +
+      `*Fecha:* ${detallesCotizacion.fecha}\n` +
+      `*Horario:* ${detallesCotizacion.horaInicio} - ${detallesCotizacion.horaFin}\n` +
+      `*Valor:* $${detallesCotizacion.valorTotal.toLocaleString('es-CO')}\n\n`
+
+    // Agregar datos de contacto del cliente
+    const contactos: string[] = []
+    if (telefonoCliente && telefonoCliente.length > 5) {
+      const whatsappUrl = `https://wa.me/${telefonoCliente}`
+      contactos.push(`WhatsApp: ${whatsappUrl}`)
+    }
+    if (detallesCotizacion.emailCliente) {
+      contactos.push(`Email: ${detallesCotizacion.emailCliente}`)
+    }
+
+    if (contactos.length > 0) {
+      bodyGerente += `*Contacto:*\n${contactos.join('\n')}\n\n`
+    } else {
+      bodyGerente += `⚠️ *Sin datos de contacto registrados*\n\n`
+    }
+
+    // Enviar documento PDF al gerente usando el mismo media_id
+    const gerenteEnviado = await this.sendDocumentByMediaId(
+      telefonoGerente,
+      mediaId,
+      filename,
+      bodyGerente
+    )
+
+    logger.info({ 
+      cliente: clienteEnviado,
+      gerente: gerenteEnviado,
+      mediaId
+    }, '📱 Resultado envío cotización por WhatsApp (usando media_id)')
 
     return {
       cliente: clienteEnviado,

@@ -32,13 +32,15 @@ export default class DisponibilidadController {
         })
       }
 
-      const tiempoMontaje = espacio.tiempoMontajeHoras || 2
-      const tiempoDesmontaje = espacio.tiempoDesmontajeHoras || 2
+      const tiempoMontaje = espacio.tiempoMontajeHoras ?? 2
+      const tiempoDesmontaje = espacio.tiempoDesmontajeHoras ?? 0
 
       console.log('Configuración espacio:', {
         espacioId,
         tiempoMontaje,
         tiempoDesmontaje,
+        tiempoMontajeDB: espacio.tiempoMontajeHoras,
+        tiempoDesmontajeDB: espacio.tiempoDesmontajeHoras,
         duracionEvento: duracionHoras,
       })
 
@@ -108,10 +110,14 @@ export default class DisponibilidadController {
         horaActual = horaActual.plus({ hours: 1 })
       }
 
+      console.log(`🕐 Slots generados inicialmente: ${slots.length}`, slots.map(s => s.hora))
+
       // Obtener bloqueos para esta fecha y espacio
       const bloqueos = await BloqueoCalendario.query()
         .where('espacio_id', espacioId)
         .where('fecha', fecha)
+
+      console.log(`🚫 Bloqueos encontrados: ${bloqueos.length}`, bloqueos.map(b => `${b.horaInicio}-${b.horaFin}`))
 
       // Marcar slots como no disponibles si hay bloqueos
       for (const bloqueo of bloqueos) {
@@ -139,19 +145,57 @@ export default class DisponibilidadController {
             hours: duracionHoras + tiempoDesmontaje,
           })
 
-          // Si el evento (con montaje/desmontaje) se cruza con el bloqueo, marcar como no disponible
-          const seCruza = !(
-            eventoFinConDesmontaje <= bloqueadoInicio || eventoInicioConMontaje >= bloqueadoFin
-          )
+          // Convertir a minutos desde medianoche para comparación precisa
+          const eventoFinMinutos = eventoFinConDesmontaje.hour * 60 + eventoFinConDesmontaje.minute
+          const eventoInicioMinutos = eventoInicioConMontaje.hour * 60 + eventoInicioConMontaje.minute
+          const bloqueadoInicioMinutos = bloqueadoInicio.hour * 60 + bloqueadoInicio.minute
+          const bloqueadoFinMinutos = bloqueadoFin.hour * 60 + bloqueadoFin.minute
+
+          // El evento se cruza con el bloqueo si:
+          // - El evento termina DESPUÉS de que empieza el bloqueo Y
+          // - El evento empieza ANTES de que termine el bloqueo
+          // PERMITIR eventos que terminan exactamente cuando empieza el bloqueo (<=)
+          const seCruza = eventoFinMinutos > bloqueadoInicioMinutos && eventoInicioMinutos < bloqueadoFinMinutos
 
           if (seCruza) {
             slot.disponible = false
             console.log(
-              `Slot ${slot.hora} bloqueado por cruce con ${bloqueadoInicio.toFormat('HH:mm')}-${bloqueadoFin.toFormat('HH:mm')}`
+              `❌ Slot ${slot.hora} bloqueado:`,
+              {
+                eventoInicio: slotHora.toFormat('HH:mm'),
+                eventoFin: slotHora.plus({ hours: duracionHoras }).toFormat('HH:mm'),
+                conMontaje: eventoInicioConMontaje.toFormat('HH:mm'),
+                conDesmontaje: eventoFinConDesmontaje.toFormat('HH:mm'),
+                bloqueadoDesde: bloqueadoInicio.toFormat('HH:mm'),
+                bloqueadoHasta: bloqueadoFin.toFormat('HH:mm'),
+                eventoFinMinutos,
+                bloqueadoInicioMinutos,
+                terminaAntes: eventoFinMinutos < bloqueadoInicioMinutos,
+                cruza: seCruza,
+              }
+            )
+          } else {
+            console.log(
+              `✅ Slot ${slot.hora} disponible:`,
+              {
+                eventoInicio: slotHora.toFormat('HH:mm'),
+                eventoFin: slotHora.plus({ hours: duracionHoras }).toFormat('HH:mm'),
+                conDesmontaje: eventoFinConDesmontaje.toFormat('HH:mm'),
+                bloqueadoDesde: bloqueadoInicio.toFormat('HH:mm'),
+                eventoFinMinutos,
+                bloqueadoInicioMinutos,
+                terminaAntes: eventoFinMinutos < bloqueadoInicioMinutos,
+              }
             )
           }
         }
       }
+
+      // DEBUG: Mostrar estado de TODOS los slots antes de filtrar
+      console.log('📊 Estado de todos los slots generados:')
+      slots.forEach(slot => {
+        console.log(`   ${slot.disponible ? '✅' : '❌'} ${slot.hora}`)
+      })
 
       // Filtrar solo slots disponibles
       const horasDisponibles = slots.filter((s) => s.disponible).map((s) => s.hora)
@@ -160,6 +204,7 @@ export default class DisponibilidadController {
         totalSlots: slots.length,
         slotsDisponibles: horasDisponibles.length,
         horasDisponibles,
+        todosLosSlots: slots,
       })
 
       return response.json({

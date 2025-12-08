@@ -76,10 +76,15 @@ export class CotizacionService {
         }
       }
 
-      const tiempoMontaje = espacio.tiempoMontajeHoras || 2
-      const tiempoDesmontaje = espacio.tiempoDesmontajeHoras || 2
+      const tiempoMontaje = espacio.tiempoMontajeHoras ?? 2
+      const tiempoDesmontaje = espacio.tiempoDesmontajeHoras ?? 0
 
-      console.log('Tiempos de montaje/desmontaje:', { tiempoMontaje, tiempoDesmontaje })
+      console.log('Tiempos de montaje/desmontaje:', { 
+        tiempoMontaje, 
+        tiempoDesmontaje,
+        tiempoMontajeDB: espacio.tiempoMontajeHoras,
+        tiempoDesmontajeDB: espacio.tiempoDesmontajeHoras
+      })
 
       // 1. Validar horario de operación
       const horario = await HorarioOperacion.findBy('dia_semana', diaSemana)
@@ -171,12 +176,33 @@ export class CotizacionService {
         const minutosInicioConMontaje = minutosInicio - (tiempoMontaje * 60)
         const minutosFinConDesmontaje = minutosFin + (tiempoDesmontaje * 60)
 
+        console.log('🔍 Validando bloqueos:', {
+          eventoSolicitado: `${horaInicio} (${minutosFin - minutosInicio} min)`,
+          eventoConMontajeDesmontaje: `${this.minutosAHora(minutosInicioConMontaje)} - ${this.minutosAHora(minutosFinConDesmontaje)}`,
+          tiempoMontaje: `${tiempoMontaje}h`,
+          tiempoDesmontaje: `${tiempoDesmontaje}h`,
+          bloqueosEncontrados: bloqueos.length,
+        })
+
         for (const bloqueo of bloqueos) {
           const minBloqueoInicio = this.horaAMinutos(bloqueo.horaInicio)
           const minBloqueoFin = this.horaAMinutos(bloqueo.horaFin)
           
-          // Validar superposición incluyendo tiempos de montaje/desmontaje
-          const seSuperpone = !(minutosFinConDesmontaje <= minBloqueoInicio || minutosInicioConMontaje >= minBloqueoFin)
+          // El evento se cruza con el bloqueo si:
+          // - El evento termina DESPUÉS de que empieza el bloqueo Y
+          // - El evento empieza ANTES de que termine el bloqueo
+          // PERMITIR eventos que terminan exactamente cuando empieza el bloqueo
+          const seSuperpone = minutosFinConDesmontaje > minBloqueoInicio && minutosInicioConMontaje < minBloqueoFin
+          
+          console.log(`   Bloqueo ${bloqueo.horaInicio}-${bloqueo.horaFin}:`, {
+            bloqueoMinutos: `${minBloqueoInicio}-${minBloqueoFin}`,
+            eventoConDesmontajeTermina: minutosFinConDesmontaje,
+            bloqueoEmpieza: minBloqueoInicio,
+            terminaAntes: minutosFinConDesmontaje <= minBloqueoInicio,
+            terminaDespues: minutosFinConDesmontaje > minBloqueoInicio,
+            seSuperpone,
+          })
+
           if (seSuperpone) {
             const horaBloqueadoDesde = this.minutosAHora(minBloqueoInicio).split(':').slice(0, 2).join(':')
             const horaBloqueadoHasta = this.minutosAHora(minBloqueoFin).split(':').slice(0, 2).join(':')
@@ -186,6 +212,8 @@ export class CotizacionService {
             }
           }
         }
+        
+        console.log('✅ No hay cruces con bloqueos existentes')
       }
 
       // Calcular hora de fin legible

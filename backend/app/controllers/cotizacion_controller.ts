@@ -135,48 +135,6 @@ export default class CotizacionController {
         PDFService
           .generarPDF(resultado.cotizacion)
           .then(async (pdfBuffer) => {
-            // Subir PDF a Supabase para obtener URL pública
-            const { supabase } = await import('#services/supabase_service')
-            const filename = `cotizacion_${resultado.cotizacion.id}_${Date.now()}.pdf`
-            
-            const { error: uploadError } = await supabase.storage
-              .from('cotizaciones_pdf')
-              .upload(filename, pdfBuffer, {
-                contentType: 'application/pdf',
-                cacheControl: '3600',
-              })
-
-            if (uploadError) {
-              console.error('❌ Error subiendo PDF a Supabase:', uploadError)
-              return
-            }
-
-            // Obtener URL pública
-            const { data: { publicUrl } } = supabase.storage
-              .from('cotizaciones_pdf')
-              .getPublicUrl(filename)
-
-            console.log('📄 PDF generado y subido:', { filename, publicUrl })
-
-            // Verificar que la URL sea accesible
-            try {
-              const testResponse = await fetch(publicUrl, { method: 'HEAD' })
-              console.log('🔍 Verificación de URL pública:', {
-                url: publicUrl,
-                status: testResponse.status,
-                contentType: testResponse.headers.get('content-type'),
-                accessible: testResponse.ok,
-              })
-              
-              if (!testResponse.ok) {
-                console.error('❌ La URL del PDF no es accesible públicamente. Verifica que el bucket de Supabase sea público.')
-                return
-              }
-            } catch (error) {
-              console.error('❌ Error verificando acceso a URL del PDF:', error)
-              return
-            }
-
             // Obtener teléfono del gerente desde la base de datos
             const datosEmpresa = await DatosEmpresa.findBy('key', 'empresa')
             if (!datosEmpresa?.whatsappGerente) {
@@ -184,7 +142,7 @@ export default class CotizacionController {
               return
             }
 
-            // Enviar por WhatsApp: puedes elegir entre botón o documento directo
+            // Formatear teléfonos
             const telefonoCliente = whatsappService.formatPhoneNumber(resultado.cotizacion.telefono!)
             const telefonoGerente = whatsappService.formatPhoneNumber(datosEmpresa.whatsappGerente)
 
@@ -193,7 +151,24 @@ export default class CotizacionController {
               clienteFormateado: telefonoCliente,
               gerenteOriginal: datosEmpresa.whatsappGerente,
               gerenteFormateado: telefonoGerente,
+              phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID,
             })
+
+            console.log('⚠️ IMPORTANTE: Verifica que estos números estén en tu lista de números de prueba en Meta:')
+            console.log(`   - Cliente: ${telefonoCliente}`)
+            console.log(`   - Gerente: ${telefonoGerente}`)
+            console.log(`   - Ir a: https://developers.facebook.com/apps/tu-app-id/whatsapp-business/wa-dev-console/`)
+
+            // 1. Subir PDF a WhatsApp para obtener media_id
+            console.log('📤 Subiendo PDF a WhatsApp...')
+            const mediaId = await whatsappService.uploadMedia(pdfBuffer, 'application/pdf')
+            
+            if (!mediaId) {
+              console.error('❌ No se pudo subir el PDF a WhatsApp')
+              return
+            }
+
+            console.log('✅ PDF subido a WhatsApp, media_id:', mediaId)
 
             // Calcular hora de fin
             const [horaInicio, minutosInicio] = resultado.cotizacion.hora.split(':').map(Number)
@@ -202,11 +177,11 @@ export default class CotizacionController {
             // Formatear fecha
             const fechaFormateada = DateTime.fromISO(resultado.cotizacion.fecha).setLocale('es').toFormat('dd/MM/yyyy')
 
-            // Opción 1: Enviar documento directamente (aparece como archivo adjunto)
-            const resultadoWhatsApp = await whatsappService.enviarCotizacionConDocumento(
+            // 2. Enviar cotización usando el media_id
+            const resultadoWhatsApp = await whatsappService.enviarCotizacionConMediaId(
               telefonoCliente,
               telefonoGerente,
-              publicUrl,
+              mediaId,
               resultado.cotizacion.id.toString(),
               {
                 salon: salonNombre || 'No especificado',
@@ -219,15 +194,24 @@ export default class CotizacionController {
               }
             )
 
-            // Opción 2: Enviar con botón interactivo (descomenta para usar)
-            // const resultadoWhatsApp = await whatsappService.enviarCotizacionConLink(
-            //   telefonoCliente,
-            //   telefonoGerente,
-            //   publicUrl,
-            //   resultado.cotizacion.id.toString()
-            // )
-
             console.log('📱 Resultado envío WhatsApp:', resultadoWhatsApp)
+
+            // 3. Opcional: Guardar también en Supabase para backup
+            try {
+              const { supabase } = await import('#services/supabase_service')
+              const filename = `cotizacion_${resultado.cotizacion.id}_${Date.now()}.pdf`
+              
+              await supabase.storage
+                .from('cotizaciones_pdf')
+                .upload(filename, pdfBuffer, {
+                  contentType: 'application/pdf',
+                  cacheControl: '3600',
+                })
+              
+              console.log('💾 PDF guardado en Supabase como backup:', filename)
+            } catch (backupError) {
+              console.error('⚠️ Error guardando backup en Supabase:', backupError)
+            }
           })
           .catch((err) => {
             console.error('📱 Error enviando WhatsApp:', err)
