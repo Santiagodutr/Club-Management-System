@@ -3,36 +3,26 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import Navbar from '../../components/Navbar.astro'
 import { marked } from 'marked'
 
-// Mantener páginas estáticas para mejor rendimiento
-export const prerender = true
+// Deshabilitar prerender para evitar conexión a DB en build time
+export const prerender = false
 
-// Obtener todos los espacios desde la API para generar rutas estáticas
-export async function getStaticPaths() {
-  const API_URL = (import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333').replace(/\/$/, '')
-  
-  try {
-    const response = await fetch(`${API_URL}/api/espacios`)
-    const result = await response.json()
-    
-    if (!result.success || !result.data) {
-      console.error('Error fetching espacios:', result)
-      return []
-    }
+const API_URL = (import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333').replace(/\/$/, '')
 
-    return result.data
-      .filter((espacio: any) => espacio.slug) // Solo espacios con slug
-      .map((espacio: any) => ({
-        params: { slug: espacio.slug },
-        props: { espacio }
-      }))
-  } catch (error) {
-    console.error('Error en getStaticPaths:', error)
-    return []
-  }
-}
-
+// Obtener slug de los parámetros
 const { slug } = Astro.params
-const { espacio } = Astro.props
+
+// Cargar espacio dinámicamente en SSR
+let espacio = null
+try {
+  const response = await fetch(`${API_URL}/api/espacios`)
+  const result = await response.json()
+  
+  if (result.success && result.data) {
+    espacio = result.data.find((e: any) => e.slug === slug)
+  }
+} catch (error) {
+  console.error('Error cargando espacio:', error)
+}
 
 if (!espacio) {
   return Astro.redirect('/salones')

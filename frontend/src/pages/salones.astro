@@ -1,8 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 
-// Mantener página estática para mejor rendimiento
-export const prerender = true
+// Deshabilitar prerender para evitar conexión a DB en build time
+export const prerender = false
 
 const API_URL = (import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3333').replace(/\/$/, '')
 
