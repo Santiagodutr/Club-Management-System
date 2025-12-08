@@ -121,4 +121,36 @@ export default class DatosEmpresaController {
       })
     }
   }
+
+  /**
+   * GET /api/datos-empresa/whatsapp
+   * Obtener solo el número de WhatsApp (endpoint público)
+   */
+  async getWhatsapp({ response }: HttpContext) {
+    try {
+      const datos = await DatosEmpresa.first()
+
+      if (!datos || !datos.whatsappGerente) {
+        return response.ok({
+          success: true,
+          data: {
+            whatsappGerente: null,
+          },
+        })
+      }
+
+      return response.ok({
+        success: true,
+        data: {
+          whatsappGerente: datos.whatsappGerente,
+        },
+      })
+    } catch (error) {
+      console.error('Error obteniendo WhatsApp:', error)
+      return response.internalServerError({
+        success: false,
+        message: 'Error al obtener número de WhatsApp',
+      })
+    }
+  }
 }

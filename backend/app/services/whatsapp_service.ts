@@ -50,8 +50,6 @@ export default class WhatsAppService {
    */
   async uploadMedia(fileBuffer: Buffer, mimeType: string = 'application/pdf'): Promise<string | null> {
     try {
-      const url = `https://graph.facebook.com/${this.config.apiVersion}/${this.config.phoneNumberId}/media`
-
       // Crear FormData con form-data de Node.js
       const FormData = (await import('form-data')).default
       const formData = new FormData()

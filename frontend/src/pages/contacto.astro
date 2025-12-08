@@ -6,6 +6,25 @@ import telefonoIcon from 'src/assets/telefono.png'
 import emailIcon from 'src/assets/email.png'
 import ubicacionIcon from 'src/assets/ubicacion.png'
 import horarioIcon from 'src/assets/horario.png'
+
+// Obtener número de WhatsApp desde la base de datos
+const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3333'
+let whatsappNumber = ''
+
+try {
+  const response = await fetch(`${API_URL}/api/datos-empresa/whatsapp`)
+  if (response.ok) {
+    const result = await response.json()
+    if (result.success && result.data?.whatsappGerente) {
+      whatsappNumber = result.data.whatsappGerente.replace(/[\s\-\+\(\)]/g, '')
+      if (!whatsappNumber.startsWith('57') && whatsappNumber.length === 10) {
+        whatsappNumber = '57' + whatsappNumber
+      }
+    }
+  }
+} catch (error) {
+  console.error('Error obteniendo número de WhatsApp:', error)
+}
 ---
 
 <BaseLayout title="Contacto - Club del Meta" hideNavbar fullWidth>
@@ -95,7 +114,7 @@ import horarioIcon from 'src/assets/horario.png'
 
   <!-- WhatsApp Floating Button -->
   <a
-    href="https://wa.me/573123439172"
+    href={`https://wa.me/${whatsappNumber}`}
     target="_blank"
     rel="noopener noreferrer"
     class="whatsapp-float"

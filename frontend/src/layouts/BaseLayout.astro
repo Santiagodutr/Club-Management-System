@@ -13,6 +13,27 @@ const {
   hideNavbar = false,
   fullWidth = false,
 } = Astro.props as Props
+
+// Obtener número de WhatsApp desde la base de datos
+const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3333'
+let whatsappNumber = ''
+
+try {
+  const response = await fetch(`${API_URL}/api/datos-empresa/whatsapp`)
+  if (response.ok) {
+    const result = await response.json()
+    if (result.success && result.data?.whatsappGerente) {
+      // Limpiar el número (quitar espacios, guiones, paréntesis, +)
+      whatsappNumber = result.data.whatsappGerente.replace(/[\s\-\+\(\)]/g, '')
+      // Si no empieza con 57, agregarlo (código de Colombia)
+      if (!whatsappNumber.startsWith('57') && whatsappNumber.length === 10) {
+        whatsappNumber = '57' + whatsappNumber
+      }
+    }
+  }
+} catch (error) {
+  console.error('Error obteniendo número de WhatsApp:', error)
+}
 ---
 
 <!DOCTYPE html>
@@ -236,7 +257,7 @@ const {
 
     <!-- Botón flotante de WhatsApp -->
     <a 
-      href="https://wa.me/573123439172?text=Hola,%20me%20gustaría%20obtener%20más%20información" 
+      href={`https://wa.me/${whatsappNumber}?text=Hola,%20me%20gustaría%20obtener%20más%20información`}
       class="whatsapp-btn" 
       target="_blank" 
       rel="noopener noreferrer"

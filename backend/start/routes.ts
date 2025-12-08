@@ -82,8 +82,11 @@ router.delete('/admin/socios/:id', [SociosController, 'eliminar']).use(middlewar
 // Socios búsqueda pública (para cotizaciones)
 router.get('/api/socios/buscar', [SociosController, 'buscarPublico'])
 
-// Datos Empresa routes (admin)
+// Datos Empresa routes
 const DatosEmpresaController = () => import('#controllers/datos_empresa_controller')
+// Público: obtener solo WhatsApp
+router.get('/api/datos-empresa/whatsapp', [DatosEmpresaController, 'getWhatsapp'])
+// Admin: CRUD completo
 router.get('/api/datos-empresa', [DatosEmpresaController, 'index']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.post('/api/datos-empresa', [DatosEmpresaController, 'store']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.put('/api/datos-empresa', [DatosEmpresaController, 'update']).use(middleware.auth()).use(middleware.checkRole('admin'))
