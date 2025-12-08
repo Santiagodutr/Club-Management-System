@@ -405,8 +405,12 @@ async function main() {
         }
         const horaFin = calcularHoraFin(horaInicio, duracion)
         
+        // Check if it's a socio quotation
+        const esSocio = c.tipoCliente === 'socio'
+        const estadoClass = esSocio ? `day-card--socio-${c.estado?.toLowerCase() || 'pendiente'}` : ''
+        
         return `
-        <div class="day-card">
+        <div class="day-card ${estadoClass}">
           <div class="card-menu">
             <button class="card-menu__btn" data-id="${c.id}" title="Más opciones">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -430,6 +434,7 @@ async function main() {
               <h3 class="day-card__title">
                 ${c.cliente.nombre}
                 <span style="font-weight: 400; font-size: 0.85rem; color: #64748b;">#${c.id}</span>
+                ${esSocio ? '<span style="font-weight: 500; font-size: 0.8rem; color: #64748b;"> · Socio del Club</span>' : ''}
               </h3>
               <p class="day-card__subtitle">${c.cliente.email}</p>
             </div>
@@ -509,7 +514,9 @@ async function main() {
             
             <div class="status-row">
               <span class="badge badge-estado ${c.estado ? c.estado.toLowerCase() : ''}">${(c as any).estado_legible || c.estado || 'Sin estado'}</span>
+              ${c.estado && c.estado.toLowerCase() !== 'rechazada' ? `
               <span class="badge badge-pago ${(c as any).estado_pago === 'pagado' ? 'pagado' : ''}">${(c as any).estado_pago_legible || c.estado_pago || 'Sin información de pago'}</span>
+              ` : ''}
             </div>
           </div>
           
@@ -570,7 +577,7 @@ async function main() {
                   </svg>
                   Ver PDF
                 </button>
-                ${c.estado !== 'aceptada' ? `
+                ${c.estado !== 'aceptada' && c.estado?.toLowerCase() !== 'rechazada' ? `
                 <button class="btn-action secondary" data-action="editar" data-id="${c.id}">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -648,8 +655,12 @@ async function main() {
           }
           const horaFin = calcularHoraFin(horaInicio, duracion)
 
+          // Check if it's a socio quotation
+          const esSocio = c.tipoCliente === 'socio'
+          const estadoClass = esSocio ? `day-card--socio-${c.estado?.toLowerCase() || 'pendiente'}` : ''
+
           return `
-        <div class="day-card">
+        <div class="day-card ${estadoClass}">
           <div class="card-menu">
             <button class="card-menu__btn" data-id="${c.id}" title="Más opciones">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -673,6 +684,7 @@ async function main() {
               <h3 class="day-card__title">
                 ${c.cliente.nombre}
                 <span style="font-weight: 400; font-size: 0.85rem; color: #64748b;">#${c.id}</span>
+                ${esSocio ? '<span style="font-weight: 500; font-size: 0.8rem; color: #64748b;"> · Socio del Club</span>' : ''}
               </h3>
               <p class="day-card__subtitle">${c.cliente.email}</p>
             </div>
@@ -752,7 +764,9 @@ async function main() {
             
             <div class="status-row">
               <span class="badge badge-estado ${c.estado ? c.estado.toLowerCase() : ''}">${(c as any).estado_legible || c.estado || 'Sin estado'}</span>
+              ${c.estado && c.estado.toLowerCase() !== 'rechazada' ? `
               <span class="badge badge-pago ${(c as any).estado_pago === 'pagado' ? 'pagado' : ''}">${(c as any).estado_pago_legible || c.estado_pago || 'Sin información de pago'}</span>
+              ` : ''}
             </div>
           </div>
           
@@ -813,7 +827,7 @@ async function main() {
                   </svg>
                   Ver PDF
                 </button>
-                ${c.estado !== 'aceptada' ? `
+                ${c.estado !== 'aceptada' && c.estado?.toLowerCase() !== 'rechazada' ? `
                 <button class="btn-action secondary" data-action="editar" data-id="${c.id}">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>

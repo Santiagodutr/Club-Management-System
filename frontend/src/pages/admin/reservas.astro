@@ -257,6 +257,31 @@ import '@scripts/reservas.ts'
     border-color: #cbd5e1;
   }
   
+  /* Socio quotation special styling - color based on state */
+  :global(.day-card--socio-pendiente) {
+    box-shadow: 0 2px 8px rgba(234, 179, 8, 0.15), 0 0 0 1px rgba(234, 179, 8, 0.1);
+  }
+  
+  :global(.day-card--socio-pendiente:hover) {
+    box-shadow: 0 4px 12px rgba(234, 179, 8, 0.2), 0 0 0 1px rgba(234, 179, 8, 0.15);
+  }
+  
+  :global(.day-card--socio-aceptada) {
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15), 0 0 0 1px rgba(34, 197, 94, 0.1);
+  }
+  
+  :global(.day-card--socio-aceptada:hover) {
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2), 0 0 0 1px rgba(34, 197, 94, 0.15);
+  }
+  
+  :global(.day-card--socio-rechazada) {
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15), 0 0 0 1px rgba(239, 68, 68, 0.1);
+  }
+  
+  :global(.day-card--socio-rechazada:hover) {
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2), 0 0 0 1px rgba(239, 68, 68, 0.15);
+  }
+  
   /* Botón eliminar en esquina superior derecha */
   :global(.card-menu) {
     position: absolute;
