@@ -3,6 +3,13 @@ import AdminLayout from '../../../../layouts/AdminLayout.astro'
 
 export const prerender = false
 
+// For static builds we must provide getStaticPaths for dynamic routes.
+// The admin dynamic routes are managed client-side / require auth, so
+// we return an empty array to skip generating static pages here.
+export async function getStaticPaths() {
+  return []
+}
+
 const { id } = Astro.params
 ---
 

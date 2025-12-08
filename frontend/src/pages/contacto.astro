@@ -8,23 +8,7 @@ import ubicacionIcon from 'src/assets/ubicacion.png'
 import horarioIcon from 'src/assets/horario.png'
 
 // Obtener número de WhatsApp desde la base de datos
-const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3333'
-let whatsappNumber = ''
-
-try {
-  const response = await fetch(`${API_URL}/api/datos-empresa/whatsapp`)
-  if (response.ok) {
-    const result = await response.json()
-    if (result.success && result.data?.whatsappGerente) {
-      whatsappNumber = result.data.whatsappGerente.replace(/[\s\-\+\(\)]/g, '')
-      if (!whatsappNumber.startsWith('57') && whatsappNumber.length === 10) {
-        whatsappNumber = '57' + whatsappNumber
-      }
-    }
-  }
-} catch (error) {
-  console.error('Error obteniendo número de WhatsApp:', error)
-}
+ 
 ---
 
 <BaseLayout title="Contacto - Club del Meta" hideNavbar fullWidth>
@@ -112,18 +96,7 @@ try {
     </div>
   </section>
 
-  <!-- WhatsApp Floating Button -->
-  <a
-    href={`https://wa.me/${whatsappNumber}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    class="whatsapp-float"
-    aria-label="Contactar por WhatsApp"
-  >
-    <svg viewBox="0 0 32 32" fill="currentColor">
-      <path d="M16 0C7.163 0 0 7.163 0 16c0 2.825.742 5.49 2.038 7.813L.054 31.19l7.649-1.925A15.94 15.94 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm8.219 22.706c-.35.987-2.056 1.831-2.844 1.95-.75.1-1.725.138-2.788-.175-.644-.188-1.469-.438-2.525-.856-4.419-1.756-7.3-6.225-7.519-6.512-.213-.281-1.75-2.325-1.75-4.437 0-2.113 1.106-3.15 1.5-3.581.394-.431.863-.538 1.15-.538.288 0 .575.006.825.013.269.013.631-.1.988.756.363.869 1.238 3.019 1.344 3.238.106.219.181.475.038.756-.144.288-.213.469-.425.719-.213.25-.444.556-.638.75-.213.212-.431.438-.181.863.25.419 1.113 1.831 2.388 2.969 1.637 1.462 3.019 1.919 3.45 2.138.431.219.681.181.931-.106.25-.288 1.075-1.256 1.363-1.688.288-.431.575-.363.969-.219.394.144 2.5 1.181 2.931 1.394.431.213.719.313.825.488.106.175.106 1.006-.244 1.994z"/>
-    </svg>
-  </a>
+  
 
   <style>
     .contact-hero {
@@ -287,32 +260,7 @@ try {
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     }
 
-    .whatsapp-float {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      width: 60px;
-      height: 60px;
-      background: #25d366;
-      color: #ffffff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      z-index: 1000;
-    }
-
-    .whatsapp-float:hover {
-      transform: translateY(-4px) scale(1.05);
-      box-shadow: 0 12px 32px rgba(37, 211, 102, 0.5);
-    }
-
-    .whatsapp-float svg {
-      width: 32px;
-      height: 32px;
-    }
+    
 
     @media (max-width: 968px) {
       .navbar-wrapper :global(.navbar__links) {
@@ -346,17 +294,7 @@ try {
         padding: 1.5rem;
       }
 
-      .whatsapp-float {
-        bottom: 1.5rem;
-        right: 1.5rem;
-        width: 56px;
-        height: 56px;
-      }
-
-      .whatsapp-float svg {
-        width: 28px;
-        height: 28px;
-      }
+      
     }
   </style>
 </BaseLayout>
