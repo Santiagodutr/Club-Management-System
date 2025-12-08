@@ -287,8 +287,8 @@ import '@scripts/espacios/nuevo.ts'
 </script>
 
 <style>
-  .panel { padding: 2rem; max-width: 1200px; margin: 0 auto 4rem; }
-  .panel__header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 2rem; }
+  .panel { padding: 2rem; max-width: 1200px; margin: 0 auto 4rem; width: 100%; box-sizing: border-box; overflow-x: hidden; }
+  .panel__header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 2rem; max-width: 100%; }
   .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.8rem; color: #0a4ba5; margin: 0 0 0.3rem; font-weight: 600; }
   h1, h2, h3, h4 { margin: 0; color: #0f172a; }
   h3 { font-size: 1.05rem; }
@@ -340,8 +340,8 @@ import '@scripts/espacios/nuevo.ts'
   :global(.tag-item button) { background: none; border: none; color: #1d4ed8; cursor: pointer; padding: 0; font-size: 1rem; line-height: 1; }
   
   /* Disposiciones */
-  .disposiciones-list { display: grid; gap: 0.75rem; min-height: 60px; }
-  :global(.config-card) { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center; padding: 1rem 1.25rem; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; transition: all 0.2s; }
+  .disposiciones-list { display: grid; gap: 0.75rem; min-height: 60px; max-width: 100%; }
+  :global(.config-card) { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center; padding: 1rem 1.25rem; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; transition: all 0.2s; max-width: 100%; box-sizing: border-box; overflow: hidden; }
   :global(.config-card:hover) { background: #ffffff; border-color: #0a4ba5; box-shadow: 0 4px 12px rgba(10, 75, 165, 0.1); }
   :global(.config-info) { display: flex; flex-direction: column; gap: 0.5rem; }
   :global(.config-title) { font-weight: 600; color: #0f172a; font-size: 0.95rem; }
@@ -358,6 +358,10 @@ import '@scripts/espacios/nuevo.ts'
   :global(.btn-tarifa.has-rates) { background: linear-gradient(135deg, #0891b2, #0e7490); box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3); }
   :global(.btn-tarifa.has-rates:hover) { background: linear-gradient(135deg, #0e7490, #155e75); }
   :global(.btn-tarifa svg) { width: 16px; height: 16px; }
+  
+  /* Form actions alineación */
+  .form-actions .btn,
+  .form-actions a.btn { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; max-width: 100%; }
   
   /* Popup disposición inline */
   .popup-disposicion { grid-column: 1 / -1; background: #f0f9ff; border: 2px solid #0ea5e9; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15); animation: slideDown 0.3s ease; }
@@ -661,24 +665,36 @@ import '@scripts/espacios/nuevo.ts'
   @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
   /* Responsive Mobile */
+  @media (max-width: 1024px) {
+    .panel { padding: 1.5rem; max-width: 100%; }
+    .panel__header { flex-direction: column; }
+    .actions { width: 100%; }
+    .actions .btn { flex: 1; justify-content: center; }
+  }
+
   @media (max-width: 768px) {
-    .panel { padding: 1rem; margin-bottom: 2rem; }
+    .panel { padding: 1rem; margin-bottom: 2rem; width: 100%; }
     .panel__header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-    .card { padding: 1rem; }
+    .actions .btn { width: 100%; }
+    .card { padding: 1rem; max-width: 100%; }
     .form-grid { grid-template-columns: 1fr; gap: 1rem; }
     
     .imagenes-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem; }
     .images-section { padding: 1rem; }
+    .images-header { flex-direction: column; align-items: stretch; }
+    .upload-actions { width: 100%; }
+    .upload-actions .btn { width: 100%; }
     
     .modal-tarifas { width: 95%; max-height: 90vh; }
-    .modal-header { padding: 1rem; }
+    .modal-header { padding: 1rem; flex-wrap: wrap; }
     .modal-body { padding: 1rem; }
-    .modal-footer { padding: 1rem; }
+    .modal-footer { padding: 1rem; flex-wrap: wrap; }
+    .modal-footer .btn { flex: 1; min-width: 140px; }
     .tariff-card { padding: 1.25rem; }
     .tariff-grid { grid-template-columns: 1fr; }
     
     :global(.config-card) { grid-template-columns: 1fr; gap: 0.75rem; padding: 1rem; }
-    :global(.disposicion-actions) { width: 100%; justify-content: flex-end; }
+    :global(.disposicion-actions) { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
     :global(.btn-tarifa) { font-size: 0.8rem; padding: 0.4rem 0.7rem; }
     :global(.btn-tarifa svg) { width: 14px; height: 14px; }
     
@@ -688,7 +704,8 @@ import '@scripts/espacios/nuevo.ts'
     .popup-actions .btn { width: 100%; }
     
     .form-actions { flex-direction: column-reverse; }
-    .form-actions .btn { width: 100%; }
+    .form-actions .btn,
+    .form-actions a { width: 100%; justify-content: center; text-align: center; }
     
     .btn { padding: 0.6rem 0.9rem; font-size: 0.9rem; }
     .btn.small { padding: 0.4rem 0.65rem; font-size: 0.8rem; }
@@ -696,6 +713,19 @@ import '@scripts/espacios/nuevo.ts'
     h1 { font-size: 1.5rem; }
     h3 { font-size: 1rem; }
     .muted { font-size: 0.85rem; }
+    
+    .section-header { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+    .section-header .btn { width: 100%; }
+    .tags-section label { flex-direction: column; align-items: stretch; }
+    .tags-section .btn { width: 100%; }
+  }
+
+  @media (max-width: 640px) {
+    .panel { padding: 0.85rem; }
+    .card { padding: 0.85rem; }
+    h1 { font-size: 1.3rem; }
+    .eyebrow { font-size: 0.75rem; }
+    .imagenes-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.65rem; }
   }
 
   @media (max-width: 480px) {
@@ -707,8 +737,14 @@ import '@scripts/espacios/nuevo.ts'
     :global(.imagen-item.is-portada::before) { font-size: 0.6rem; padding: 0.2rem 0.5rem; }
     
     .modal-tarifas { width: 98%; border-radius: 12px; }
-    .tariff-card { padding: 1rem; }
+    .modal-header { padding: 0.85rem; }
+    .modal-header h3 { font-size: 1.1rem; }
     .btn-close { font-size: 1.75rem; }
+    .modal-body { padding: 0.85rem; }
+    .modal-footer { padding: 0.75rem; }
+    .modal-footer .btn { min-width: auto; font-size: 0.85rem; }
+    .tariff-card { padding: 1rem; }
+    .tariff-card-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
     
     :global(.config-card) { padding: 0.75rem; }
     :global(.config-title) { font-size: 0.9rem; }
@@ -718,5 +754,13 @@ import '@scripts/espacios/nuevo.ts'
     
     h1 { font-size: 1.25rem; }
     .eyebrow { font-size: 0.75rem; }
+    .btn { font-size: 0.85rem; padding: 0.55rem 0.8rem; }
+  }
+
+  @media (max-width: 380px) {
+    .panel { padding: 0.5rem; }
+    .card { padding: 0.5rem; }
+    h1 { font-size: 1.1rem; }
+    .imagenes-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.4rem; }
   }
 </style>
