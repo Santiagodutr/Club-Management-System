@@ -120,17 +120,144 @@ const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.pro
         padding: 2rem 2.5rem;
       }
 
+      /* Botón hamburguesa - oculto en desktop */
+      .mobile-menu-btn {
+        display: none;
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 1001;
+        background: #0a4ba5;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(10, 75, 165, 0.3);
+        transition: all 0.2s ease;
+      }
+
+      .mobile-menu-btn:hover {
+        background: #083d8a;
+        transform: scale(1.05);
+      }
+
+      .mobile-menu-btn svg {
+        display: block;
+        width: 24px;
+        height: 24px;
+        stroke: white;
+        stroke-width: 2;
+        fill: none;
+      }
+
+      /* Overlay oscuro para móvil */
+      .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        pointer-events: none;
+      }
+
+      .sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
       @media (max-width: 900px) {
-        .layout { grid-template-columns: 1fr; }
-        .sidebar { position: relative; height: auto; flex-direction: row; align-items: center; flex-wrap: wrap; }
-        nav { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); width: 100%; }
-        .bottom-actions { width: 100%; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 1rem; grid-template-columns: 1fr 1fr; }
+        .mobile-menu-btn {
+          display: block;
+        }
+
+        .layout { 
+          grid-template-columns: 1fr; 
+        }
+        
+        .sidebar { 
+          position: fixed;
+          top: 0;
+          left: -100%;
+          height: 100vh;
+          width: 280px;
+          max-width: 85vw;
+          z-index: 1000;
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 1.5rem 1.25rem;
+          transition: left 0.3s ease;
+          overflow-y: auto;
+          box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar.active {
+          left: 0;
+        }
+
+        nav { 
+          grid-template-columns: 1fr;
+          width: 100%;
+        }
+
+        .bottom-actions { 
+          width: 100%;
+          margin-top: auto;
+          border-top: 1px solid rgba(255,255,255,0.12);
+          padding-top: 1rem;
+          grid-template-columns: 1fr;
+        }
+
+        .content {
+          padding: 5rem 1.5rem 2rem;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .content {
+          padding: 5rem 1rem 1.5rem;
+        }
+
+        .sidebar {
+          width: 260px;
+        }
+
+        .brand {
+          font-size: 0.95rem;
+        }
+
+        .brand-logo {
+          width: 40px;
+          height: 40px;
+        }
+
+        .nav-item {
+          padding: 0.65rem 0.75rem;
+          font-size: 0.95rem;
+        }
       }
     </style>
   </head>
   <body>
+    <!-- Botón menú hamburguesa (móvil) -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menú">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+
+    <!-- Overlay oscuro -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <div class="layout">
-      <aside class="sidebar">
+      <aside class="sidebar" id="sidebar">
         <div class="brand">
           <img src={logoCorpmeta.src} alt="Club del Meta" class="brand-logo" />
           <div>
@@ -182,6 +309,50 @@ const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.pro
           
           // Redirect to login
           window.location.href = '/admin/login';
+        });
+
+        // Mobile menu functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function openSidebar() {
+          sidebar?.classList.add('active');
+          sidebarOverlay?.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebar() {
+          sidebar?.classList.remove('active');
+          sidebarOverlay?.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+
+        mobileMenuBtn?.addEventListener('click', () => {
+          if (sidebar?.classList.contains('active')) {
+            closeSidebar();
+          } else {
+            openSidebar();
+          }
+        });
+
+        sidebarOverlay?.addEventListener('click', closeSidebar);
+
+        // Cerrar sidebar al hacer clic en un enlace (móvil)
+        const navItems = sidebar?.querySelectorAll('.nav-item');
+        navItems?.forEach(item => {
+          item.addEventListener('click', () => {
+            if (window.innerWidth <= 900) {
+              closeSidebar();
+            }
+          });
+        });
+
+        // Cerrar sidebar si se redimensiona a desktop
+        window.addEventListener('resize', () => {
+          if (window.innerWidth > 900) {
+            closeSidebar();
+          }
         });
       })
     </script>
