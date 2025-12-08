@@ -206,7 +206,7 @@ export default class EspacioController {
       }
 
       // Actualizar timestamp de contenido
-      datos.contenido_actualizado_at = new Date()
+      ;(datos as any).contenido_actualizado_at = new Date()
 
       // Actualizar el espacio
       await db.from('espacios').where('id', espacioId).update(datos)

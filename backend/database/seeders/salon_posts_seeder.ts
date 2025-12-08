@@ -12,7 +12,6 @@ export default class SalonPostsSeeder extends BaseSeeder {
         espacioId: 1, // Ajustar según tus espacios
         titulo: 'Conoce nuestro Salón Principal',
         slug: 'conoce-nuestro-salon-principal',
-        excerpt: 'Descubre las instalaciones y servicios que ofrece nuestro salón principal para eventos corporativos y sociales.',
         content: `# Salón Principal
 
 Nuestro **Salón Principal** es el espacio más versátil del club, ideal para todo tipo de eventos.
@@ -51,7 +50,6 @@ Nuestro **Salón Principal** es el espacio más versátil del club, ideal para t
         espacioId: 2, // Ajustar según tus espacios
         titulo: 'Terraza El Mirador: Tu evento al aire libre',
         slug: 'terraza-el-mirador-evento-aire-libre',
-        excerpt: 'La terraza perfecta para eventos al aire libre con una vista espectacular.',
         content: `# Terraza El Mirador
 
 Disfruta de eventos únicos en nuestra **Terraza El Mirador**, con las mejores vistas de la ciudad.
@@ -93,7 +91,6 @@ Perfecta para eventos diurnos y nocturnos, con iluminación decorativa.
         espacioId: null,
         titulo: 'Próximamente: Nuevo Salón Ejecutivo',
         slug: 'proximamente-nuevo-salon-ejecutivo',
-        excerpt: 'Estamos trabajando en un nuevo espacio exclusivo para reuniones ejecutivas.',
         content: `# Próximamente: Salón Ejecutivo
 
 Estamos emocionados de anunciar la próxima apertura de nuestro **Salón Ejecutivo**.

@@ -599,9 +599,7 @@ async function enviarNotificacionConfirmacion(datos: {
         content: logoBuffer,
         filename: 'logo-club-el-meta.png',
         contentType: 'image/png',
-        disposition: 'inline',
-        contentId: 'logo-corpmeta',
-      }] : undefined,
+      } as any] : undefined,
     })
 
     return true
@@ -740,9 +738,7 @@ async function enviarNotificacionCancelacion(datos: {
         content: logoBuffer,
         filename: 'logo-club-el-meta.png',
         contentType: 'image/png',
-        disposition: 'inline',
-        contentId: 'logo-corpmeta',
-      }] : undefined,
+      } as any] : undefined,
     })
 
     return true

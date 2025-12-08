@@ -263,8 +263,8 @@ async function main() {
       
       // Filtro por estado de pago
       if (pagoSelect?.value) {
-        const pagoFiltro = pagoSelect.value.toLowerCase()
-        const pagoCotizacion = (c.estado_pago || '').toLowerCase()
+        const pagoFiltro = pagoSelect.value
+        const pagoCotizacion = c.estado_pago || ''
         if (pagoCotizacion !== pagoFiltro) return false
       }
       

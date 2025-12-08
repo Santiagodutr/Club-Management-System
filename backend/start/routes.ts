@@ -75,7 +75,6 @@ router.post('/admin/plantillas-pdf/:id/activar', [PlantillasPdfController, 'acti
 const SociosController = () => import('#controllers/socios_controller')
 router.get('/admin/socios', [SociosController, 'index']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.post('/admin/socios', [SociosController, 'crear']).use(middleware.auth()).use(middleware.checkRole('admin'))
-router.get('/admin/socios/buscar-por-documento', [SociosController, 'buscarPorDocumento']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.get('/admin/socios/:id', [SociosController, 'mostrar']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.put('/admin/socios/:id', [SociosController, 'actualizar']).use(middleware.auth()).use(middleware.checkRole('admin'))
 router.delete('/admin/socios/:id', [SociosController, 'eliminar']).use(middleware.auth()).use(middleware.checkRole('admin'))

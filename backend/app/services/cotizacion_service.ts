@@ -22,6 +22,7 @@ export interface SolicitudCotizacion {
   email: string
   telefono?: string
   observaciones?: string
+  codigoSocio?: string
 }
 
 export interface ResultadoCotizacion {
@@ -136,9 +137,6 @@ export class CotizacionService {
 
       // 4. Validar hora de fin del evento (sin considerar desmontaje aún)
       if (!horarioPasaMedianoche && !eventoFinalPasaMedianoche && minutosFin > minutosOpFin) {
-
-      // 4. Validar hora de fin del evento (sin considerar desmontaje aún)
-      if (!horarioPasaMedianoche && !eventoFinalPasaMedianoche && minutosFin > minutosOpFin) {
         const horaFinFormato = this.minutosAHora(minutosFin).split(':').slice(0, 2).join(':')
         return {
           disponible: false,
@@ -157,6 +155,12 @@ export class CotizacionService {
       }
 
       if (!horarioPasaMedianoche && eventoFinalPasaMedianoche) {
+        return {
+          disponible: false,
+          mensaje: `El evento pasa de medianoche pero el horario del club no. Esto no está permitido.`,
+        }
+      }
+
       // 5. Validar bloqueos existentes (AQUÍ SÍ se considera montaje/desmontaje)
       const bloqueos = await BloqueoCalendario.query()
         .where('espacio_id', espacioId)
@@ -174,15 +178,6 @@ export class CotizacionService {
           // Validar superposición incluyendo tiempos de montaje/desmontaje
           const seSuperpone = !(minutosFinConDesmontaje <= minBloqueoInicio || minutosInicioConMontaje >= minBloqueoFin)
           if (seSuperpone) {
-            const horaBloqueadoDesde = this.minutosAHora(minBloqueoInicio).split(':').slice(0, 2).join(':')
-            const horaBloqueadoHasta = this.minutosAHora(minBloqueoFin).split(':').slice(0, 2).join(':')
-            return {
-              disponible: false,
-              mensaje: `Ese horario se cruza con otro evento (${horaBloqueadoDesde}-${horaBloqueadoHasta}). Se requieren ${tiempoMontaje}h montaje y ${tiempoDesmontaje}h desmontaje`,
-            }
-          }
-        }
-      }   if (seSuperpone) {
             const horaBloqueadoDesde = this.minutosAHora(minBloqueoInicio).split(':').slice(0, 2).join(':')
             const horaBloqueadoHasta = this.minutosAHora(minBloqueoFin).split(':').slice(0, 2).join(':')
             return {

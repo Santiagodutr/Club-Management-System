@@ -156,6 +156,27 @@ export default class CotizacionController {
               .from('cotizaciones_pdf')
               .getPublicUrl(filename)
 
+            console.log('📄 PDF generado y subido:', { filename, publicUrl })
+
+            // Verificar que la URL sea accesible
+            try {
+              const testResponse = await fetch(publicUrl, { method: 'HEAD' })
+              console.log('🔍 Verificación de URL pública:', {
+                url: publicUrl,
+                status: testResponse.status,
+                contentType: testResponse.headers.get('content-type'),
+                accessible: testResponse.ok,
+              })
+              
+              if (!testResponse.ok) {
+                console.error('❌ La URL del PDF no es accesible públicamente. Verifica que el bucket de Supabase sea público.')
+                return
+              }
+            } catch (error) {
+              console.error('❌ Error verificando acceso a URL del PDF:', error)
+              return
+            }
+
             // Obtener teléfono del gerente desde la base de datos
             const datosEmpresa = await DatosEmpresa.findBy('key', 'empresa')
             if (!datosEmpresa?.whatsappGerente) {
@@ -166,6 +187,13 @@ export default class CotizacionController {
             // Enviar por WhatsApp: puedes elegir entre botón o documento directo
             const telefonoCliente = whatsappService.formatPhoneNumber(resultado.cotizacion.telefono!)
             const telefonoGerente = whatsappService.formatPhoneNumber(datosEmpresa.whatsappGerente)
+
+            console.log('📞 Números de teléfono formateados:', {
+              clienteOriginal: resultado.cotizacion.telefono,
+              clienteFormateado: telefonoCliente,
+              gerenteOriginal: datosEmpresa.whatsappGerente,
+              gerenteFormateado: telefonoGerente,
+            })
 
             // Calcular hora de fin
             const [horaInicio, minutosInicio] = resultado.cotizacion.hora.split(':').map(Number)
@@ -332,7 +360,7 @@ export default class CotizacionController {
       // Obtener total de registros
       const totalQuery = query.clone()
       const total = await totalQuery.count('* as total')
-      const totalRecords = Number(total[0]?.total || 0)
+      const totalRecords = Number(total[0]?.$extras?.total || 0)
 
       // Obtener cotizaciones con paginación y eager loading (optimizado)
       // Solo seleccionar campos necesarios para la lista
@@ -561,8 +589,8 @@ export default class CotizacionController {
           servicios: data.servicios || (cotizacion.prestaciones as number[]) || [],
           nombre: data.nombre || cotizacion.nombre,
           email: data.email || cotizacion.email,
-          telefono: data.telefono || cotizacion.telefono,
-          observaciones: data.observaciones || cotizacion.observaciones,
+          telefono: data.telefono || cotizacion.telefono || undefined,
+          observaciones: data.observaciones || cotizacion.observaciones || undefined,
         }
 
         // Usar recalcularCotizacion en lugar de crearCotizacion (que duplicaba)
@@ -932,8 +960,7 @@ export default class CotizacionController {
             const pdfBuffer = await PDFService.generarPDF(cotizacion)
             
             // Subir a Supabase Storage
-            const { getSupabaseClient } = await import('#services/supabase_service')
-            const supabase = getSupabaseClient()
+            const { supabase } = await import('#services/supabase_service')
             const filename = `cotizacion_${cotizacion.id}_${Date.now()}.pdf`
             
             const { error: uploadError } = await supabase.storage

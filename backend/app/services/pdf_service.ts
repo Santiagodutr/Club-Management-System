@@ -19,7 +19,7 @@ export class PDFService {
 
     try {
       const browser = await puppeteer.launch({
-        headless: 'new',
+        headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
       })
 
@@ -34,7 +34,7 @@ export class PDFService {
 
       await browser.close()
 
-      return pdfBuffer
+      return Buffer.from(pdfBuffer)
     } catch (error) {
       console.error('Error generando PDF con Puppeteer:', error)
       throw new Error('Error al generar el PDF')

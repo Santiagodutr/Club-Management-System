@@ -232,21 +232,19 @@ export default class SalonPostsController {
       ])
 
       // Auto-generar slug del título
-      if (data.titulo) {
-        data.slug = data.titulo
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '')
-      }
+      const slug = data.titulo
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
 
       // Si se publica por primera vez, setear fecha de publicación
       if (data.publicado && !post.publicado) {
         post.publishedAt = DateTime.now()
       }
 
-      post.merge(data)
+      post.merge({ ...data, slug })
       await post.save()
 
       await post.refresh()

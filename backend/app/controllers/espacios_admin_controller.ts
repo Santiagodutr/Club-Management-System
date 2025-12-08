@@ -203,7 +203,7 @@ export default class EspaciosAdminController {
       const data = await vine.validate({ schema, data: request.all() })
 
       // Verificar que la disposición exista
-      const disposicion = await Disposicion.findOrFail(data.disposicionId)
+      await Disposicion.findOrFail(data.disposicionId)
 
       // Verificar que no exista ya esta configuración
       const existente = await ConfiguracionEspacio.query()
