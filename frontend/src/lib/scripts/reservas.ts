@@ -1604,6 +1604,11 @@ async function main() {
   // Removed abrirModalEditar - now using separate edit page
   // See /admin/reservas/[id]/editar.astro
   
+  function abrirModalEditar(id: number) {
+    // Redirigir a la página de edición
+    window.location.href = `/admin/reservas/${id}/editar`
+  }
+  
   async function abrirModalEditar_DEPRECATED(id: number) {
     const modal = new Modal()
     const loading = new LoadingOverlay()
