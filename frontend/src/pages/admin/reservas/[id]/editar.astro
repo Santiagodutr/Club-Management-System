@@ -15,7 +15,7 @@ const { id } = Astro.params
         </svg>
         Volver a Reservas
       </a>
-      <h1>Editar Cotización <span id="cotizacion-numero"></span></h1>
+      <h1>Editar Cotización #{id}</h1>
     </header>
 
     <!-- Estado de carga -->
@@ -520,9 +520,6 @@ const { id } = Astro.params
       console.log('[Editar] ========== POBLANDO FORMULARIO ==========')
       console.log('[Editar] Cotización completa:', cotizacionData)
       
-      // Número de cotización
-      document.getElementById('cotizacion-numero').textContent = `#${cotizacionData.numero || cotizacionData.id}`
-
       // ESPACIOS - Ahora el backend devuelve espacioId directamente
       const espacioIdActual = cotizacionData.espacioId
       console.log('[Editar] Espacio ID:', espacioIdActual)

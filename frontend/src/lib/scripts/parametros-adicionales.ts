@@ -8,7 +8,6 @@ let servicioEliminar: any | null = null
 const serviciosList = document.getElementById('serviciosList') as HTMLTableSectionElement
 const btnNuevoServicio = document.getElementById('btnNuevoServicio') as HTMLButtonElement
 const btnRefrescar = document.getElementById('btnRefrescar') as HTMLButtonElement
-const filtroTipoCliente = document.getElementById('filtroTipoCliente') as HTMLSelectElement
 const filtroEstado = document.getElementById('filtroEstado') as HTMLSelectElement
 
 // Modal servicio
@@ -23,7 +22,6 @@ const btnGuardar = document.getElementById('btnGuardar') as HTMLButtonElement
 const servicioId = document.getElementById('servicioId') as HTMLInputElement
 const inputNombre = document.getElementById('nombre') as HTMLInputElement
 const inputDescripcion = document.getElementById('descripcion') as HTMLTextAreaElement
-const inputTipoCliente = document.getElementById('tipoCliente') as HTMLSelectElement
 const inputPrecio = document.getElementById('precio') as HTMLInputElement
 const inputActivo = document.getElementById('activo') as HTMLInputElement
 
@@ -41,13 +39,13 @@ const mensajeErrorTexto = document.getElementById('mensajeErrorTexto') as HTMLSp
 
 async function cargarServicios() {
   try {
-    serviciosList.innerHTML = '<tr><td colspan="6" class="placeholder">Cargando servicios...</td></tr>'
+    serviciosList.innerHTML = '<tr><td colspan="5" class="placeholder">Cargando servicios...</td></tr>'
     const response = await serviciosAdicionalesAPI.listar()
     servicios = response.data
     renderServicios()
   } catch (error) {
     console.error('Error al cargar servicios:', error)
-    serviciosList.innerHTML = '<tr><td colspan="6" class="placeholder">Error al cargar servicios</td></tr>'
+    serviciosList.innerHTML = '<tr><td colspan="5" class="placeholder">Error al cargar servicios</td></tr>'
     mostrarError('No se pudieron cargar los servicios')
   }
 }
@@ -56,11 +54,6 @@ function renderServicios() {
   let serviciosFiltrados = [...servicios]
 
   // Aplicar filtros
-  const tipoFiltro = filtroTipoCliente.value
-  if (tipoFiltro) {
-    serviciosFiltrados = serviciosFiltrados.filter(s => s.tipo_cliente === tipoFiltro)
-  }
-
   const estadoFiltro = filtroEstado.value
   if (estadoFiltro) {
     const estadoBool = estadoFiltro === 'true'
@@ -68,7 +61,7 @@ function renderServicios() {
   }
 
   if (serviciosFiltrados.length === 0) {
-    serviciosList.innerHTML = '<tr><td colspan="6" class="placeholder">No se encontraron servicios</td></tr>'
+    serviciosList.innerHTML = '<tr><td colspan="5" class="placeholder">No se encontraron servicios</td></tr>'
     return
   }
 
@@ -80,7 +73,6 @@ function renderServicios() {
         minimumFractionDigits: 0,
       }).format(Number(servicio.precio))
 
-      const tipoClienteBadge = servicio.tipo_cliente === 'socio' ? 'Socio' : 'Particular'
       const estadoBadge = servicio.activo ? 'Activo' : 'Inactivo'
 
       const descripcionDisplay = servicio.descripcion 
@@ -93,7 +85,6 @@ function renderServicios() {
             <div class="servicio-nombre">${servicio.nombre}</div>
           </td>
           <td>${descripcionDisplay}</td>
-          <td>${tipoClienteBadge}</td>
           <td><span class="servicio-precio">${precio}</span></td>
           <td>${estadoBadge}</td>
           <td>
@@ -119,7 +110,6 @@ function abrirModalNuevo() {
   servicioId.value = ''
   inputNombre.value = ''
   inputDescripcion.value = ''
-  inputTipoCliente.value = ''
   inputPrecio.value = ''
   inputActivo.checked = true
   
@@ -136,7 +126,6 @@ function abrirModalEditar(id: number) {
   servicioId.value = String(servicio.id)
   inputNombre.value = servicio.nombre
   inputDescripcion.value = servicio.descripcion || ''
-  inputTipoCliente.value = servicio.tipo_cliente
   inputPrecio.value = String(servicio.precio)
   inputActivo.checked = servicio.activo
   
@@ -154,11 +143,10 @@ async function guardarServicio(e: Event) {
 
   const nombre = inputNombre.value.trim()
   const descripcion = inputDescripcion.value.trim() || null
-  const tipoCliente = inputTipoCliente.value as 'socio' | 'particular'
   const precio = Number(inputPrecio.value)
   const activo = inputActivo.checked
 
-  if (!nombre || !tipoCliente || precio < 0) {
+  if (!nombre || precio < 0) {
     mostrarError('Completa todos los campos requeridos')
     return
   }
@@ -169,7 +157,7 @@ async function guardarServicio(e: Event) {
     const servicioData = {
       nombre,
       descripcion,
-      tipo_cliente: tipoCliente,
+      tipo_cliente: 'socio' as 'socio' | 'particular', // Siempre socio por defecto
       precio,
       activo,
     }
@@ -244,7 +232,6 @@ function mostrarError(mensaje: string) {
 // Event listeners
 btnNuevoServicio.addEventListener('click', abrirModalNuevo)
 btnRefrescar.addEventListener('click', cargarServicios)
-filtroTipoCliente.addEventListener('change', renderServicios)
 filtroEstado.addEventListener('change', renderServicios)
 
 btnCerrarModal.addEventListener('click', cerrarModalServicio)

@@ -10,7 +10,7 @@ export const prerender = false
       <div>
         <p class="eyebrow">Administración</p>
         <h1>Servicios Adicionales</h1>
-        <p class="muted">Gestiona los servicios adicionales disponibles para cotizaciones: precios diferenciados por tipo de cliente.</p>
+        <p class="muted">Gestiona los servicios adicionales disponibles para cotizaciones.</p>
       </div>
       <div class="actions">
         <button id="btnNuevoServicio" class="btn primary">+ Nuevo Servicio</button>
@@ -19,14 +19,6 @@ export const prerender = false
 
     <div class="filters-bar">
       <div class="filters">
-        <label>
-          Tipo de Cliente
-          <select id="filtroTipoCliente">
-            <option value="">Todos</option>
-            <option value="socio">Socio</option>
-            <option value="particular">Particular</option>
-          </select>
-        </label>
         <label>
           Estado
           <select id="filtroEstado">
@@ -52,7 +44,6 @@ export const prerender = false
             <tr>
               <th>Nombre</th>
               <th>Descripción</th>
-              <th>Tipo Cliente</th>
               <th>Precio</th>
               <th>Estado</th>
               <th>Acciones</th>
@@ -60,7 +51,7 @@ export const prerender = false
           </thead>
           <tbody id="serviciosList">
             <tr>
-              <td colspan="6" class="placeholder">Cargando servicios...</td>
+              <td colspan="5" class="placeholder">Cargando servicios...</td>
             </tr>
           </tbody>
         </table>
@@ -96,15 +87,6 @@ export const prerender = false
               rows="3"
               placeholder="Descripción del servicio (opcional)"
             ></textarea>
-          </label>
-
-          <label for="tipoCliente">
-            Tipo de Cliente *
-            <select id="tipoCliente" required>
-              <option value="">Seleccionar...</option>
-              <option value="socio">Socio</option>
-              <option value="particular">Particular</option>
-            </select>
           </label>
 
           <label for="precio">
