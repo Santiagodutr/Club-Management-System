@@ -308,6 +308,7 @@ try {
     .salones-grid {
       grid-template-columns: 1fr;
       gap: 1.5rem;
+      padding: 0 1rem;
     }
 
     .salon-card {
@@ -329,17 +330,32 @@ try {
 
     .salon-card__footer {
       flex-direction: column;
-      gap: 1rem;
-      align-items: flex-start;
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+
+    .salon-card__precio {
+      text-align: center;
     }
 
     .salon-card__btn {
       width: 100%;
       justify-content: center;
+      padding: 0.75rem 1rem;
+      box-sizing: border-box;
     }
   }
 
   @media (max-width: 480px) {
+    .salones {
+      padding: 2rem 0;
+    }
+
+    .salones-grid {
+      padding: 0 0.75rem;
+      gap: 1.25rem;
+    }
+
     .salon-card {
       min-height: 420px;
     }
@@ -361,13 +377,18 @@ try {
       font-size: 0.875rem;
     }
 
+    .salon-card__footer {
+      gap: 0.65rem;
+    }
+
     .salon-card__precio {
       font-size: 1rem;
     }
 
     .salon-card__btn {
       font-size: 0.85rem;
-      padding: 0.6rem 1.25rem;
+      padding: 0.7rem 1rem;
+      white-space: nowrap;
     }
   }
 </style>
