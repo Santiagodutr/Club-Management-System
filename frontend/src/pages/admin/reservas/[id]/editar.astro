@@ -424,6 +424,96 @@ const { id } = Astro.params
         width: 100%;
       }
     }
+
+    /* Estilos para modales */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      transform: scale(0.9);
+      transition: transform 0.2s ease;
+    }
+
+    .modal-overlay.show .modal {
+      transform: scale(1);
+    }
+
+    .modal__content {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal__content--success {
+      color: #059669;
+    }
+
+    .modal__content--error {
+      color: #dc2626;
+    }
+
+    .modal__content--info {
+      color: #0284c7;
+    }
+
+    .modal__icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal__content p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #334155;
+      margin: 0;
+    }
+
+    .modal__actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .modal__actions button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .modal__actions button.primary {
+      background: #0a4ba5;
+      color: white;
+    }
+
+    .modal__actions button.primary:hover {
+      background: #083a82;
+    }
   </style>
 
   <script>
@@ -433,6 +523,53 @@ const { id } = Astro.params
     const cotizacionId = window.location.pathname.split('/')[3]
     
     console.log('[Editar] Iniciando para cotización ID:', cotizacionId)
+
+    // Sistema de modales elegantes
+    class Modal {
+      private overlay: HTMLDivElement
+      private modal: HTMLDivElement
+
+      constructor() {
+        this.overlay = document.createElement('div')
+        this.overlay.className = 'modal-overlay'
+        this.modal = document.createElement('div')
+        this.modal.className = 'modal'
+        this.overlay.appendChild(this.modal)
+      }
+
+      alert(message: string, variant: 'success' | 'error' | 'info' = 'info') {
+        const icons = {
+          success: '✓',
+          error: '✕',
+          info: 'ℹ'
+        }
+        
+        this.modal.innerHTML = `
+          <div class="modal__content modal__content--${variant}">
+            <div class="modal__icon">${icons[variant]}</div>
+            <p>${message}</p>
+          </div>
+          <div class="modal__actions">
+            <button class="btn primary" data-action="ok">OK</button>
+          </div>
+        `
+
+        const okBtn = this.modal.querySelector('[data-action="ok"]')
+        okBtn?.addEventListener('click', () => this.close())
+
+        document.body.appendChild(this.overlay)
+        setTimeout(() => this.overlay.classList.add('show'), 10)
+      }
+
+      close() {
+        this.overlay.classList.remove('show')
+        setTimeout(() => {
+          if (this.overlay.parentNode) {
+            this.overlay.parentNode.removeChild(this.overlay)
+          }
+        }, 200)
+      }
+    }
 
     const loadingState = document.getElementById('loading-state')
     const errorState = document.getElementById('error-state')
@@ -703,11 +840,13 @@ const { id } = Astro.params
     durationInput.addEventListener('change', () => {
       const duracionValue = parseInt(durationInput.value)
       if (duracionValue < 4) {
-        alert('La duración mínima es de 4 horas')
+        const modal = new Modal()
+        modal.alert('La duración mínima es de 4 horas', 'error')
         durationInput.value = 4
       }
       if (duracionValue > 8) {
-        alert('La duración máxima es de 8 horas')
+        const modal = new Modal()
+        modal.alert('La duración máxima es de 8 horas', 'error')
         durationInput.value = 8
       }
       calcularHoraFinal()
@@ -721,7 +860,8 @@ const { id } = Astro.params
       const asistentes = parseInt(asistentesInput.value)
       
       if (asistentes > capacidad) {
-        alert(`Máximo ${capacidad} personas para esta disposición`)
+        const modal = new Modal()
+        modal.alert(`Máximo ${capacidad} personas para esta disposición`, 'error')
         asistentesInput.value = capacidad
       }
     })
@@ -736,19 +876,22 @@ const { id } = Astro.params
 
       // Validar salón
       if (!salonSelect.value) {
-        alert('Selecciona un salón')
+        const modal = new Modal()
+        modal.alert('Selecciona un salón', 'error')
         return
       }
 
       // Validar disposición
       if (!disposicionSelect.value) {
-        alert('Selecciona una disposición')
+        const modal = new Modal()
+        modal.alert('Selecciona una disposición', 'error')
         return
       }
 
       const selected = disposicionSelect.selectedOptions[0]
       if (!selected) {
-        alert('Error: No se pudo obtener la disposición seleccionada')
+        const modal = new Modal()
+        modal.alert('Error: No se pudo obtener la disposición seleccionada', 'error')
         return
       }
 
@@ -758,7 +901,8 @@ const { id } = Astro.params
       console.log('[Editar] Validando capacidad:', asistentes, '<=', capacidad)
       
       if (asistentes > capacidad) {
-        alert(`Máximo ${capacidad} personas para esta disposición`)
+        const modal = new Modal()
+        modal.alert(`Máximo ${capacidad} personas para esta disposición`, 'error')
         return
       }
 
@@ -803,14 +947,19 @@ const { id } = Astro.params
         console.log('[Editar] Response data:', result)
 
         if (result.success) {
-          alert('✓ Cotización actualizada correctamente')
-          window.location.href = '/admin/reservas'
+          const modal = new Modal()
+          modal.alert('✓ Cotización actualizada correctamente', 'success')
+          setTimeout(() => {
+            window.location.href = '/admin/reservas'
+          }, 1500)
         } else {
-          alert('Error: ' + (result.message || 'No se pudo actualizar'))
+          const modal = new Modal()
+          modal.alert('Error: ' + (result.message || 'No se pudo actualizar'), 'error')
         }
       } catch (error) {
         console.error('[Editar] Error:', error)
-        alert('Error de conexión al actualizar: ' + error.message)
+        const modal = new Modal()
+        modal.alert('Error de conexión al actualizar: ' + error.message, 'error')
       } finally {
         submitBtn.disabled = false
         submitBtn.textContent = originalText

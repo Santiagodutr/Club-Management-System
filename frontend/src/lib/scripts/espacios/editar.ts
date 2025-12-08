@@ -1,6 +1,7 @@
 import EasyMDE from 'easymde'
 import 'easymde/dist/easymde.min.css'
 import { createClient } from '@supabase/supabase-js'
+import { Modal } from '../../modal'
 
 const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL
 const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY
@@ -318,7 +319,8 @@ async function cargarEspacio() {
     document.getElementById('pageTitle')!.textContent = `Editar: ${espacio.nombre}`
   } catch (error) {
     console.error('Error al cargar espacio:', error)
-    alert('Error al cargar el espacio')
+    const modal = new Modal()
+    modal.alert('Error al cargar el espacio', 'error')
   }
 }
 
@@ -364,12 +366,14 @@ function confirmarDisposicion() {
   const capacidad = parseInt(inputCap.value)
 
   if (!disposicionId || !capacidad) {
-    alert('Selecciona una disposición y una capacidad')
+    const modal = new Modal()
+    modal.alert('Selecciona una disposición y una capacidad', 'error')
     return
   }
 
   if (disposicionesEspacio.find((d) => d.disposicion_id === disposicionId)) {
-    alert('Esta disposición ya está agregada')
+    const modal = new Modal()
+    modal.alert('Esta disposición ya está agregada', 'error')
     return
   }
 
@@ -535,11 +539,12 @@ function renderDisposiciones() {
 }
 
 function agregarCaracteristica() {
-  const texto = prompt('Ingresa la característica:')
-  if (!texto?.trim()) return
-
-  caracteristicas.push(texto.trim())
-  renderCaracteristicas()
+  const modal = new Modal()
+  modal.prompt('Agregar característica', 'Ingresa la característica', (texto) => {
+    if (!texto?.trim()) return
+    caracteristicas.push(texto.trim())
+    renderCaracteristicas()
+  })
 }
 
 function eliminarCaracteristica(index: number) {
@@ -569,11 +574,12 @@ function renderCaracteristicas() {
 }
 
 function agregarServicio() {
-  const texto = prompt('Ingresa el servicio incluido:')
-  if (!texto?.trim()) return
-
-  servicios.push(texto.trim())
-  renderServicios()
+  const modal = new Modal()
+  modal.prompt('Agregar servicio incluido', 'Ingresa el servicio incluido', (texto) => {
+    if (!texto?.trim()) return
+    servicios.push(texto.trim())
+    renderServicios()
+  })
 }
 
 function eliminarServicio(index: number) {
@@ -711,8 +717,11 @@ async function actualizarDisposiciones() {
   const token = await getFreshToken()
   
   if (!token) {
-    alert('Sesión expirada. Por favor, inicia sesión nuevamente.')
-    window.location.href = '/admin/login'
+    const modal = new Modal()
+    modal.alert('Sesión expirada. Por favor, inicia sesión nuevamente.', 'error')
+    setTimeout(() => {
+      window.location.href = '/admin/login'
+    }, 1500)
     return
   }
   
@@ -806,7 +815,8 @@ async function actualizarDisposiciones() {
 async function guardarEspacio() {
   const nombre = (document.getElementById('nombre') as HTMLInputElement).value.trim()
   if (!nombre) {
-    alert('El nombre es obligatorio')
+    const modal = new Modal()
+    modal.alert('El nombre es obligatorio', 'error')
     return
   }
 
@@ -835,8 +845,11 @@ async function guardarEspacio() {
     const token = await getFreshToken()
     
     if (!token) {
-      alert('Sesión expirada. Por favor, inicia sesión nuevamente.')
-      window.location.href = '/admin/login'
+      const modal = new Modal()
+      modal.alert('Sesión expirada. Por favor, inicia sesión nuevamente.', 'error')
+      setTimeout(() => {
+        window.location.href = '/admin/login'
+      }, 1500)
       return
     }
     
@@ -852,7 +865,8 @@ async function guardarEspacio() {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       console.error('Error al guardar espacio:', response.status, errorData)
-      alert(`Error al guardar espacio: ${errorData.message || 'Error desconocido'}`)
+      const modal = new Modal()
+      modal.alert(`Error al guardar espacio: ${errorData.message || 'Error desconocido'}`, 'error')
       return
     }
 
@@ -864,11 +878,15 @@ async function guardarEspacio() {
     // Marcar que hay cambios sin publicar
     localStorage.setItem('hayCambiosSinPublicar', 'true')
 
-    alert('Espacio actualizado exitosamente. Recuerda publicar los cambios cuando estés listo.')
-    window.location.href = '/admin/espacios'
+    const modal = new Modal()
+    modal.alert('Espacio actualizado exitosamente. Recuerda publicar los cambios cuando estés listo.', 'success')
+    setTimeout(() => {
+      window.location.href = '/admin/espacios'
+    }, 1500)
   } catch (error) {
     console.error('Error al guardar espacio:', error)
-    alert(`Error al guardar el espacio: ${error}`)
+    const modal = new Modal()
+    modal.alert(`Error al guardar el espacio: ${error}`, 'error')
   }
 }
 

@@ -10,6 +10,113 @@ function qs<T extends HTMLElement>(sel: string): Maybe<T> {
   return document.querySelector(sel) as Maybe<T>
 }
 
+// Sistema de modales elegantes
+class Modal {
+  private overlay: HTMLDivElement
+  private modal: HTMLDivElement
+
+  constructor() {
+    this.overlay = document.createElement('div')
+    this.overlay.className = 'modal-overlay'
+    this.modal = document.createElement('div')
+    this.modal.className = 'modal'
+    this.overlay.appendChild(this.modal)
+  }
+
+  show(content: string, actions: { label: string; handler: () => void; variant?: 'primary' | 'danger' | 'secondary' }[] = []) {
+    this.modal.innerHTML = `
+      <div class="modal__content">${content}</div>
+      <div class="modal__actions">
+        ${actions.map(a => `<button class="btn ${a.variant || 'secondary'}" data-action="${a.label}">${a.label}</button>`).join('')}
+      </div>
+    `
+
+    actions.forEach(action => {
+      const btn = this.modal.querySelector(`[data-action="${action.label}"]`)
+      btn?.addEventListener('click', () => {
+        action.handler()
+        this.close()
+      })
+    })
+
+    document.body.appendChild(this.overlay)
+    setTimeout(() => this.overlay.classList.add('show'), 10)
+  }
+
+  prompt(title: string, placeholder: string, callback: (value: string | null) => void) {
+    this.modal.innerHTML = `
+      <div class="modal__content">
+        <h3>${title}</h3>
+        <input type="text" class="modal__input" placeholder="${placeholder}" />
+      </div>
+      <div class="modal__actions">
+        <button class="btn secondary" data-action="cancel">Cancelar</button>
+        <button class="btn primary" data-action="confirm">Confirmar</button>
+      </div>
+    `
+
+    const input = this.modal.querySelector('.modal__input') as HTMLInputElement
+    const cancelBtn = this.modal.querySelector('[data-action="cancel"]')
+    const confirmBtn = this.modal.querySelector('[data-action="confirm"]')
+
+    cancelBtn?.addEventListener('click', () => {
+      callback(null)
+      this.close()
+    })
+
+    confirmBtn?.addEventListener('click', () => {
+      callback(input.value)
+      this.close()
+    })
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        callback(input.value)
+        this.close()
+      }
+    })
+
+    document.body.appendChild(this.overlay)
+    setTimeout(() => {
+      this.overlay.classList.add('show')
+      input.focus()
+    }, 10)
+  }
+
+  alert(message: string, variant: 'success' | 'error' | 'info' = 'info') {
+    const icons = {
+      success: '✓',
+      error: '✕',
+      info: 'ℹ'
+    }
+    
+    this.modal.innerHTML = `
+      <div class="modal__content modal__content--${variant}">
+        <div class="modal__icon">${icons[variant]}</div>
+        <p>${message}</p>
+      </div>
+      <div class="modal__actions">
+        <button class="btn primary" data-action="ok">OK</button>
+      </div>
+    `
+
+    const okBtn = this.modal.querySelector('[data-action="ok"]')
+    okBtn?.addEventListener('click', () => this.close())
+
+    document.body.appendChild(this.overlay)
+    setTimeout(() => this.overlay.classList.add('show'), 10)
+  }
+
+  close() {
+    this.overlay.classList.remove('show')
+    setTimeout(() => {
+      if (this.overlay.parentNode) {
+        this.overlay.parentNode.removeChild(this.overlay)
+      }
+    }, 200)
+  }
+}
+
 async function ensureSession() {
   // Usar getFreshToken para auto-refresh
   const { getFreshToken } = await import('../auth')
@@ -119,53 +226,81 @@ async function main() {
   }
 
   async function verCotizacion(id: number) {
+    const modal = new Modal()
     try {
       const resp = await cotizacionesAPI.obtener(id)
       const c = resp.data
       const detalles = (c as any).detalles || []
-      const msg = `#${c.numero}\n${c.cliente.nombre} · ${c.cliente.email}\n${c.evento.fecha} ${c.evento.hora}\nTotal: $${c.totales.valor_total}\nEstado: ${c.estado} / ${c.estado_pago}\n\nDetalles:\n${detalles
-        .map((d: any) => `- ${d.servicio}: ${d.cantidad} x ${d.valorUnitario} = ${d.total}`)
-        .join('\n')}`
-      alert(msg)
+      const msg = `
+        <h3>Cotización #${c.numero}</h3>
+        <p><strong>Cliente:</strong> ${c.cliente.nombre}</p>
+        <p><strong>Email:</strong> ${c.cliente.email}</p>
+        <p><strong>Fecha:</strong> ${c.evento.fecha} ${c.evento.hora}</p>
+        <p><strong>Total:</strong> $${c.totales.valor_total}</p>
+        <p><strong>Estado:</strong> ${c.estado} / ${c.estado_pago}</p>
+        <h4>Detalles:</h4>
+        <ul>
+          ${detalles.map((d: any) => `<li>${d.servicio}: ${d.cantidad} x ${d.valorUnitario} = ${d.total}</li>`).join('')}
+        </ul>
+      `
+      modal.alert(msg, 'info')
     } catch (err) {
-      alert('No se pudo obtener el detalle')
+      modal.alert('No se pudo obtener el detalle', 'error')
     }
   }
 
   async function cerrarCotizacion(id: number, estadoPago: 'abonado' | 'pagado') {
-    const monto = prompt(`Monto a registrar como ${estadoPago}. Deja vacío para usar el mínimo requerido.`)
-    const payload: any = { estadoPago }
-    if (monto) payload.montoPago = Number(monto)
-    try {
-      await cotizacionesAPI.cerrar(id, payload)
-      await loadCotizaciones()
-      alert('Cotización cerrada y calendario bloqueado.')
-    } catch (err: any) {
-      alert(err?.message || 'Error al cerrar la cotización')
-    }
+    const modal = new Modal()
+    modal.prompt(`Monto a registrar como ${estadoPago}`, 'Deja vacío para usar el mínimo requerido', async (monto) => {
+      if (monto === null) return // Usuario canceló
+      
+      const payload: any = { estadoPago }
+      if (monto) payload.montoPago = Number(monto)
+      
+      try {
+        await cotizacionesAPI.cerrar(id, payload)
+        await loadCotizaciones()
+        const successModal = new Modal()
+        successModal.alert('Cotización cerrada y calendario bloqueado.', 'success')
+      } catch (err: any) {
+        const errorModal = new Modal()
+        errorModal.alert(err?.message || 'Error al cerrar la cotización', 'error')
+      }
+    })
   }
 
   async function registrarPago(id: number) {
-    const monto = prompt('Monto a registrar (COP):')
-    if (!monto) return
-    try {
-      await cotizacionesAPI.registrarPago(id, { monto: Number(monto) })
-      await loadCotizaciones()
-      alert('Pago registrado')
-    } catch (err: any) {
-      alert(err?.message || 'Error registrando pago')
-    }
+    const modal = new Modal()
+    modal.prompt('Monto a registrar', 'Ingresa el monto en COP', async (monto) => {
+      if (!monto) return
+      
+      try {
+        await cotizacionesAPI.registrarPago(id, { monto: Number(monto) })
+        await loadCotizaciones()
+        const successModal = new Modal()
+        successModal.alert('Pago registrado', 'success')
+      } catch (err: any) {
+        const errorModal = new Modal()
+        errorModal.alert(err?.message || 'Error registrando pago', 'error')
+      }
+    })
   }
 
   async function rechazarCotizacion(id: number) {
-    const motivo = prompt('Motivo de rechazo:') || undefined
-    try {
-      await cotizacionesAPI.rechazar(id, motivo)
-      await loadCotizaciones()
-      alert('Cotización rechazada')
-    } catch (err: any) {
-      alert(err?.message || 'Error al rechazar')
-    }
+    const modal = new Modal()
+    modal.prompt('Motivo de rechazo', 'Ingresa el motivo (opcional)', async (motivo) => {
+      if (motivo === null) return // Usuario canceló
+      
+      try {
+        await cotizacionesAPI.rechazar(id, motivo || undefined)
+        await loadCotizaciones()
+        const successModal = new Modal()
+        successModal.alert('Cotización rechazada', 'success')
+      } catch (err: any) {
+        const errorModal = new Modal()
+        errorModal.alert(err?.message || 'Error al rechazar', 'error')
+      }
+    })
   }
 
   function abrirPdf(id: number) {
@@ -175,9 +310,11 @@ async function main() {
   async function reenviarCorreo(id: number) {
     try {
       await cotizacionesAPI.reenviarCorreo(id)
-      alert('Correo reenviado')
+      const modal = new Modal()
+      modal.alert('Correo reenviado', 'success')
     } catch (err: any) {
-      alert(err?.message || 'Error reenviando correo')
+      const modal = new Modal()
+      modal.alert(err?.message || 'Error reenviando correo', 'error')
     }
   }
 
@@ -285,7 +422,8 @@ async function main() {
     const activo = (card.querySelector('.activo') as HTMLInputElement)?.checked || false
     await espaciosAdminAPI.actualizar(id, { nombre, descripcion, activo })
     await loadEspacios()
-    alert('Salón actualizado')
+    const modal = new Modal()
+    modal.alert('Salón actualizado', 'success')
   }
 
   async function agregarConfig(espacioId: number, wrapper: Element) {
@@ -294,39 +432,59 @@ async function main() {
     const disposicionId = Number(select?.value)
     const capacidad = Number(capInput?.value)
     if (!disposicionId || !capacidad) {
-      alert('Selecciona disposición y capacidad')
+      const modal = new Modal()
+      modal.alert('Selecciona disposición y capacidad', 'error')
       return
     }
     await espaciosAdminAPI.agregarConfiguracion(espacioId, { disposicionId, capacidad })
     await loadEspacios()
-    alert('Configuración agregada')
+    const modal = new Modal()
+    modal.alert('Configuración agregada', 'success')
   }
 
   async function guardarConfig(configId: number, espacioId: number, row: Element) {
     const capacidad = Number((row.querySelector('.capacidad') as HTMLInputElement | null)?.value)
     if (!capacidad) {
-      alert('Capacidad requerida')
+      const modal = new Modal()
+      modal.alert('Capacidad requerida', 'error')
       return
     }
     await espaciosAdminAPI.actualizarConfiguracion(espacioId, configId, { capacidad })
     await loadEspacios()
-    alert('Configuración actualizada')
+    const modal = new Modal()
+    modal.alert('Configuración actualizada', 'success')
   }
 
   async function eliminarConfig(configId: number, espacioId: number) {
-    if (!confirm('¿Eliminar configuración?')) return
-    await espaciosAdminAPI.eliminarConfiguracion(espacioId, configId)
-    await loadEspacios()
-    alert('Configuración eliminada')
+    const modal = new Modal()
+    modal.show('¿Estás seguro de eliminar esta configuración?', [
+      { label: 'Cancelar', variant: 'secondary', handler: () => {} },
+      { 
+        label: 'Eliminar', 
+        variant: 'danger', 
+        handler: async () => {
+          await espaciosAdminAPI.eliminarConfiguracion(espacioId, configId)
+          await loadEspacios()
+          const successModal = new Modal()
+          successModal.alert('Configuración eliminada', 'success')
+        }
+      }
+    ])
   }
 
   async function crearEspacio() {
-    const nombre = prompt('Nombre del salón:')
-    if (!nombre) return
-    const descripcion = prompt('Descripción (opcional):') || undefined
-    await espaciosAdminAPI.crear({ nombre, descripcion })
-    await loadEspacios()
-    alert('Salón creado')
+    const modal = new Modal()
+    modal.prompt('Nombre del salón', 'Ingresa el nombre del salón', async (nombre) => {
+      if (!nombre) return
+      
+      const modal2 = new Modal()
+      modal2.prompt('Descripción (opcional)', 'Ingresa una descripción', async (descripcion) => {
+        await espaciosAdminAPI.crear({ nombre, descripcion: descripcion || undefined })
+        await loadEspacios()
+        const successModal = new Modal()
+        successModal.alert('Salón creado', 'success')
+      })
+    })
   }
 
   function wireEspaciosActions() {

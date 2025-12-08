@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { Modal } from '../../modal'
 
 // Use global EasyMDE from CDN
 declare const EasyMDE: any
@@ -155,6 +156,15 @@ function setupEventListeners() {
   // Formateo de inputs de moneda
   setupCurrencyInputs()
 
+  // Prevenir que el modal de tarifas se cierre al hacer clic dentro
+  const modalTarifas = document.getElementById('modalTarifas')
+  modalTarifas?.addEventListener('click', (e) => {
+    // Solo cerrar si se hace clic en el overlay, no en el contenido
+    if (e.target === modalTarifas) {
+      cerrarModalTarifas()
+    }
+  })
+
   // Event delegation para eliminar disposiciones y abrir modal de tarifas
   const disposicionesList = document.getElementById('disposicionesList')
   disposicionesList?.addEventListener('click', (e) => {
@@ -166,12 +176,22 @@ function setupEventListeners() {
     const index = button.dataset.index
 
     if (action === 'eliminar-disposicion' && index !== undefined) {
-      if (confirm('¿Eliminar esta disposición?')) {
-        eliminarDisposicion(parseInt(index))
-      }
+      const modal = new Modal()
+      modal.show('¿Estás seguro de eliminar esta disposición?', [
+        { label: 'Cancelar', variant: 'secondary', handler: () => {} },
+        { 
+          label: 'Eliminar', 
+          variant: 'danger', 
+          handler: () => {
+            eliminarDisposicion(parseInt(index))
+          }
+        }
+      ])
     }
 
     if (action === 'configurar-tarifas' && index !== undefined) {
+      e.preventDefault()
+      e.stopPropagation()
       abrirModalTarifas(parseInt(index))
     }
   })
@@ -258,11 +278,12 @@ function generateSlug(text: string): string {
 }
 
 function agregarCaracteristica() {
-  const texto = prompt('Ingresa la característica:')
-  if (!texto?.trim()) return
-
-  caracteristicas.push(texto.trim())
-  renderCaracteristicas()
+  const modal = new Modal()
+  modal.prompt('Agregar característica', 'Ingresa la característica', (texto) => {
+    if (!texto?.trim()) return
+    caracteristicas.push(texto.trim())
+    renderCaracteristicas()
+  })
 }
 
 function eliminarCaracteristica(index: number) {
@@ -292,11 +313,12 @@ function renderCaracteristicas() {
 }
 
 function agregarServicio() {
-  const texto = prompt('Ingresa el servicio incluido:')
-  if (!texto?.trim()) return
-
-  servicios.push(texto.trim())
-  renderServicios()
+  const modal = new Modal()
+  modal.prompt('Agregar servicio incluido', 'Ingresa el servicio incluido', (texto) => {
+    if (!texto?.trim()) return
+    servicios.push(texto.trim())
+    renderServicios()
+  })
 }
 
 function eliminarServicio(index: number) {
@@ -433,7 +455,11 @@ function abrirModalTarifas(index: number) {
   ;(document.getElementById('modalAdicionalParticular8h') as HTMLInputElement).value = tarifas.particular_adicional_8h ? formatCurrency(tarifas.particular_adicional_8h.toString()) : ''
   
   const modal = document.getElementById('modalTarifas')
-  if (modal) modal.style.display = 'flex'
+  if (modal) {
+    modal.style.display = 'flex'
+    // Asegurar que está por encima de otros modales
+    modal.style.zIndex = '10001'
+  }
 }
 
 function cerrarModalTarifas() {
