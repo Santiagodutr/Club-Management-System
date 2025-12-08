@@ -81,13 +81,13 @@ function renderServicios() {
 
       return `
         <tr class="${!servicio.activo ? 'inactivo' : ''}">
-          <td>
+          <td data-label="Nombre">
             <div class="servicio-nombre">${servicio.nombre}</div>
           </td>
-          <td>${descripcionDisplay}</td>
-          <td><span class="servicio-precio">${precio}</span></td>
-          <td>${estadoBadge}</td>
-          <td>
+          <td data-label="Descripción">${descripcionDisplay}</td>
+          <td data-label="Precio"><span class="servicio-precio">${precio}</span></td>
+          <td data-label="Estado"><span class="badge">${estadoBadge}</span></td>
+          <td data-label="Acciones">
             <div class="servicio-actions">
               <button class="btn-action edit" onclick="window.editarServicio(${servicio.id})">
                 Editar
