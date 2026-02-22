@@ -2,10 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Navbar from '../components/Navbar.astro'
 import heroBackground from 'src/assets/fondoclub.png'
-import telefonoIcon from 'src/assets/telefono.png'
-import emailIcon from 'src/assets/email.png'
-import ubicacionIcon from 'src/assets/ubicacion.png'
-import horarioIcon from 'src/assets/horario.png'
 
 // Obtener número de WhatsApp desde la base de datos
  
@@ -15,7 +11,7 @@ import horarioIcon from 'src/assets/horario.png'
   <section class="contact-hero">
     <div
       class="contact-hero__background"
-      style={`background-image: linear-gradient(rgba(4, 14, 32, 0.6), rgba(4, 14, 32, 0.8)), url(${heroBackground.src});`}
+      style={`background-image: linear-gradient(rgba(4, 14, 32, 0.4), rgba(4, 14, 32, 0.7)), url(${heroBackground.src});`}
     ></div>
     
     <div class="navbar-wrapper">
@@ -23,18 +19,92 @@ import horarioIcon from 'src/assets/horario.png'
     </div>
 
     <div class="contact-hero__content">
-      <h1>Contáctanos</h1>
+      <div class="contact-hero__badge">Atención Personalizada</div>
+      <h1>
+        <span class="title-top">ESTAMOS A TU</span>
+        <span class="title-main">DISPOSICIÓN</span>
+      </h1>
       <p>
-        ¿Necesitas más información sobre nuestros salones o quieres reservar un espacio para tu evento? 
-        Nuestro equipo está listo para asesorarte y hacer de tu celebración una experiencia inolvidable.
+        ¿Tienes un evento en mente o deseas conocer más sobre nuestra comunidad? 
+        Nuestro equipo está listo para brindarte la mejor asesoría en el corazón de Villavicencio.
       </p>
     </div>
   </section>
 
   <section class="contact-content">
     <div class="contact-container">
+      <div class="contact-info-section">
+        <div class="section-header">
+          <h2>Canales de Contacto</h2>
+          <p>Elige el medio que prefieras para comunicarte con nosotros</p>
+        </div>
+        
+        <div class="info-grid">
+          <div class="info-card" style="--card-index: 1">
+            <div class="info-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+            </div>
+            <h3>Líneas Directas</h3>
+            <div class="info-details">
+              <p><span>General:</span> (8) 6 64 11 15</p>
+              <p><span>WhatsApp:</span> 312 4347893</p>
+              <p><span>Eventos:</span> 310 8874473</p>
+            </div>
+          </div>
+
+          <div class="info-card" style="--card-index: 2">
+            <div class="info-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </div>
+            <h3>Correo Electrónico</h3>
+            <div class="info-details">
+              <p><a href="mailto:comunicaciones@clubelmeta.com">comunicaciones@clubelmeta.com</a></p>
+              <p><a href="mailto:secretaria@clubelmeta.com">secretaria@clubelmeta.com</a></p>
+            </div>
+          </div>
+
+          <div class="info-card" style="--card-index: 3">
+            <div class="info-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+            </div>
+            <h3>Ubicación</h3>
+            <div class="info-details">
+              <p>Calle 48A Carrera 30</p>
+              <p>Barrio Ciudad Oriental</p>
+              <p>Villavicencio - Meta</p>
+            </div>
+          </div>
+
+          <div class="info-card" style="--card-index: 4">
+            <div class="info-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <h3>Horarios</h3>
+            <div class="info-details">
+              <p>Lunes a Viernes: 8:00 AM - 6:00 PM</p>
+              <p>Sábados: 9:00 AM - 2:00 PM</p>
+              <p>Domingos: Cerrado</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="map-section">
-        <h2>Nuestra Ubicación</h2>
+        <div class="section-header">
+          <h2>Cómo Llegar</h2>
+          <p>Visítanos en nuestras instalaciones de primer nivel</p>
+        </div>
         <div class="map-container">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1989.645188052661!2d-73.63941951079238!3d4.163210806773625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e3e2d9252257e01%3A0x13a9394f0ef8b23d!2sClub%20Meta!5e0!3m2!1ses!2sco!4v1762378314013!5m2!1ses!2sco"
@@ -47,61 +117,15 @@ import horarioIcon from 'src/assets/horario.png'
           ></iframe>
         </div>
       </div>
-
-      <div class="contact-info-section">
-        <h2>Información de Contacto</h2>
-        
-        <div class="info-grid">
-          <div class="info-card">
-            <div class="info-icon">
-              <img src={telefonoIcon.src} alt="Teléfono" />
-            </div>
-            <h3>Teléfonos</h3>
-            <p>(8) 6 64 11 15 - 312 4347893</p>
-            <p>EVENTOS: 310 8874473 - 312 4350412</p>
-            <p>COMPRAS: 310 8771304</p>
-            <p>CARTERA: 313 2349780</p>
-            <p>OPERACIONES: 313 4660698</p>
-          </div>
-
-          <div class="info-card">
-            <div class="info-icon">
-              <img src={emailIcon.src} alt="Email" />
-            </div>
-            <h3>Email</h3>
-            <p><a href="mailto:comunicaciones@clubelmeta.com">comunicaciones@clubelmeta.com</a></p>
-            <p><a href="mailto:secretaria@clubelmeta.com">secretaria@clubelmeta.com</a></p>
-          </div>
-
-          <div class="info-card">
-            <div class="info-icon">
-              <img src={ubicacionIcon.src} alt="Ubicación" />
-            </div>
-            <h3>Dirección</h3>
-            <p>Calle 48A Carrera 30</p>
-            <p>Barrio Ciudad Oriental</p>
-            <p>Villavicencio - Meta</p>
-          </div>
-
-          <div class="info-card">
-            <div class="info-icon">
-              <img src={horarioIcon.src} alt="Horario" />
-            </div>
-            <h3>Horario de Atención</h3>
-            <p>Lunes a Viernes: 8:00 AM - 6:00 PM</p>
-            <p>Sábados: 9:00 AM - 2:00 PM</p>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
-  
-
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700&display=swap');
+
     .contact-hero {
       position: relative;
-      min-height: 70vh;
+      min-height: 80vh;
       display: flex;
       flex-direction: column;
       color: #ffffff;
@@ -116,6 +140,13 @@ import horarioIcon from 'src/assets/horario.png'
       background-size: cover;
       background-position: center;
       width: 100%;
+      transform: scale(1.05);
+      animation: heroZoom 20s infinite alternate;
+    }
+
+    @keyframes heroZoom {
+      from { transform: scale(1.05); }
+      to { transform: scale(1.2); }
     }
 
     .navbar-wrapper {
@@ -126,19 +157,11 @@ import horarioIcon from 'src/assets/horario.png'
     .navbar-wrapper :global(.navbar) {
       background: transparent !important;
       box-shadow: none !important;
-      position: relative !important;
+      padding-top: 2rem !important;
     }
 
     .navbar-wrapper :global(.navbar__link) {
       color: #ffffff !important;
-    }
-
-    .navbar-wrapper :global(.navbar__link:hover) {
-      color: #60a5fa !important;
-    }
-
-    .navbar-wrapper :global(.navbar__toggle span) {
-      background: #ffffff !important;
     }
 
     .contact-hero__content {
@@ -150,151 +173,191 @@ import horarioIcon from 'src/assets/horario.png'
       z-index: 1;
     }
 
-    .contact-hero h1 {
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
+    .contact-hero__badge {
+      display: inline-block;
+      padding: 0.5rem 1.25rem;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 99px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.75rem;
       font-weight: 700;
-      margin: 0 0 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 2rem;
+    }
+
+    .contact-hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      line-height: 0.9;
+      margin: 0 0 2rem;
+    }
+
+    .title-top {
+      display: block;
+      font-size: clamp(2rem, 5vw, 3rem);
+      color: rgba(255, 255, 255, 0.7);
+      letter-spacing: 0.1em;
+    }
+
+    .title-main {
+      display: block;
+      font-size: clamp(4rem, 12vw, 8rem);
+      color: #ffffff;
       letter-spacing: 0.02em;
     }
 
     .contact-hero p {
-      font-size: clamp(1rem, 2vw, 1.25rem);
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(1.1rem, 2vw, 1.35rem);
       line-height: 1.7;
-      margin: 0;
-      color: rgba(255, 255, 255, 0.95);
-      max-width: 800px;
+      color: rgba(255, 255, 255, 0.9);
+      max-width: 750px;
       margin: 0 auto;
     }
 
     .contact-content {
-      padding: 5rem 2rem;
-      background: #ffffff;
+      padding: 8rem 2rem;
+      background: #fdfdfd;
     }
 
     .contact-container {
       max-width: 1400px;
       margin: 0 auto;
-      display: grid;
-      gap: 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8rem;
     }
 
-    .contact-info-section h2,
-    .map-section h2 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin: 0 0 2.5rem;
-      color: #1f2937;
+    .section-header {
       text-align: center;
+      margin-bottom: 5rem;
+    }
+
+    .section-header h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 6vw, 4rem);
+      color: #041a4a;
+      margin: 0 0 1rem;
+    }
+
+    .section-header p {
+      font-family: 'Outfit', sans-serif;
+      color: #94a3b8;
+      font-size: 1.1rem;
     }
 
     .info-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
-      margin-bottom: 3rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2.5rem;
     }
 
     .info-card {
-      background: #f9fafb;
-      padding: 2rem;
-      border-radius: 16px;
-      text-align: center;
-      border: 1px solid #e5e7eb;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background: white;
+      padding: 3.5rem 2.5rem;
+      border-radius: 32px;
+      text-align: left;
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+      transition: all 0.4s cubic-bezier(0.2, 0, 0.2, 1);
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 0.8s ease-out forwards;
+      animation-delay: calc(var(--card-index) * 0.15s);
     }
 
     .info-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      transform: translateY(-10px);
+      box-shadow: 0 40px 60px rgba(4, 26, 74, 0.08);
+      border-color: #e2e8f0;
     }
 
     .info-icon {
-      width: 60px;
-      height: 60px;
-      margin: 0 auto 1rem;
+      width: 64px;
+      height: 64px;
+      background: #f8fafc;
+      color: #0a4ba5;
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-bottom: 2.5rem;
+      transition: all 0.4s ease;
     }
 
-    .info-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+    .info-card:hover .info-icon {
+      background: #0a4ba5;
+      color: white;
+      transform: rotate(10deg);
     }
 
     .info-card h3 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin: 0 0 1rem;
-      color: #1f2937;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 1.5rem;
+      color: #041a4a;
     }
 
-    .info-card p {
-      margin: 0.5rem 0;
-      color: #6b7280;
-      line-height: 1.6;
-      font-size: 0.95rem;
+    .info-details p {
+      font-family: 'Outfit', sans-serif;
+      margin: 0.75rem 0;
+      color: #64748b;
+      line-height: 1.5;
+      font-size: 1.05rem;
     }
 
-    .info-card a {
+    .info-details span {
+      font-weight: 700;
+      color: #475569;
+      margin-right: 0.5rem;
+    }
+
+    .info-details a {
       color: #0a4ba5;
       text-decoration: none;
-      transition: color 0.2s ease;
+      font-weight: 600;
+      border-bottom: 1.5px solid transparent;
+      transition: all 0.2s ease;
     }
 
-    .info-card a:hover {
-      color: #0842a0;
-      text-decoration: underline;
-    }
-
-    .map-section {
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
+    .info-details a:hover {
+      border-bottom-color: #0a4ba5;
     }
 
     .map-container {
-      border-radius: 16px;
+      border-radius: 32px;
       overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+      border: 8px solid white;
     }
 
-    
-
-    @media (max-width: 968px) {
-      .navbar-wrapper :global(.navbar__links) {
-        background: rgba(10, 75, 165, 0.98) !important;
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
+    }
 
-      .contact-hero {
-        min-height: 60vh;
-      }
-
+    @media (max-width: 768px) {
       .contact-content {
-        padding: 3rem 1.5rem;
+        padding: 5rem 1.5rem;
       }
 
-      .info-grid {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .contact-hero h1 {
-        font-size: 2rem;
-      }
-
-      .contact-hero p {
-        font-size: 1rem;
+      .contact-container {
+        gap: 5rem;
       }
 
       .info-card {
-        padding: 1.5rem;
+        padding: 2.5rem 2rem;
       }
 
-      
+      .title-main {
+        font-size: 4rem;
+      }
     }
   </style>
 </BaseLayout>

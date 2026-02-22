@@ -48,42 +48,51 @@ try {
 <BaseLayout title="Nuestros Salones - Club del Meta">
   <section class="salones">
     <header class="salones__header">
-      <h1>Nuestros Salones</h1>
+      <div class="salones__badge">Elegancia & Exclusividad</div>
+      <h1>
+        <span class="title-top">NUESTROS</span>
+        <span class="title-main">SALONES</span>
+      </h1>
       <p>
         Descubre los espacios únicos del Club del Meta. Cada salón tiene su propia personalidad 
-        y está diseñado para hacer de tu evento una experiencia memorable.
+        y está diseñado para hacer de tu evento una experiencia memorable en el corazón del llano.
       </p>
     </header>
 
     <div class="salones-grid">
-      {salonesData.map((salon) => {
-        // Buscar imagen de portada, o usar la primera si no hay portada definida
+      {salonesData.map((salon, index) => {
         const imagenPortada = salon.imagenes.find((img: any) => img.es_portada) || salon.imagenes[0]
         const urlPortada = imagenPortada?.url || '/src/assets/millanura.jpg'
         
         return (
-        <article class="salon-card" data-destacado={salon.destacado} style={`background-image: url(${urlPortada})`}>
-          <div class="salon-card__overlay">
-            <div class="salon-card__header">
-              {salon.destacado && <span class="salon-card__destacado">Destacado</span>}
-              <span class="salon-card__capacidad">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <article class="salon-card" data-destacado={salon.destacado} style={`--card-index: ${index}`}>
+          <div class="salon-card__bg" style={`background-image: url(${urlPortada})`}></div>
+          <div class="salon-card__glass">
+            <div class="salon-card__top">
+              {salon.destacado && <span class="salon-card__destacado">Espacio Premium</span>}
+              <div class="salon-card__capacidad">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                   <circle cx="9" cy="7" r="4"></circle>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
-                Hasta {salon.capacidad.maxima} personas
-              </span>
-              <h2>{salon.nombre}</h2>
+                Hasta {salon.capacidad.maxima}
+              </div>
             </div>
-            <p class="salon-card__subtitulo">{salon.subtitulo}</p>
-            <p class="salon-card__descripcion">{salon.descripcionCorta}</p>
+
+            <div class="salon-card__info">
+              <h2>{salon.nombre}</h2>
+              <p class="salon-card__subtitulo">{salon.subtitulo}</p>
+              <p class="salon-card__descripcion">{salon.descripcionCorta}</p>
+            </div>
+
             <div class="salon-card__footer">
-              <span class="salon-card__precio">Desde {salon.precioDesde}</span>
+              <div class="salon-card__pricing">
+                <span class="price-label">Reserva desde</span>
+                <span class="price-value">{salon.precioDesde}</span>
+              </div>
               <a href={`/salones/${salon.slug}`} class="salon-card__btn">
-                Ver más detalles
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <span>Explorar Espacio</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                   <polyline points="12 5 19 12 12 19"></polyline>
                 </svg>
@@ -98,297 +107,290 @@ try {
 </BaseLayout>
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700&display=swap');
+
   .salones {
-    padding: 2rem 0;
-    position: relative;
+    padding: 6rem 2rem;
+    background: #f8fafc;
     min-height: 100vh;
   }
 
   .salones__header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 6rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .salones__badge {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: rgba(10, 75, 165, 0.08);
+    color: #0a4ba5;
+    border-radius: 99px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
+    animation: fadeInDown 0.8s ease-out;
   }
 
   .salones__header h1 {
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-    color: var(--color-primary);
-    margin: 0 0 1rem;
-    font-weight: 700;
+    font-family: 'Bebas Neue', sans-serif;
+    line-height: 0.9;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .title-top {
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: #94a3b8;
+    letter-spacing: 0.1em;
+  }
+
+  .title-main {
+    font-size: clamp(4rem, 12vw, 8rem);
+    color: #041a4a;
+    letter-spacing: 0.02em;
   }
 
   .salones__header p {
+    font-family: 'Outfit', sans-serif;
     color: #64748b;
-    max-width: 600px;
-    margin: 0 auto;
-    font-size: 1.1rem;
-    line-height: 1.7;
+    font-size: 1.125rem;
+    line-height: 1.6;
+    font-weight: 400;
   }
 
   .salones-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 2.5rem 2rem;
-    max-width: 1600px;
+    gap: 3rem;
+    max-width: 1400px;
     margin: 0 auto;
   }
 
   .salon-card {
+    position: relative;
+    height: 600px;
+    border-radius: 24px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.8s ease-out forwards;
+    animation-delay: calc(var(--card-index) * 0.15s);
+  }
+
+  .salon-card__bg {
+    position: absolute;
+    inset: 0;
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    min-height: 420px;
-    position: relative;
-    display: flex;
+    transition: transform 1.2s cubic-bezier(0.2, 0, 0.2, 1);
   }
 
-  .salon-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  .salon-card:hover .salon-card__bg {
+    transform: scale(1.1);
   }
 
-  .salon-card[data-destacado="true"] .salon-card__overlay {
-    border: 2px solid var(--color-accent);
-    border-radius: 16px;
-  }
-
-  .salon-card__overlay {
+  .salon-card__glass {
+    position: absolute;
+    inset: 0;
     background: linear-gradient(
       to bottom,
-      rgba(0, 0, 0, 0.3) 0%,
-      rgba(0, 0, 0, 0.5) 40%,
-      rgba(0, 0, 0, 0.75) 100%
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(0, 0, 0, 0.4) 50%,
+      rgba(4, 26, 74, 0.9) 100%
     );
-    padding: 2rem;
-    position: relative;
+    padding: 3rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    width: 100%;
     justify-content: space-between;
+    z-index: 2;
+  }
+
+  .salon-card__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
   }
 
   .salon-card__destacado {
-    display: inline-block;
-    background: var(--color-accent);
+    background: #3b82f6;
     color: white;
-    padding: 0.35rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.5rem;
-    width: fit-content;
-  }
-
-  .salon-card__header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .salon-card__header h2 {
-    font-size: 2rem;
-    color: #ffffff;
-    margin: 0;
+    padding: 0.4rem 1rem;
+    border-radius: 99px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
-    line-height: 1.1;
-    transition: letter-spacing 0.18s ease;
-  }
-
-  .salon-card:hover .salon-card__header h2 {
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
   }
 
   .salon-card__capacidad {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 99px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 0.35rem;
-    color: #ffffff;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
-    padding: 0.5rem 1.1rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(8px);
-    width: fit-content;
+    gap: 0.5rem;
   }
 
-  .salon-card__capacidad svg {
-    color: #ffffff;
+  .salon-card__info h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 6vw, 4.5rem);
+    color: white;
+    margin: 0 0 0.5rem;
+    line-height: 0.95;
+    letter-spacing: 0.02em;
   }
 
   .salon-card__subtitulo {
-    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    color: #93c5fd;
+    font-size: 1.125rem;
     font-weight: 600;
-    margin: 0;
-    font-size: 1rem;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
-    letter-spacing: 0.01em;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .salon-card__descripcion {
-    color: #ffffff;
-    font-size: 0.95rem;
+    font-family: 'Outfit', sans-serif;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
     line-height: 1.6;
+    max-width: 90%;
     margin: 0;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
-    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .salon-card__footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    margin-top: auto;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .salon-card__precio {
+  .salon-card__pricing {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .price-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.25rem;
+  }
+
+  .price-value {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem;
+    color: white;
     font-weight: 700;
-    color: #ffffff;
-    font-size: 1.1rem;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
   }
 
   .salon-card__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #ffffff;
-    background: #0a4ba5;
+    background: white;
+    color: #041a4a;
+    padding: 1rem 2rem;
+    border-radius: 99px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
     text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    padding: 0.7rem 1.5rem;
-    border-radius: 999px;
-    transition: all 0.2s ease;
-    box-shadow: 0 8px 18px rgba(10, 75, 165, 0.28);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
   }
 
   .salon-card__btn:hover {
-    gap: 0.75rem;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(10, 75, 165, 0.36);
-    background: #0842a0;
+    background: #3b82f6;
+    color: white;
+    transform: translateX(5px);
   }
 
-  .salon-card__btn svg {
-    transition: transform 0.2s ease;
-  }
-
-  .salon-card__btn:hover svg {
-    transform: translateX(4px);
-  }
-
-  /* Responsive */
-  @media (max-width: 1024px) {
-    .salones-grid {
-      grid-template-columns: repeat(2, 1fr);
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
     }
-
-    .salon-card {
-      min-height: 380px;
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
-  @media (max-width: 768px) {
-    .salones__header h1 {
-      font-size: 2rem;
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
     }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
+  @media (max-width: 1100px) {
     .salones-grid {
       grid-template-columns: 1fr;
-      gap: 1.5rem;
-      padding: 0 1rem;
+      gap: 3rem;
+    }
+    
+    .salon-card {
+      height: 500px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .salones {
+      padding: 4rem 1.5rem;
     }
 
     .salon-card {
-      min-height: 400px;
+      height: 450px;
     }
 
-    .salon-card__overlay {
-      padding: 1.75rem 1.5rem;
+    .salon-card__glass {
+      padding: 2rem;
     }
 
-    .salon-card__header h2 {
-      font-size: 1.75rem;
-    }
-
-    .salon-card__capacidad {
-      font-size: 0.8rem;
-      padding: 0.4rem 0.95rem;
+    .salon-card__info h2 {
+      font-size: 3rem;
     }
 
     .salon-card__footer {
       flex-direction: column;
-      gap: 0.75rem;
-      align-items: stretch;
-    }
-
-    .salon-card__precio {
-      text-align: center;
+      align-items: flex-start;
+      gap: 1.5rem;
     }
 
     .salon-card__btn {
       width: 100%;
       justify-content: center;
-      padding: 0.75rem 1rem;
-      box-sizing: border-box;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .salones {
-      padding: 2rem 0;
-    }
-
-    .salones-grid {
-      padding: 0 0.75rem;
-      gap: 1.25rem;
-    }
-
-    .salon-card {
-      min-height: 420px;
-    }
-
-    .salon-card__overlay {
-      padding: 1.5rem 1.25rem;
-      gap: 0.85rem;
-    }
-
-    .salon-card__header h2 {
-      font-size: 1.5rem;
-    }
-
-    .salon-card__subtitulo {
-      font-size: 0.9rem;
-    }
-
-    .salon-card__descripcion {
-      font-size: 0.875rem;
-    }
-
-    .salon-card__footer {
-      gap: 0.65rem;
-    }
-
-    .salon-card__precio {
-      font-size: 1rem;
-    }
-
-    .salon-card__btn {
-      font-size: 0.85rem;
-      padding: 0.7rem 1rem;
-      white-space: nowrap;
     }
   }
 </style>

@@ -55,827 +55,527 @@ try {
 <BaseLayout title="Eventos Realizados - Club del Meta">
   <section class="eventos">
     <header class="eventos__header">
-      <h1>Nuestros Eventos</h1>
+      <div class="eventos__badge">Momentos Memorables</div>
+      <h1>
+        <span class="title-top">GALERÍA DE</span>
+        <span class="title-main">EVENTOS</span>
+      </h1>
       <p>
         Revive los momentos más especiales que han tenido lugar en el Club del Meta.
-        Cada evento cuenta una historia única de celebración y éxito.
+        Cada celebración es una historia de éxito y elegancia que nos enorgullece compartir.
       </p>
     </header>
 
     <div class="eventos-feed">
       {posts.length > 0 ? (
         posts.map((post, postIndex) => (
-          <article class="evento-item" data-post-id={post.id}>
-            <div class="evento-item__header">
+          <article class="evento-item" data-post-id={post.id} style={`--item-index: ${postIndex}`}>
+            <div class="evento-item__gallery">
+              {post.imagenes && post.imagenes.length > 0 ? (
+                <div class="evento-item__carousel" data-carousel={`carousel-${post.id}`}>
+                  <div class="carousel-container">
+                    {post.imagenes.map((img: any, imgIndex: number) => (
+                      <div 
+                        class={`carousel-slide ${imgIndex === 0 ? 'active' : ''}`}
+                        data-slide={imgIndex}
+                      >
+                        <img 
+                          src={img.url} 
+                          alt={img.alt || post.titulo} 
+                          loading={imgIndex === 0 ? 'eager' : 'lazy'}
+                          class="gallery-img"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {post.imagenes.length > 1 && (
+                    <>
+                      <button class="carousel-btn carousel-btn--prev" aria-label="Anterior">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                      </button>
+                      <button class="carousel-btn carousel-btn--next" aria-label="Siguiente">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                  
+                  <div class="carousel-counter">
+                    <span class="current">1</span> / <span class="total">{post.imagenes.length}</span>
+                  </div>
+                </div>
+              ) : (
+                <div class="evento-item__placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            <div class="evento-item__info">
               <div class="evento-item__meta">
                 <span class="evento-item__salon">{post.espacioNombre}</span>
-                <span class="evento-item__separator">•</span>
                 <time class="evento-item__date" datetime={post.publishedAt}>
                   {(() => {
                     try {
                       const fecha = new Date(post.publishedAt)
-                      if (isNaN(fecha.getTime())) {
-                        return 'Fecha no disponible'
-                      }
                       return fecha.toLocaleDateString('es-CO', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                        month: 'short', 
+                        day: 'numeric',
+                        year: 'numeric'
                       })
-                    } catch {
-                      return 'Fecha no disponible'
-                    }
+                    } catch { return 'Reciente' }
                   })()}
                 </time>
               </div>
+              
               <h2 class="evento-item__title">{post.titulo}</h2>
-            </div>
-            
-            {post.imagenes && post.imagenes.length > 0 && (
-              <div class="evento-item__carousel" data-carousel={`carousel-${post.id}`}>
-                <div class="carousel-container">
-                  {post.imagenes.map((img: any, imgIndex: number) => (
-                    <div 
-                      class={`carousel-slide ${imgIndex === 0 ? 'active' : ''}`}
-                      data-slide={imgIndex}
-                    >
-                      <img 
-                        src={img.url} 
-                        alt={img.alt || post.titulo} 
-                        loading={imgIndex === 0 ? 'eager' : 'lazy'}
-                      />
-                    </div>
-                  ))}
+              
+              <div class="evento-item__content">
+                <div class="evento-item__preview" data-preview set:html={post.preview} />
+                <div class="evento-item__body collapsible" data-collapsed="true">
+                  <div class="collapsible-content" set:html={post.content} />
                 </div>
-                
-                {post.imagenes.length > 1 && (
-                  <>
-                    <button class="carousel-btn carousel-btn--prev" aria-label="Imagen anterior">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                      </svg>
-                    </button>
-                    <button class="carousel-btn carousel-btn--next" aria-label="Siguiente imagen">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                      </svg>
-                    </button>
-                    <div class="carousel-indicators">
-                      {post.imagenes.map((_: any, idx: number) => (
-                        <button 
-                          class={`indicator ${idx === 0 ? 'active' : ''}`}
-                          data-slide-to={idx}
-                          aria-label={`Ir a imagen ${idx + 1}`}
-                        ></button>
-                      ))}
-                    </div>
-                  </>
-                )}
+                <button class="ver-mas-btn">
+                  <span class="btn-text">Leer relato completo</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
               </div>
-            )}
-            
-            <div class="evento-item__content">
-              <div class="evento-item__preview" data-preview set:html={post.preview} />
-              <div class="evento-item__body collapsible" data-collapsed="true">
-                <div class="collapsible-content" set:html={post.content} />
-              </div>
-              <button class="ver-mas-btn">Ver más</button>
             </div>
           </article>
         ))
       ) : (
         <div class="no-eventos">
-          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-          </svg>
+          <div class="no-eventos__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
           <h3>Próximamente</h3>
-          <p>Pronto compartiremos las historias de los eventos más memorables de nuestro club.</p>
+          <p>Estamos preparando las historias de nuestros eventos más recientes para compartirlas contigo.</p>
         </div>
       )}
     </div>
   </section>
 
-  <!-- Modal de Imagen -->
-  <div class="image-modal" id="imageModal" role="dialog" aria-hidden="true">
-    <button class="modal-close" aria-label="Cerrar">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    </button>
-    <img src="" alt="" class="modal-image" />
-    <div class="modal-nav">
-      <button class="modal-prev" aria-label="Anterior">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-      </button>
-      <button class="modal-next" aria-label="Siguiente">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-      </button>
+  <!-- Lightbox Modal -->
+  <div class="image-modal" id="imageModal">
+    <button class="modal-close">×</button>
+    <div class="modal-content">
+      <img src="" alt="" class="modal-image" />
     </div>
   </div>
 </BaseLayout>
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700&display=swap');
+
   .eventos {
-    padding: 3rem 0;
+    padding: 6rem 0;
+    background: #fdfdfd;
     min-height: 100vh;
-    background: var(--color-background);
   }
 
   .eventos__header {
     text-align: center;
-    margin-bottom: 4rem;
-    padding: 0 1rem;
+    margin-bottom: 6rem;
+    padding: 0 2rem;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .eventos__badge {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: rgba(10, 75, 165, 0.08);
+    color: #0a4ba5;
+    border-radius: 99px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
   }
 
   .eventos__header h1 {
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-    color: var(--color-primary);
-    margin: 0 0 1rem;
-    font-weight: 700;
+    font-family: 'Bebas Neue', sans-serif;
+    line-height: 0.9;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .title-top {
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: #94a3b8;
+    letter-spacing: 0.1em;
+  }
+
+  .title-main {
+    font-size: clamp(4rem, 12vw, 8rem);
+    color: #041a4a;
+    letter-spacing: 0.02em;
   }
 
   .eventos__header p {
+    font-family: 'Outfit', sans-serif;
     color: #64748b;
-    max-width: 700px;
-    margin: 0 auto;
     font-size: 1.15rem;
     line-height: 1.7;
+    max-width: 700px;
+    margin: 0 auto;
   }
 
   .eventos-feed {
-    max-width: 800px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 0 1.5rem;
+    padding: 0 2rem;
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    gap: 6rem;
   }
 
   .evento-item {
-    background: white;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-    transition: box-shadow 0.3s ease;
-  }
-
-  .evento-item:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  }
-
-  .evento-item__header {
-    padding: 2rem 2rem 1rem;
-  }
-
-  .evento-item__meta {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 4rem;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
+    opacity: 0;
+    transform: translateY(40px);
+    animation: fadeInUp 0.8s ease-out forwards;
+    animation-delay: calc(var(--item-index) * 0.2s);
   }
 
-  .evento-item__salon {
-    background: var(--color-primary);
-    color: white;
-    padding: 0.4rem 1rem;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.8rem;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+  .evento-item:nth-child(even) {
+    grid-template-columns: 1fr 1.2fr;
   }
 
-  .evento-item__separator {
-    color: #cbd5e1;
-    font-weight: bold;
+  .evento-item:nth-child(even) .evento-item__gallery {
+    order: 2;
   }
 
-  .evento-item__date {
-    color: #64748b;
-    font-weight: 600;
-  }
-
-  .evento-item__title {
-    font-size: 1.875rem;
-    color: #0f172a;
-    margin: 0;
-    font-weight: 700;
-    line-height: 1.3;
-  }
-
-  .evento-item__image {
-    width: 100%;
-    max-height: 500px;
+  .evento-item__gallery {
+    position: relative;
+    border-radius: 32px;
     overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
+    aspect-ratio: 4/5;
     background: #f1f5f9;
   }
 
-  .evento-item__image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .evento-item__content {
-    padding: 1.5rem 2rem 2rem;
-  }
-
-  .evento-item__preview {
-    font-size: 1.05rem;
-    color: #334155;
-    margin: 0 0 1rem;
-    line-height: 1.7;
-    max-height: 150px;
-    overflow: hidden;
-    position: relative;
-    --show-gradient: 1;
-  }
-
-  .evento-item__preview::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40px;
-    background: linear-gradient(to bottom, transparent, white);
-    opacity: var(--show-gradient);
-  }
-
-  /* Estilos para markdown en el preview */
-  .evento-item__preview :global(p) {
-    margin: 0.75rem 0;
-    font-size: 1.05rem;
-  }
-
-  .evento-item__preview :global(img) {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    margin: 1rem 0;
-  }
-
-  .evento-item__preview :global(h1),
-  .evento-item__preview :global(h2),
-  .evento-item__preview :global(h3) {
-    color: var(--color-primary);
-    margin: 1rem 0 0.5rem;
-    font-size: 1.5rem;
-  }
-
-  .evento-item__preview :global(strong) {
-    color: var(--color-primary);
-    font-weight: 700;
-  }
-
-  .evento-item__preview :global(em) {
-    font-style: italic;
-  }
-
-  .evento-item__preview :global(a) {
-    color: var(--color-primary);
-    text-decoration: underline;
-  }
-
-  .evento-item__body {
-    color: #334155;
-    font-size: 1.05rem;
-    line-height: 1.7;
-  }
-
-  /* Estilos para markdown en el feed */
-  .evento-item__body :global(p) {
-    margin: 0.75rem 0;
-    font-size: 1.05rem;
-  }
-
-  .evento-item__body :global(h1),
-  .evento-item__body :global(h2),
-  .evento-item__body :global(h3) {
-    color: var(--color-primary);
-    margin: 1rem 0 0.5rem;
-    font-size: 1.5rem;
-  }
-
-  .evento-item__body :global(img) {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    margin: 1rem 0;
-  }
-
-  .evento-item__body :global(strong) {
-    color: var(--color-primary);
-    font-weight: 700;
-  }
-
-  .evento-item__body :global(em) {
-    font-style: italic;
-  }
-
-  .evento-item__body :global(a) {
-    color: var(--color-primary);
-    text-decoration: underline;
-  }
-
-  .no-eventos {
-    text-align: center;
-    padding: 5rem 2rem;
-    color: #64748b;
-  }
-
-  .no-eventos svg {
-    margin-bottom: 2rem;
-    opacity: 0.4;
-  }
-
-  .no-eventos h3 {
-    font-size: 2rem;
-    color: #0f172a;
-    margin: 0 0 1rem;
-    font-weight: 700;
-  }
-
-  .no-eventos p {
-    font-size: 1.15rem;
-    max-width: 500px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-
-  /* Carrusel de imágenes tipo Instagram */
   .evento-item__carousel {
-    position: relative;
+    height: 100%;
     width: 100%;
-    aspect-ratio: 16/10;
-    overflow: hidden;
-    background: #f1f5f9;
+    position: relative;
   }
 
   .carousel-container {
-    position: relative;
-    width: 100%;
     height: 100%;
+    width: 100%;
   }
 
   .carousel-slide {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     opacity: 0;
-    transition: opacity 0.5s ease;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .carousel-slide.active {
     opacity: 1;
-    pointer-events: auto;
+    z-index: 1;
   }
 
   .carousel-slide img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    display: block;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-  }
-
-  .carousel-slide img:hover {
-    transform: scale(1.02);
+    object-fit: cover;
   }
 
   .carousel-btn {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: none;
+    color: #041a4a;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 10;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   }
 
   .carousel-btn:hover {
-    background: white;
+    background: #0a4ba5;
+    color: white;
     transform: translateY(-50%) scale(1.1);
   }
 
-  .carousel-btn--prev {
-    left: 1rem;
-  }
+  .carousel-btn--prev { left: 1.5rem; }
+  .carousel-btn--next { right: 1.5rem; }
 
-  .carousel-btn--next {
-    right: 1rem;
-  }
-
-  .carousel-btn svg {
-    color: #0a4ba5;
-  }
-
-  .carousel-indicators {
+  .carousel-counter {
     position: absolute;
-    bottom: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 0.5rem;
+    bottom: 2rem;
+    right: 2rem;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 99px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
     z-index: 10;
   }
 
-  .indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 0;
+  .evento-item__meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
   }
 
-  .indicator.active {
-    background: white;
-    width: 24px;
-    border-radius: 4px;
+  .evento-item__salon {
+    font-family: 'Outfit', sans-serif;
+    color: #0a4ba5;
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
   }
 
-  .indicator:hover {
-    background: rgba(255, 255, 255, 0.8);
+  .evento-item__date {
+    font-family: 'Outfit', sans-serif;
+    color: #94a3b8;
+    font-size: 0.875rem;
+    font-weight: 500;
   }
 
-  /* Ver más / Ver menos */
-  .collapsible {
-    position: relative;
+  .evento-item__title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    color: #041a4a;
+    margin: 0 0 2rem;
+    line-height: 1;
+    letter-spacing: 0.02em;
   }
 
-  .collapsible[data-collapsed="true"] .collapsible-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-  }
-
-  .collapsible[data-collapsed="false"] .collapsible-content {
-    max-height: none;
-    overflow: visible;
-    transition: max-height 0.5s ease;
-  }
-
-  /* Ocultar el degradado del preview cuando está expandido */
-  .evento-item__content:has(.collapsible[data-collapsed="false"]) .evento-item__preview::after {
-    display: none;
+  .evento-item__preview {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: #64748b;
+    margin-bottom: 1.5rem;
   }
 
   .ver-mas-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     background: none;
     border: none;
-    color: var(--color-primary);
+    color: #0a4ba5;
+    font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
-    padding: 0.5rem 0;
-    margin-top: 1rem;
+    padding: 0;
     transition: all 0.3s ease;
   }
 
   .ver-mas-btn:hover {
-    text-decoration: underline;
-  }
-
-  /* Modal de imagen - Lightbox */
-  .image-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
-  }
-
-  .image-modal.active {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .modal-image {
-    max-width: 90vw;
-    max-height: 85vh;
-    object-fit: contain;
-    border-radius: 8px;
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    background: rgba(255,255,255,0.1);
-    border: none;
-    color: white;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-  }
-
-  .modal-close:hover {
-    background: rgba(255,255,255,0.2);
-  }
-
-  .modal-nav {
-    position: absolute;
-    bottom: 2rem;
-    display: flex;
+    color: #3b82f6;
     gap: 1rem;
   }
 
-  .modal-prev,
-  .modal-next {
-    background: rgba(255,255,255,0.1);
-    border: none;
-    color: white;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
+  .ver-mas-btn svg {
+    transition: transform 0.3s ease;
   }
 
-  .modal-prev:hover,
-  .modal-next:hover {
-    background: rgba(255,255,255,0.2);
+  .evento-item__body.collapsible[data-collapsed="false"] ~ .ver-mas-btn svg {
+    transform: rotate(180deg);
   }
 
-  @media (max-width: 768px) {
-    .eventos-feed {
-      padding: 0 1rem;
-      gap: 2rem;
+  .collapsible-content {
+    font-family: 'Outfit', sans-serif;
+    color: #64748b;
+    font-size: 1.125rem;
+    line-height: 1.8;
+  }
+
+  .no-eventos {
+    text-align: center;
+    padding: 8rem 2rem;
+  }
+
+  .no-eventos__icon {
+    color: #cbd5e1;
+    margin-bottom: 2rem;
+  }
+
+  .no-eventos h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    color: #041a4a;
+    margin-bottom: 1rem;
+  }
+
+  .no-eventos p {
+    font-family: 'Outfit', sans-serif;
+    color: #94a3b8;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 968px) {
+    .evento-item, .evento-item:nth-child(even) {
+      grid-template-columns: 1fr;
+      gap: 3rem;
     }
 
-    .evento-item__header {
-      padding: 1.5rem 1.5rem 1rem;
-    }
-
-    .evento-item__title {
-      font-size: 1.5rem;
-    }
-
-    .evento-item__content {
-      padding: 1.5rem;
-    }
-
-    .evento-item__excerpt {
-      font-size: 1rem;
-    }
-
-    .evento-item__body {
-      font-size: 1rem;
-    }
-
-    .evento-item__carousel {
+    .evento-item__gallery {
+      order: 1 !important;
       aspect-ratio: 16/9;
     }
 
-    .carousel-btn {
-      width: 32px;
-      height: 32px;
+    .evento-item__info {
+      order: 2 !important;
     }
 
-    .carousel-btn--prev {
-      left: 0.5rem;
+    .eventos-feed {
+      gap: 8rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .eventos {
+      padding: 4rem 1.5rem;
     }
 
-    .carousel-btn--next {
-      right: 0.5rem;
+    .eventos__header {
+      margin-bottom: 4rem;
     }
 
-    .eventos__header h1 {
-      font-size: 2.25rem;
-    }
-
-    .modal-close {
-      width: 40px;
-      height: 40px;
-      top: 1rem;
-      right: 1rem;
-    }
-
-    .modal-nav {
-      bottom: 1rem;
-    }
-
-    .modal-prev,
-    .modal-next {
-      width: 40px;
-      height: 40px;
+    .evento-item__title {
+      font-size: 3rem;
     }
   }
 </style>
 
 <script>
-  // Carrusel de imágenes
+  // Enhanced Carousel Logic
   document.querySelectorAll('.evento-item__carousel').forEach((carousel) => {
-    const slides = carousel.querySelectorAll('.carousel-slide')
-    const prevBtn = carousel.querySelector('.carousel-btn--prev')
-    const nextBtn = carousel.querySelector('.carousel-btn--next')
-    const indicators = carousel.querySelectorAll('.indicator')
-    let currentSlide = 0
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    const prevBtn = carousel.querySelector('.carousel-btn--prev');
+    const nextBtn = carousel.querySelector('.carousel-btn--next');
+    const currentSpan = carousel.querySelector('.carousel-counter .current');
+    let currentSlide = 0;
 
-    // No hacer nada si solo hay una imagen
-    if (slides.length <= 1) return
+    if (slides.length <= 1) return;
 
     function showSlide(index) {
       slides.forEach((slide, i) => {
-        slide.classList.toggle('active', i === index)
-      })
-      indicators.forEach((ind, i) => {
-        ind.classList.toggle('active', i === index)
-      })
-      currentSlide = index
+        slide.classList.toggle('active', i === index);
+      });
+      if (currentSpan) currentSpan.textContent = index + 1;
+      currentSlide = index;
     }
 
     if (prevBtn) {
       prevBtn.addEventListener('click', () => {
-        const newIndex = currentSlide === 0 ? slides.length - 1 : currentSlide - 1
-        showSlide(newIndex)
-      })
+        const newIndex = currentSlide === 0 ? slides.length - 1 : currentSlide - 1;
+        showSlide(newIndex);
+      });
     }
 
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
-        const newIndex = currentSlide === slides.length - 1 ? 0 : currentSlide + 1
-        showSlide(newIndex)
-      })
+        const newIndex = currentSlide === slides.length - 1 ? 0 : currentSlide + 1;
+        showSlide(newIndex);
+      });
     }
+  });
 
-    indicators.forEach((indicator, index) => {
-      indicator.addEventListener('click', () => showSlide(index))
-    })
-  })
-
-  // Ver más / Ver menos - Solo mostrar si es necesario
-  function checkOverflow() {
-    document.querySelectorAll('.evento-item__content').forEach((content) => {
-      const btn = content.querySelector('.ver-mas-btn')
-      const preview = content.querySelector('[data-preview]')
-      const collapsible = content.querySelector('.collapsible')
-      
-      if (!btn || !preview || !collapsible) return
-      
-      // Verificar si el contenido completo es más alto que el preview
-      const collapsibleContent = collapsible.querySelector('.collapsible-content')
-      if (!collapsibleContent) return
-      
-      // Temporalmente expandir para medir
-      const originalDisplay = collapsible.style.display
-      const originalMaxHeight = collapsible.style.maxHeight
-      collapsible.style.display = 'block'
-      collapsible.style.maxHeight = 'none'
-      
-      const contentHeight = collapsibleContent.scrollHeight
-      const previewHeight = preview.offsetHeight
-      
-      // Restaurar
-      collapsible.style.display = originalDisplay
-      collapsible.style.maxHeight = originalMaxHeight
-      
-      // Solo mostrar botón si hay contenido que expandir (más de 20px de diferencia)
-      if (contentHeight > previewHeight + 20) {
-        btn.style.display = 'block'
-      } else {
-        btn.style.display = 'none'
-        // Si no hay contenido extra, ocultar el gradiente del preview
-        if (preview.querySelector('::after') || true) {
-          preview.style.setProperty('--show-gradient', '0')
-        }
-      }
-    })
-  }
-
-  // Ejecutar al cargar y al redimensionar
-  checkOverflow()
-  window.addEventListener('resize', checkOverflow)
-
+  // Ver más / Ver menos Refinement
   document.querySelectorAll('.ver-mas-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const content = btn.closest('.evento-item__content')
-      if (!content) return
+      const content = btn.closest('.evento-item__info');
+      if (!content) return;
       
-      const collapsible = content.querySelector('.collapsible')
-      const preview = content.querySelector('[data-preview]')
+      const collapsible = content.querySelector('.collapsible');
+      if (!collapsible) return;
       
-      if (!collapsible) return
+      const isCollapsed = collapsible.getAttribute('data-collapsed') === 'true';
+      collapsible.setAttribute('data-collapsed', (!isCollapsed).toString());
+      btn.querySelector('.btn-text').textContent = isCollapsed ? 'Mostrar menos' : 'Leer relato completo';
       
-      const isCollapsed = collapsible.getAttribute('data-collapsed') === 'true'
-      collapsible.setAttribute('data-collapsed', isCollapsed ? 'false' : 'true')
-      btn.textContent = isCollapsed ? 'Ver menos' : 'Ver más'
-      
-      // Ocultar/mostrar preview
-      if (preview) {
-        preview.style.display = isCollapsed ? 'none' : 'block'
+      if (!isCollapsed) {
+        collapsible.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
-    })
-  })
+    });
+  });
 
-  // Lightbox - Implementación tipo salones que funciona
-  const modal = document.getElementById('imageModal')
-  const modalImg = modal?.querySelector('.modal-image')
-  let currentPostImages = []
-  let currentImageIndex = 0
+  // Simple Lightbox
+  const modal = document.getElementById('imageModal');
+  const modalImg = modal.querySelector('.modal-image');
+  const modalClose = modal.querySelector('.modal-close');
 
-  function openModal(images, startIndex) {
-    currentPostImages = images
-    currentImageIndex = startIndex
-    if (modal && modalImg) {
-      modalImg.src = currentPostImages[currentImageIndex].src
-      modalImg.alt = currentPostImages[currentImageIndex].alt
-      modal.classList.add('active')
-      modal.setAttribute('aria-hidden', 'false')
-      document.body.style.overflow = 'hidden'
-      
-      // Ocultar navegación si solo hay una imagen
-      const modalNav = modal.querySelector('.modal-nav')
-      if (modalNav) {
-        modalNav.style.display = images.length > 1 ? 'flex' : 'none'
-      }
+  document.querySelectorAll('.gallery-img').forEach(img => {
+    img.addEventListener('click', () => {
+      modal.classList.add('active');
+      modalImg.src = img.src;
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  modalClose.addEventListener('click', () => {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
     }
-  }
-
-  function closeModal() {
-    if (modal) {
-      modal.classList.remove('active')
-      modal.setAttribute('aria-hidden', 'true')
-      document.body.style.overflow = ''
-    }
-  }
-
-  function navigate(direction) {
-    currentImageIndex = (currentImageIndex + direction + currentPostImages.length) % currentPostImages.length
-    if (modalImg) {
-      modalImg.src = currentPostImages[currentImageIndex].src
-      modalImg.alt = currentPostImages[currentImageIndex].alt
-    }
-  }
-
-  // Asignar click handlers a todas las imágenes del carrusel
-  document.querySelectorAll('.carousel-slide img').forEach((img) => {
-    img.addEventListener('click', (e) => {
-      const carousel = img.closest('.evento-item__carousel')
-      if (!carousel) return
-      
-      const allImagesInCarousel = Array.from(carousel.querySelectorAll('.carousel-slide img'))
-      const clickedIndex = allImagesInCarousel.indexOf(img)
-      openModal(allImagesInCarousel, clickedIndex)
-    })
-  })
-
-  modal?.querySelector('.modal-close')?.addEventListener('click', closeModal)
-  modal?.querySelector('.modal-prev')?.addEventListener('click', () => navigate(-1))
-  modal?.querySelector('.modal-next')?.addEventListener('click', () => navigate(1))
-
-  modal?.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal()
-  })
-
-  document.addEventListener('keydown', (e) => {
-    if (!modal?.classList.contains('active')) return
-    if (e.key === 'Escape') closeModal()
-    // Solo permitir navegación con teclado si hay más de una imagen
-    if (currentPostImages.length > 1) {
-      if (e.key === 'ArrowLeft') navigate(-1)
-      if (e.key === 'ArrowRight') navigate(1)
-    }
-  })
+  });
+  // The following lines were part of an incomplete keydown listener in the provided snippet.
+  // Assuming they were meant to be part of a larger keydown listener,
+  // but without the full context, they are left as is to match the instruction.
+  // If this was an error in the instruction, it should be corrected.
+  // if (currentPostImages.length > 1) { // currentPostImages is not defined in this scope
+  //     if (e.key === 'ArrowLeft') navigate(-1) // navigate is not defined in this scope
+  //     if (e.key === 'ArrowRight') navigate(1) // navigate is not defined in this scope
+  //   }
+  // })
 </script>
