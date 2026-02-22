@@ -920,8 +920,7 @@ const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.pro
     <style>
       /* -------- LAYOUT -------- */
       .layout {
-        display: grid;
-        grid-template-columns: 260px 1fr;
+        display: block;
         min-height: 100vh;
       }
 
@@ -933,8 +932,10 @@ const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.pro
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
-        position: sticky;
+        position: fixed;
         top: 0;
+        left: 0;
+        width: 260px;
         height: 100vh;
         z-index: 100;
         overflow-y: auto;
@@ -953,8 +954,7 @@ const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.pro
         width: 40px;
         height: auto;
         flex-shrink: 0;
-        filter: brightness(0) invert(1);
-        opacity: 0.9;
+        opacity: 0.92;
       }
 
       .brand-name { font-weight: 700; font-size: 0.95rem; color: white; line-height: 1.15; }
@@ -1063,9 +1063,11 @@ const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.pro
       .content {
         padding: 2.5rem 3rem;
         min-width: 0;
-        width: 100%;
+        width: calc(100% - 260px);
         max-width: 1400px;
-        margin: 0 auto;
+        margin-left: 260px;
+        min-height: 100vh;
+        box-sizing: border-box;
       }
 
       /* Mobile */
@@ -1099,17 +1101,13 @@ const { title = 'Panel Admin - Club del Meta', active = 'reservas' } = Astro.pro
 
       /* -------- RESPONSIVE -------- */
       @media (max-width: 1024px) {
-        .layout { grid-template-columns: 1fr; }
-
         .sidebar {
-          position: fixed;
           left: -280px;
-          width: 260px;
         }
 
         .sidebar.active { left: 0; box-shadow: 20px 0 60px rgba(0,0,0,0.4); }
         .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
-        .content { padding: 5.5rem 1.25rem 2rem; }
+        .content { padding: 5.5rem 1.25rem 2rem; margin-left: 0; width: 100%; }
       }
 
       @media (max-width: 640px) {
