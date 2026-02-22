@@ -9,62 +9,76 @@ import heroBackground from 'src/assets/fondoclub.png'
     <div
       class="hero__background"
       aria-hidden="true"
-      style={`background-image: linear-gradient(rgba(4, 14, 32, 0.15), rgba(4, 14, 32, 0.4)), url(${heroBackground.src});`}
+      style={`background-image: linear-gradient(rgba(2, 6, 23, 0.4), rgba(2, 6, 23, 0.7)), url(${heroBackground.src});`}
     ></div>
-    <div class="hero__layer" aria-hidden="true"></div>
+    <div class="hero__overlay" aria-hidden="true"></div>
 
-    <div class="hero__wrap">
-      <header class="hero__header">
-        <div class="hero__identity">
+    <div class="hero__container">
+      <header class="hero__nav animate-fade-in">
+        <div class="hero__brand">
           <img src={logoClub.src} alt="Logo Corporacion Club el Meta" class="hero__logo" />
-          <span class="hero__name">Corporacion Club el Meta</span>
+          <div class="hero__brand-text">
+            <span class="hero__brand-name">Corporación</span>
+            <span class="hero__brand-sub">Club el Meta</span>
+          </div>
         </div>
-        <a href="/admin/login" class="admin-btn" title="Acceso Administrador">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="/admin/login" class="hero__admin-link" title="Acceso Administrador">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             <path d="M9 12l2 2 4-4"></path>
           </svg>
-          Soy Admin
+          Portal Admin
         </a>
       </header>
 
-      <div class="hero__content">
-        <div class="hero__eyebrow">Tu espacio, tu horario, tu comunidad</div>
-        <h1 id="hero-heading" class="hero__headline">
-          <span class="hero__headline-top">EL LUGAR</span>
-          <span class="hero__headline-bottom">perfecto para tu evento</span>
-        </h1>
-        <div class="hero__actions">
-          <a class="hero__cta" href="/salones">Obtén tu cotización aqui</a>
+      <div class="hero__main">
+        <div class="hero__badge animate-slide-up" style="animation-delay: 0.2s;">
+          <span class="badge-dot"></span>
+          Reserva tu espacio exclusivo
         </div>
-        <p class="hero__subtitle">
-          Gestiona y obtén cotizaciones de salones y eventos en el Club el Meta en segundos. controla
-          calendarios y garantiza la mejor experiencia para tu evento.
+        
+        <h1 id="hero-heading" class="hero__title">
+          <span class="hero__title-line animate-slide-up" style="animation-delay: 0.4s;">
+            EL LUGAR <span class="text-accent">PERFECTO</span>
+          </span>
+          <span class="hero__title-line animate-slide-up" style="animation-delay: 0.6s;">
+            para tu evento
+          </span>
+        </h1>
+
+        <p class="hero__description animate-slide-up" style="animation-delay: 0.8s;">
+          Gestione y obtenga cotizaciones de salones exclusivos en segundos. 
+          Experimente la elegancia y el confort de la mejor comunidad del Meta.
         </p>
 
-      
+        <div class="hero__actions animate-slide-up" style="animation-delay: 1s;">
+          <a class="btn-primary" href="/salones">
+            Comenzar Cotización
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+          <a class="btn-secondary" href="/eventos">Explorar Eventos</a>
+        </div>
       </div>
     </div>
   </section>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap');
 
     :global(body) {
       font-family: 'Outfit', sans-serif;
+      margin: 0;
+      overflow-x: hidden;
+      background: #020617;
     }
 
     .hero {
       position: relative;
       min-height: 100vh;
-      border-radius: 0;
-      overflow: hidden;
-      color: #ffffff;
       display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: clamp(1rem, 3vw, 2.5rem) clamp(2.5rem, 7vw, 5rem);
-      background: #07193a;
+      flex-direction: column;
+      color: #f8fafc;
+      overflow: hidden;
     }
 
     .hero__background {
@@ -72,277 +86,255 @@ import heroBackground from 'src/assets/fondoclub.png'
       inset: 0;
       background-size: cover;
       background-position: center;
+      z-index: -2;
+      transform: scale(1.05);
+      animation: hero-zoom 20s ease-in-out infinite alternate;
     }
 
-    .hero__layer {
+    @keyframes hero-zoom {
+      from { transform: scale(1.05); }
+      to { transform: scale(1.15); }
+    }
+
+    .hero__overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(110deg, rgba(8, 27, 68, 0.9), rgba(8, 27, 68, 0.6) 48%, rgba(16, 36, 78, 0.35));
+      background: radial-gradient(circle at center, rgba(2, 6, 23, 0.3) 0%, rgba(2, 6, 23, 0.8) 100%);
+      z-index: -1;
     }
 
-    .hero__wrap {
+    .hero__container {
       position: relative;
-      display: grid;
-      gap: clamp(1.5rem, 4vw, 3rem);
-      max-width: min(1200px, 96vw);
-      width: 100%;
+      width: min(1400px, 92vw);
+      margin: 0 auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0;
     }
 
-    .hero__header {
+    .hero__nav {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 1.5rem;
+      align-items: center;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .hero__identity {
+    .hero__brand {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 1.25rem;
     }
 
     .hero__logo {
-      width: clamp(96px, 10vw, 140px);
+      width: 64px;
       height: auto;
-      filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+      filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.3));
     }
 
-    .hero__name {
-      font-size: clamp(1.4rem, 3vw, 2.2rem);
-      font-weight: 600;
-      letter-spacing: 0.04em;
+    .hero__brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .hero__brand-name {
+      font-size: 1.25rem;
+      font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #fff;
     }
 
-    .admin-btn {
+    .hero__brand-sub {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 0.05em;
+    }
+
+    .hero__admin-link {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      background: rgba(255, 255, 255, 0.15);
-      color: white;
-      padding: 0.75rem 1.25rem;
-      border-radius: 50px;
-      text-decoration: none;
+      gap: 0.625rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.625rem 1.25rem;
+      border-radius: 99px;
+      font-size: 0.875rem;
       font-weight: 600;
-      font-size: 0.9rem;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(8px);
+      color: #fff;
+      text-decoration: none;
+      backdrop-filter: blur(12px);
       transition: all 0.3s ease;
     }
 
-    .admin-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
-      border-color: rgba(255, 255, 255, 0.4);
+    .hero__admin-link:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
       transform: translateY(-2px);
     }
 
-    .hero__languages {
+    .hero__main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 800px;
+      padding: 4rem 0;
+    }
+
+    .hero__badge {
       display: inline-flex;
-      gap: 0.65rem;
-      background: rgba(255, 255, 255, 0.12);
-      padding: 0.45rem;
-      border-radius: 999px;
-      backdrop-filter: blur(6px);
-    }
-
-    .hero__language {
-      font-size: 0.95rem;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      padding: 0.5rem 1.25rem;
+      border-radius: 99px;
+      font-size: 0.8125rem;
       font-weight: 600;
-      color: rgba(255, 255, 255, 0.75);
-      text-decoration: none;
-      padding: 0.45rem 0.95rem;
-      border-radius: 999px;
-      transition: background 0.2s ease, color 0.2s ease;
-    }
-
-    .hero__language--active,
-    .hero__language:hover {
-      background: #ffffff;
-      color: #0a1e4a;
-    }
-
-    .hero__content {
-      display: grid;
-      gap: 1.6rem;
-      max-width: min(720px, 95%);
-    }
-
-    .hero__eyebrow {
+      color: #60a5fa;
       text-transform: uppercase;
-      letter-spacing: 0.25em;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.8);
+      letter-spacing: 0.1em;
+      margin-bottom: 2rem;
+      width: fit-content;
     }
 
-    .hero__headline {
-      margin: 0;
-      line-height: 1;
-      display: grid;
-      gap: 0.15em;
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      background: #60a5fa;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #60a5fa;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .hero__title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 8vw, 6.5rem);
+      line-height: 0.95;
+      margin: 0 0 1.5rem;
       text-transform: uppercase;
+      letter-spacing: -0.01em;
     }
 
-    .hero__headline-top {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(3rem, 7vw, 4.2rem);
-      letter-spacing: 0.18em;
-      color: #ff2b6d;
+    .hero__title-line {
+      display: block;
     }
 
-    .hero__headline-bottom {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(3.2rem, 7.5vw, 5.1rem);
-      letter-spacing: 0.2em;
+    .text-accent {
+      color: #3b82f6;
+      -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
     }
 
-    .hero__subtitle {
-      margin: 0;
-      font-size: clamp(1.05rem, 2.3vw, 1.2rem);
-      line-height: 1.8;
-      color: rgba(255, 255, 255, 0.88);
+    .hero__description {
+      font-size: clamp(1.125rem, 2vw, 1.375rem);
+      line-height: 1.6;
+      color: rgba(248, 250, 252, 0.8);
+      margin-bottom: 3rem;
+      max-width: 600px;
+      font-weight: 300;
     }
 
     .hero__actions {
       display: flex;
+      gap: 1.5rem;
       flex-wrap: wrap;
-      gap: 1rem;
     }
 
-    .hero__cta {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem 2.4rem;
-      border-radius: 999px;
-      background: #ffffff;
-      color: #0a1e4a;
-      font-weight: 600;
-      text-decoration: none;
-      letter-spacing: 0.08em;
-      box-shadow: 0 18px 30px rgba(0, 0, 0, 0.28);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .hero__cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 22px 38px rgba(0, 0, 0, 0.32);
-    }
-
-    .hero__secondary {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem 2rem;
-      border-radius: 999px;
-      background: rgba(9, 21, 50, 0.62);
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: 500;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      transition: background 0.2s ease, transform 0.2s ease;
-    }
-
-    .hero__secondary:hover {
-      background: rgba(9, 21, 50, 0.78);
-      transform: translateY(-1px);
-    }
-
-    .hero__stores {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .hero__store {
+    .btn-primary {
       display: inline-flex;
       align-items: center;
       gap: 0.75rem;
-      padding: 0.65rem 1.4rem;
-      border-radius: 14px;
-      background: rgba(7, 24, 60, 0.7);
-      text-decoration: none;
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      transition: background 0.2s ease, border-color 0.2s ease;
-  font-family: 'Outfit', sans-serif;
-    }
-
-    .hero__store:hover {
-      background: rgba(7, 28, 72, 0.95);
-      border-color: rgba(255, 255, 255, 0.35);
-    }
-
-    .hero__store-icon {
-      font-size: 1.6rem;
-      line-height: 1;
-    }
-
-    .hero__store-text {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.2;
-    }
-
-    .hero__store-small {
-      font-size: 0.7rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.65);
-    }
-
-    .hero__store-name {
-      font-size: 1rem;
+      background: #3b82f6;
+      color: #fff;
+      padding: 1.125rem 2.25rem;
+      border-radius: 12px;
       font-weight: 600;
-    }
-
-    .hero__support {
-      margin-top: auto;
-      justify-self: end;
-      max-width: 420px;
-      padding: 0.95rem 1.4rem;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.14);
-      color: #ffffff;
       text-decoration: none;
-      font-weight: 500;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(6px);
-      transition: background 0.2s ease;
+      font-size: 1.0625rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 10px 30px -5px rgba(59, 130, 246, 0.4);
     }
 
-    .hero__support:hover {
-      background: rgba(255, 255, 255, 0.22);
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.6);
     }
 
-    @media (max-width: 900px) {
-      .hero {
-        padding: clamp(1rem, 8vw, 2rem) clamp(1.5rem, 10vw, 3.5rem);
-      }
-
-      .hero__header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .hero__support {
-        justify-self: stretch;
-      }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 1.125rem 2.25rem;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 1.0625rem;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
     }
 
-    @media (max-width: 620px) {
-      .hero__languages {
-        align-self: flex-start;
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    /* Animations */
+    .animate-fade-in {
+      animation: fade-in 1s ease-out forwards;
+    }
+
+    .animate-slide-up {
+      opacity: 0;
+      animation: slide-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .hero__nav {
+        padding: 1rem 0;
+      }
+      
+      .hero__brand-text {
+        display: none;
       }
 
-      .hero__content {
-        max-width: 100%;
+      .hero__main {
+        padding: 2rem 0;
+        text-align: center;
+        align-items: center;
       }
 
-      .hero__actions,
-      .hero__stores {
-        flex-direction: column;
-        align-items: stretch;
+      .hero__actions {
+        justify-content: center;
+        width: 100%;
+      }
+
+      .btn-primary, .btn-secondary {
+        width: 100%;
+        justify-content: center;
       }
     }
   </style>
