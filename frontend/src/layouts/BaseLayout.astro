@@ -7,12 +7,14 @@ interface Props {
   title?: string
   hideNavbar?: boolean
   fullWidth?: boolean
+  theme?: 'light' | 'dark'
 }
 
 const {
   title = 'Corporación Club del Meta',
   hideNavbar = false,
   fullWidth = false,
+  theme = 'light'
 } = Astro.props as Props
 
 // Obtener número de WhatsApp desde la base de datos
@@ -68,7 +70,7 @@ const {
         padding: 3rem 0;
       }
 
-      .layout--full {
+      .layout--dark {
         background: #07193a;
       }
 
@@ -197,7 +199,7 @@ const {
       }
     </style>
   </head>
-  <body class={fullWidth ? 'layout layout--full' : 'layout'}>
+  <body class={`layout ${fullWidth ? 'layout--full' : ''} ${theme === 'dark' ? 'layout--dark' : ''}`}>
     {!hideNavbar && <Navbar />}
     <main class={fullWidth ? 'main main--full' : 'main'}>
       <slot />
